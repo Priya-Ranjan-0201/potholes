@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scamroad.dev/schemas/detection.schema.json",
+  "title": "Detection",
+  "description": "A single detection from an inference frame. Produced by the edge agent or server-side processing.",
+  "type": "object",
+  "required": ["detection_id", "class_code", "confidence", "bbox", "frame_index", "timestamp", "model_version"],
+  "properties": {
+    "detection_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique ID for this detection"
+    },
+    "class_code": {
+      "type": "string",
+      "description": "Taxonomy class code (e.g., POTHOLE, CRACK_LONG)",
+      "enum": ["POTHOLE", "CRACK_LONG", "CRACK_TRANS", "CRACK_ALLIGATOR", "WATERLOGGING", "MANHOLE_DAMAGED", "MARKING_FADED", "SPEEDBREAKER_DAMAGED", "EDGE_DAMAGE", "SURFACE_DETERIORATION", "SHOULDER_DETERIORATION", "RUTTING", "UNEVEN_SURFACE"]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Model confidence score. NOT severity."
+    },
+    "bbox": {
+      "type": "object",
+      "description": "Bounding box in pixel coordinates (x1, y1, x2, y2 format)",
+      "required": ["x1", "y1", "x2", "y2"],
+      "properties": {
+        "x1": { "type": "number", "minimum": 0 },
+        "y1": { "type": "number", "minimum": 0 },
+        "x2": { "type": "number", "minimum": 0 },
+        "y2": { "type": "number", "minimum": 0 }
+      }
+    },
+    "segmentation_mask_rle": {
+      "type": ["string", "null"],
+      "description": "Run-length encoded segmentation mask, if available"
+    },
+    "relative_area": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Area of detection as fraction of road mask / frame area. Uncalibrated."
+    },
+    "measurement": {
+      "type": ["object", "null"],
+      "description": "Physical measurement (only if calibrated source available)",
+      "properties": {
+        "width_value": { "type": "number" },
+        "height_value": { "type": "number" },
+        "area_value": { "type": "number" },
+        "unit": { "type": "string", "enum": ["px", "cm", "m", "m2", "relative"] },
+        "calibrated": { "type": "boolean" },
+        "method": { "type": ["string", "null"], "description": "Calibration method used" },
+        "error_estimate": { "type": ["number", "null"], "description": "Estimated error in the unit" }
+      },
+      "required": ["unit", "calibrated"]
+    },
+    "frame_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Frame number in the video/capture sequence"
+    },
+    "frame_width": { "type": "integer", "minimum": 1 },
+    "frame_height": { "type": "integer", "minimum": 1 },
+    "track_id": {
+      "type": ["integer", "null"],
+      "description": "In-video tracker ID assigned by ByteTrack/BoT-SORT"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of the frame"
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Model version string (e.g., yolov8n-pothole-v1.0-int8)"
+    },
+    "device_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Device that produced this detection"
+    },
+    "quality_score": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Frame quality score (blur, exposure)"
+    }
+  },
+  "additionalProperties": false
+}

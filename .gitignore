@@ -1,0 +1,89 @@
+# =========================
+# ScamRoad .gitignore
+# =========================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# ML / Training
+ml/runs/
+ml/data/raw/
+ml/data/processed/
+ml/data/external/
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.engine
+*.ncnn.bin
+*.ncnn.param
+wandb/
+mlruns/
+
+# Node / Web / Mobile
+node_modules/
+.next/
+.expo/
+*.tsbuildinfo
+web/dist/
+mobile/dist/
+
+# Docker
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Media uploads (local dev)
+uploads/
+media_store/
+
+# Secrets
+*.pem
+*.key
+*.crt
+!infra/nginx/certs/.gitkeep
+
+# MinIO data
+minio_data/
+
+# Postgres data
+pgdata/
+
+# Backup
+*.sql.gz
+*.dump

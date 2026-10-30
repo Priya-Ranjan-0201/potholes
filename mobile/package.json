@@ -1,0 +1,10 @@
+{
+  "name": "scamroad-mobile",
+  "version": "0.0.1",
+  "private": true,
+  "description": "ScamRoad mobile app — stub. Will be initialised with Expo in Phase 11.",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo 'Not initialised. Run npx create-expo-app in Phase 11.'"
+  }
+}

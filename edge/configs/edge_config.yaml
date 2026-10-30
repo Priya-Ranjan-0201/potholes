@@ -1,0 +1,38 @@
+# ScamRoad Edge Agent — Configuration
+# =====================================
+
+# --- Model ---
+model_path: "models/scamroad_nano.onnx"   # Path to exported ONNX model
+model_format: "onnx"                       # onnx | tflite
+
+# --- Inference ---
+confidence_threshold: 0.25                 # Minimum detection confidence
+nms_iou_threshold: 0.45                    # NMS IoU threshold
+input_size: 640                            # Model input resolution (px)
+
+# --- Camera ---
+camera_device: 0                           # Camera index or /dev/video0
+target_fps: 15                             # Target frame rate
+buffer_size: 64                            # Ring-buffer capacity (frames)
+
+# --- GPS ---
+gps_port: "/dev/ttyUSB0"
+gps_baud: 9600
+
+# --- Privacy ---
+blur_faces: true
+blur_plates: true
+
+# --- Outbox / Sync ---
+outbox_db: "/var/lib/scamroad/outbox.db"
+sync_api_url: "https://api.scamroad.example.com"
+sync_interval_seconds: 30
+upload_chunk_size_kb: 512
+
+# --- Health ---
+health_port: 9100                          # Prometheus metrics port
+health_interval_seconds: 10
+
+# --- Logging ---
+log_level: "INFO"
+log_file: "/var/log/scamroad/edge.log"

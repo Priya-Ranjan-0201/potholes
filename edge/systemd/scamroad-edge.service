@@ -1,0 +1,33 @@
+[Unit]
+Description=ScamRoad Edge Detection Agent
+Documentation=https://github.com/scamroad/scamroad
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=scamroad
+Group=scamroad
+WorkingDirectory=/opt/scamroad
+ExecStart=/opt/scamroad/venv/bin/python -m edge.agent.infer --config /opt/scamroad/edge/configs/edge_config.yaml
+Restart=on-failure
+RestartSec=10
+WatchdogSec=60
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=80%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=scamroad-edge
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/scamroad /var/log/scamroad
+
+[Install]
+WantedBy=multi-user.target

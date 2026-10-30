@@ -1,0 +1,37 @@
+# ScamRoad — Default Training Configuration
+# ==========================================
+# Uncomment and adjust values before launching a training run.
+#
+# Usage:
+#   python -m ml.training.train --cfg ml/configs/default.yaml
+
+# --- Model ---
+# model: yolov8n.pt          # Pretrained checkpoint (nano for fast iteration)
+
+# --- Data ---
+# data: datasets/scamroad.yaml  # Dataset YAML (YOLO format)
+
+# --- Hyperparameters ---
+# imgsz: 640                 # Input image size (px)
+# batch: 8                   # Batch size (reduce for low-VRAM devices)
+# epochs: 100                # Total training epochs
+# lr0: 0.01                  # Initial learning rate
+# lrf: 0.01                  # Final learning rate factor
+
+# --- Device ---
+# device: 0                  # GPU id (0) or "cpu"
+
+# --- Output ---
+# project: ml/runs           # Run artifacts directory
+# name: train                # Run name
+# exist_ok: false            # Overwrite existing run directory
+
+# --- Augmentation (sensible road-scene defaults) ---
+# augment: true
+# mosaic: 1.0
+# mixup: 0.0
+# hsv_h: 0.015
+# hsv_s: 0.7
+# hsv_v: 0.4
+# flipud: 0.0
+# fliplr: 0.5
