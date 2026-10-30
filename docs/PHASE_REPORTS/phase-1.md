@@ -115,3 +115,4 @@ Proceed to **Phase 2: Datasets and Audit**:
 3. Implement annotation conversion script in `ml/data/convert.py` (Pascal VOC XML → normalized YOLO format).
 4. Run leakage checks between train/val/test splits.
 5. Record dataset licenses and metrics in `docs/DATASETS.md` and generate `docs/DATASET_AUDIT.md`.
+

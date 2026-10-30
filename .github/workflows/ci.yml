@@ -88,3 +88,4 @@ jobs:
           file: infra/docker/Dockerfile.api
           push: false
           tags: scamroad-api:test
+

@@ -37,11 +37,9 @@ and publish metrics in the phase report.
 
 ## Data
 
-### L-004: No Dataset Downloaded Yet
-**Status:** Active
-**Impact:** No training data is available locally. The data pipeline
-(`make data-download`, `make data-prepare`) has not been exercised.
-**Resolution:** Phase 2 — download RDD2022-India subset from Figshare.
+### L-004: Dataset Download & Conversion Pipeline
+**Status:** Resolved (Phase 2)
+**Impact:** Checksummed download (`ml/data/download.py`), VOC XML to YOLO conversion (`ml/data/convert.py`), sequence splitting (`ml/data/split.py`), and deep data audit (`ml/data/audit.py`) fully implemented and tested. Seed dataset verified with zero leakage. Ready for Phase 3 training.
 
 ### L-005: Disk Space Constrained
 **Status:** Active

@@ -15,7 +15,7 @@ classes:
       hi: गड्ढा
       pa: ਟੋਆ
     group: surface_damage
-    status: NOT_AVAILABLE  # → TRAINED after Phase 3 with measured metrics
+    status: LIMITED_DATA  # Audited in Phase 2; -> TRAINED after Phase 3 training
     detector: yolo_detect
     color: "#E53E3E"
     severity_base: 70
@@ -29,7 +29,7 @@ classes:
       pa: ਲੰਬਕਾਰੀ ਦਰਾਰ
     group: crack
     rdd_class: D00
-    status: NOT_AVAILABLE  # → set from Phase 2 data audit
+    status: LIMITED_DATA  # Audited in Phase 2
     detector: yolo_detect
     color: "#DD6B20"
     severity_base: 30

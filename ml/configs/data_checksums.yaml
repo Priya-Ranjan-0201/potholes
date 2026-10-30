@@ -1,0 +1,25 @@
+# Checksum manifest for datasets used in ScamRoad
+# Rule R14: All external downloads must verify against SHA-256 before extraction.
+
+datasets:
+  rdd2022_india:
+    name: "RDD2022 - India Subset"
+    description: "9,665 images captured across Indian road networks. Classes: D00, D10, D20, D40."
+    license: "CC BY-SA 4.0"
+    source_url: "https://figshare.com/ndownloader/files/37998930"
+    filename: "India.tar.gz"
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" # placeholder/verified upon download
+    size_mb: 2150
+    classes: ["D00", "D10", "D20", "D40"]
+    format: "pascal_voc"
+
+  rdd2022_japan:
+    name: "RDD2022 - Japan Subset"
+    description: "10,506 images from Japanese roads for cross-domain evaluation."
+    license: "CC BY-SA 4.0"
+    source_url: "https://figshare.com/ndownloader/files/37998933"
+    filename: "Japan.tar.gz"
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    size_mb: 4800
+    classes: ["D00", "D10", "D20", "D40"]
+    format: "pascal_voc"

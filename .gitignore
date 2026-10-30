@@ -25,6 +25,7 @@ htmlcov/
 coverage.xml
 
 # ML / Training
+data/
 ml/runs/
 ml/data/raw/
 ml/data/processed/

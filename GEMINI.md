@@ -84,3 +84,4 @@ scam_road/
 - Before any long training: run `nvidia-smi` (or detect CPU), estimate duration, set resumable checkpoints, log to `ml/runs/<id>/`.
 - Parallel agents only on independent areas (`web/` vs `ml/`) on separate branches `feat/<area>-<topic>`; merge via PR with checks.
 - Same error twice → stop, diagnose root cause, record finding, then proceed. No retry loops, no `try/except: pass`, no skipped tests.
+
