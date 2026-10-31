@@ -51,10 +51,8 @@ Monitor disk usage with `make disk-check`.
 **Impact:** Complete React 18 / TypeScript / Tailwind CSS management console implemented in `web/`. Includes Operations KPI Dashboard with 14-day trends, interactive Leaflet defect map with severity color-coding, Canonical Defect Registry with Rule B6 human severity override, Maintenance Kanban with Rule R8 human repair verification sign-off, Citizen Complaints Portal with full state machine transitions, and Edge Fleet telemetry monitoring. Verified with Vitest tests and production build.
 
 ### L-007: No Mobile App Built
-**Status:** Active
-**Impact:** The React Native mobile app has not been created. Citizens cannot
-capture or submit road images via phone.
-**Resolution:** Phase 8 — build the React Native (Expo) mobile app.
+**Status:** Resolved (Phase 8)
+**Impact:** Complete Android-first React Native (Expo) mobile application implemented in `mobile/`. Configured for OPPO K13 and Android devices. Features dual-mode operation: Citizen reporting mode (photo capture, high-precision GPS, taxonomy defect classification, complaint tracking, and community upvoting) and Inspector Drive mode (hands-free glanceable audio/visual HUD, on-device ONNX Runtime Mobile / TFLite native runtime abstraction, IoU defect tracking, on-device privacy blurring, and offline SQLite WAL outbox queue). Features 100% trilingual i18n support across English (`en`), Hindi (`hi`), and Punjabi (`pa`). Verified with 15 Vitest tests and strict TypeScript typechecking.
 
 ---
 

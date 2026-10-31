@@ -112,4 +112,3 @@ def test_get_me_profile(client: TestClient) -> None:
     profile = resp_with_token.json()
     assert profile["email"] == "me@example.com"
     assert "admin" in profile["roles"]
-

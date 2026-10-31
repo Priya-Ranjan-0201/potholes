@@ -135,3 +135,4 @@ $ .\make.bat test
 | **R7** | Missing data is NULL | Missing factors or telemetry show "N/A" or "Not recorded" rather than synthetic defaults. |
 | **R8** | AI never closes work orders | Direct closure of work orders is forbidden. The web UI enforces authoritative human sign-off with mandatory engineer justification notes via `/api/v1/work-orders/{id}/verify`. |
 | **R15** | Privacy by design | Uploaded media displays privacy badge; edge nodes report on-device blurring status before synchronization. |
+

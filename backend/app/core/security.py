@@ -85,4 +85,3 @@ def decode_token(token: str) -> dict[str, Any]:
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
-
