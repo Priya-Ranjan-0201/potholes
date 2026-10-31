@@ -100,8 +100,8 @@ bench:  ## Run edge inference benchmarks (Phase 4)
 
 # ─── Edge ──────────────────────────────────────────────────────────────────
 .PHONY: edge-run
-edge-run:  ## Start edge agent (Phase 5+)
-	@Write-Host "Edge agent not yet implemented. See Phase 5." -ForegroundColor Yellow
+edge-run:  ## Start edge agent (Phase 5)
+	$(PYTHON) -m edge.agent.main --mock-gps --max-frames 30
 
 # ─── Utilities ─────────────────────────────────────────────────────────────
 .PHONY: disk-check

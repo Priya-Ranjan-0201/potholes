@@ -18,6 +18,8 @@ function Show-Help {
     Write-Host "  test         - Run all pytest test suites"
     Write-Host "  test-backend - Run backend tests only"
     Write-Host "  test-shared  - Run shared schema contract tests only"
+    Write-Host "  bench        - Run edge inference benchmarks (Phase 4)"
+    Write-Host "  edge-run     - Start ScamRoad Edge Agent (Phase 5)"
     Write-Host "  disk-check   - Display current drive free space"
     Write-Host "  clean        - Clean python cache files"
 }
@@ -98,6 +100,11 @@ switch ($Target) {
     "bench" {
         Write-Host "Running edge inference benchmarks (Phase 4)..." -ForegroundColor Cyan
         python -m edge.benchmarks.run_benchmark --model ml/runs/pothole_yolov8n/weights/best.onnx --device generic
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+    "edge-run" {
+        Write-Host "Starting ScamRoad Edge Agent (Phase 5)..." -ForegroundColor Cyan
+        python -m edge.agent.main --mock-gps --max-frames 30
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
     "disk-check" {

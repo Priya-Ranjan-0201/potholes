@@ -97,6 +97,9 @@ class OutboxManager:
         priority: int = 1,
         media_paths: list[str | Path] | None = None,
         max_attempts: int = 5,
+        idempotency_key: str | None = None,
+        media_path: str | Path | None = None,
+        media_sha256: str | None = None,
     ) -> str:
         """Enqueue an event and optional associated media items into the outbox.
 
@@ -106,24 +109,38 @@ class OutboxManager:
             priority: Queue priority integer (higher = fetched first).
             media_paths: Optional list of local file paths to attach.
             max_attempts: Maximum retry attempts before marking failed.
+            idempotency_key: Optional client-generated idempotency key.
+            media_path: Optional single media file path.
+            media_sha256: Optional precomputed media hash.
 
         Returns:
             UUID string representing the enqueued event.
         """
         event_id = str(uuid.uuid4())
         now = datetime.now(UTC).isoformat()
+        if idempotency_key:
+            payload["idempotency_key"] = idempotency_key
+
         payload_str = json.dumps(payload, ensure_ascii=False)
 
         media_records: list[tuple[str, str, str, str, int, str]] = []
+        all_paths: list[str | Path] = []
         if media_paths:
-            for p in media_paths:
-                fpath = Path(p)
-                if not fpath.exists():
-                    raise FileNotFoundError(f"Media file not found: {fpath}")
+            all_paths.extend(media_paths)
+        if media_path and Path(media_path).exists():
+            all_paths.append(media_path)
+
+        for p in all_paths:
+            fpath = Path(p)
+            if not fpath.exists():
+                raise FileNotFoundError(f"Media file not found: {fpath}")
+            if media_sha256 and len(all_paths) == 1:
+                fhash = media_sha256
+            else:
                 fhash = self._compute_sha256(fpath)
-                fsize = fpath.stat().st_size
-                media_id = str(uuid.uuid4())
-                media_records.append((media_id, event_id, str(fpath.resolve()), fhash, fsize, now))
+            fsize = fpath.stat().st_size
+            media_id = str(uuid.uuid4())
+            media_records.append((media_id, event_id, str(fpath.resolve()), fhash, fsize, now))
 
         with self._get_connection() as conn:
             conn.execute(
@@ -335,6 +352,10 @@ class OutboxManager:
 
         return evicted_count
 
+    def peek_pending(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Alias for fetch_pending_batch."""
+        return self.fetch_pending_batch(limit=limit)
+
     def get_stats(self) -> dict[str, Any]:
         """Retrieve aggregated statistics on outbox queues and storage.
 
@@ -408,3 +429,6 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
+
+# Type alias for external API compatibility
+SQLiteOutbox = OutboxManager

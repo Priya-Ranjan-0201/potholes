@@ -64,11 +64,8 @@ capture or submit road images via phone.
 ## Edge & Capture
 
 ### L-008: Edge Agent Skeleton Only
-**Status:** Active
-**Impact:** The edge agent (`src/edge/`) is a minimal skeleton with no
-functional image capture, inference, or sync capabilities. It cannot process
-images or communicate with the backend.
-**Resolution:** Phase 5 — implement the full edge capture pipeline.
+**Status:** Resolved (Phase 5)
+**Impact:** Complete Edge AI pipeline implemented in `edge/agent/` (`capture.py`, `infer.py`, `track.py`, `blur_privacy.py`, `geotag.py`, `outbox.py`, `sync.py`, `health.py`, `main.py`). Verified with live hardware webcam run (`make edge-run`), 27 dedicated edge unit tests, and end-to-end integration test.
 
 ### L-009: GPS Source Limited to Phone
 **Status:** Active
@@ -85,12 +82,8 @@ to the edge agent.
 ## Privacy & Compliance
 
 ### L-010: Privacy Blur Not Implemented
-**Status:** Active
-**Impact:** Faces and licence plates in uploaded images are NOT automatically
-blurred. Images are stored as-is, which may violate privacy requirements
-(rule R12) if images contain identifiable information.
-**Resolution:** Phase 9 — implement the privacy blur pipeline using a
-face/plate detection model before image storage.
+**Status:** Resolved (Phase 5)
+**Impact:** On-device privacy redaction implemented in `edge/agent/blur_privacy.py` (Rule R15). Gaussian blur ($ksize \ge 35$) is applied to detected face and license plate regions prior to saving to local outbox media or uploading to cloud backend. Verified in `edge/tests/test_blur_privacy.py`.
 
 ---
 
