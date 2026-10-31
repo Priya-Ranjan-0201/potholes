@@ -147,3 +147,4 @@ Training status: DRY_RUN_PASSED | Run dir: ml\runs\pothole_yolov8n_20261031_0225
    - Measure and report accuracy drop (FP32 vs INT8 mAP delta).
 3. **Edge Benchmark Suite (`edge/benchmarks/benchmark.py`)**:
    - Measure inference latency (p50, p95), memory usage, and throughput (FPS) across targets (Android / OPPO K13, Raspberry Pi, laptop).
+

@@ -146,3 +146,4 @@ Every requirement in this specification is validated by automated test suites ex
 - Alembic migrations validated via `backend/tests/test_migrations.py`.
 - SQLite WAL outbox validated via `edge/tests/test_outbox.py`.
 - Dataset pipelines and converters validated via `ml/tests/test_convert.py`, `test_audit.py`, `test_split.py`.
+

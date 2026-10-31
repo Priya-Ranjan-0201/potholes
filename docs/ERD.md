@@ -464,3 +464,4 @@ To ensure sub-50ms query latencies for edge syncing, bounding box queries, and s
 2. `CREATE INDEX idx_defect_observations_location_gist ON defect_observations USING gist (location);`
 3. `CREATE INDEX idx_road_segments_geom_gist ON road_segments USING gist (geometry);`
 4. `CREATE INDEX idx_outbox_events_status_priority ON outbox_events (status, priority DESC, created_at ASC);` (Edge SQLite WAL Outbox)
+

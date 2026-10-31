@@ -87,12 +87,16 @@ train-dry:  ## Dry-run ML training configuration and hardware detection
 	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
 
 .PHONY: export
-export:  ## Export model to ONNX/TFLite (Phase 4+)
-	@Write-Host "Model export not yet implemented. See Phase 4." -ForegroundColor Yellow
+export:  ## Export model to ONNX (Phase 4)
+	$(PYTHON) -m ml.export.export_onnx --weights ml/runs/pothole_yolov8n/weights/best.pt --imgsz 640
+
+.PHONY: quantize
+quantize:  ## Quantize ONNX model to INT8 (Phase 4)
+	$(PYTHON) -m ml.quantization.quantize --model ml/runs/pothole_yolov8n/weights/best.onnx --precision int8
 
 .PHONY: bench
-bench:  ## Run edge benchmarks (Phase 4+)
-	@Write-Host "Benchmarks not yet implemented. See Phase 4." -ForegroundColor Yellow
+bench:  ## Run edge inference benchmarks (Phase 4)
+	$(PYTHON) -m edge.benchmarks.run_benchmark --model ml/runs/pothole_yolov8n/weights/best.onnx --device generic
 
 # ─── Edge ──────────────────────────────────────────────────────────────────
 .PHONY: edge-run

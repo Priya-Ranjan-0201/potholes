@@ -85,6 +85,21 @@ switch ($Target) {
         python -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
+    "export" {
+        Write-Host "Exporting model to ONNX (Phase 4)..." -ForegroundColor Cyan
+        python -m ml.export.export_onnx --weights ml/runs/pothole_yolov8n/weights/best.pt --imgsz 640
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+    "quantize" {
+        Write-Host "Quantizing ONNX model to INT8 (Phase 4)..." -ForegroundColor Cyan
+        python -m ml.quantization.quantize --model ml/runs/pothole_yolov8n/weights/best.onnx --precision int8
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+    "bench" {
+        Write-Host "Running edge inference benchmarks (Phase 4)..." -ForegroundColor Cyan
+        python -m edge.benchmarks.run_benchmark --model ml/runs/pothole_yolov8n/weights/best.onnx --device generic
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
     "disk-check" {
         Get-PSDrive C | Select-Object @{N='FreeGB';E={[math]::Round($_.Free/1GB,2)}}, @{N='UsedGB';E={[math]::Round($_.Used/1GB,2)}} | Format-Table -AutoSize
     }

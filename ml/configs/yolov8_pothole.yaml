@@ -53,3 +53,4 @@ exist_ok: false               # Never silently overwrite existing runs
 save: true                    # Save best.pt and last.pt checkpoints
 save_period: 10               # Periodic checkpoint interval in epochs
 plots: true                   # Generate training curves, confusion matrix, PR curves
+
