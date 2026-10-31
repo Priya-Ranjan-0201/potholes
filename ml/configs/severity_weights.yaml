@@ -1,0 +1,60 @@
+# ScamRoad Severity Engine Configuration
+# Version: 1.0.0
+# Reference: docs/SPEC.md Section B6
+
+version: "1.0.0"
+
+# Factor Weights: Sum = 1.0
+weights:
+  class_base_risk: 0.30
+  relative_area: 0.25
+  recurrence_density: 0.15
+  detection_confidence: 0.10
+  vulnerable_poi_proximity: 0.10
+  rainfall_exposure: 0.10
+
+# Base risk per class code (0.0 to 1.0 scale)
+class_base_risks:
+  POTHOLE: 0.85
+  CRACK_ALLIGATOR: 0.65
+  MANHOLE_DAMAGED: 0.75
+  WATERLOGGING: 0.70
+  CRACK_TRANS: 0.45
+  CRACK_LONG: 0.35
+  EDGE_DAMAGE: 0.40
+  SURFACE_DETERIORATION: 0.30
+  SPEEDBREAKER_DAMAGED: 0.50
+  MARKING_FADED: 0.20
+  DEFAULT: 0.30
+
+# Severity Levels & Cutoffs
+thresholds:
+  minor:
+    max_score: 25.0
+    label: "Minor"
+    sla_hours: 168 # 7 days
+    recommended_action: "Routine monitoring / scheduled patch"
+  moderate:
+    min_score: 25.01
+    max_score: 50.0
+    label: "Moderate"
+    sla_hours: 72 # 3 days
+    recommended_action: "Cold mix / asphalt fill in next maintenance run"
+  severe:
+    min_score: 50.01
+    max_score: 75.0
+    label: "Severe"
+    sla_hours: 24 # 24 hours
+    recommended_action: "Immediate hot-mix repair / traffic warning marker"
+  critical:
+    min_score: 75.01
+    max_score: 100.0
+    label: "Critical"
+    sla_hours: 6 # 6 hours
+    recommended_action: "Emergency closure / barricade & rapid remediation"
+
+# Quality & Review Criteria
+review_triggers:
+  min_confidence_for_auto: 0.40
+  min_track_frames_for_auto: 3
+  high_area_threshold_pct: 15.0 # Flag for human inspection if > 15% road area

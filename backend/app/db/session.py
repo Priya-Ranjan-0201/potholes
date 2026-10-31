@@ -1,18 +1,24 @@
 """Database session and connection management."""
 
 from collections.abc import AsyncGenerator
+from typing import Any
 
 from backend.app.core.config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 # Async engine for FastAPI request handling
+# NullPool avoids event-loop boundary errors with asyncpg during testing and local dev
+engine_kwargs: dict[str, Any] = {"echo": settings.DEBUG}
+if settings.ENVIRONMENT in ("development", "test"):
+    engine_kwargs["poolclass"] = NullPool
+else:
+    engine_kwargs.update({"pool_pre_ping": True, "pool_size": 10, "max_overflow": 20})
+
 async_engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI,
-    echo=settings.DEBUG,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    **engine_kwargs,
 )
 
 # Async session factory

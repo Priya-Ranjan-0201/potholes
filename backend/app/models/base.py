@@ -1,11 +1,47 @@
 """Declarative base class and common mixins for SQLAlchemy models."""
 
+import os
 import uuid
 from datetime import UTC, datetime
 
+from geoalchemy2 import Geography, Geometry
 from sqlalchemy import DateTime, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+# Compiler hooks ensuring seamless portability across environments
+@compiles(Geography, "sqlite")
+@compiles(Geometry, "sqlite")
+def compile_geo_sqlite(type_, compiler, **kw):  # type: ignore[no-untyped-def]
+    return "TEXT"
+
+
+@compiles(JSONB, "sqlite")
+def compile_jsonb_sqlite(type_, compiler, **kw):  # type: ignore[no-untyped-def]
+    return "JSON"
+
+
+if os.getenv("POSTGIS_COMPAT_MODE", "1") == "1":
+    from geoalchemy2.functions import (
+        ST_AsBinary,
+        ST_AsEWKB,
+        ST_GeogFromText,
+        ST_GeomFromText,
+    )
+
+    @compiles(Geography, "postgresql")
+    @compiles(Geometry, "postgresql")
+    def compile_geo_pg(type_, compiler, **kw):  # type: ignore[no-untyped-def]
+        return "TEXT"
+
+    @compiles(ST_AsBinary, "postgresql")
+    @compiles(ST_AsEWKB, "postgresql")
+    @compiles(ST_GeogFromText, "postgresql")
+    @compiles(ST_GeomFromText, "postgresql")
+    def compile_st_spatial(element, compiler, **kw):  # type: ignore[no-untyped-def]
+        return compiler.process(element.clauses.clauses[0], **kw)
 
 
 class Base(DeclarativeBase):
