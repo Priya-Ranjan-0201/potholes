@@ -62,7 +62,7 @@ switch ($Target) {
     }
     "test" {
         Write-Host "Running all pytest suites..." -ForegroundColor Cyan
-        python -m pytest backend/tests shared/tests ml/tests -v --tb=short
+        python -m pytest backend/tests shared/tests ml/tests edge/tests -v --tb=short
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
     "test-backend" {

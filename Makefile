@@ -67,7 +67,7 @@ format:  ## Auto-format code
 # ─── Tests ─────────────────────────────────────────────────────────────────
 .PHONY: test
 test:  ## Run all tests
-	$(PYTHON) -m pytest backend/tests shared/tests ml/tests --tb=short -v
+	$(PYTHON) -m pytest backend/tests shared/tests ml/tests edge/tests --tb=short -v
 
 .PHONY: test-backend
 test-backend:  ## Run backend tests only

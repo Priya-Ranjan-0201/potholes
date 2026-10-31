@@ -4,6 +4,7 @@ Creates realistic sample images with varying resolutions, defects, and Pascal VO
 """
 
 from pathlib import Path
+
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -34,7 +35,13 @@ def create_sample_road_image(
         # Inner crater (dark)
         draw.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=(25, 25, 25))
         # Edge lip (slightly lighter highlight)
-        draw.arc([cx - rx - 2, cy - ry - 2, cx + rx + 2, cy + ry + 2], start=30, end=150, fill=(90, 90, 90), width=3)
+        draw.arc(
+            [cx - rx - 2, cy - ry - 2, cx + rx + 2, cy + ry + 2],
+            start=30,
+            end=150,
+            fill=(90, 90, 90),
+            width=3,
+        )
 
     if add_crack:
         # Irregular line representing a transverse or longitudinal crack
