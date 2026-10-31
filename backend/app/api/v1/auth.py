@@ -195,3 +195,4 @@ async def get_me(
 ) -> UserResponse:
     """Retrieve details and role permissions of currently authenticated user."""
     return _format_user_response(current_user)
+
