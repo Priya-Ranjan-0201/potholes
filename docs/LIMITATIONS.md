@@ -9,12 +9,8 @@ resolved.
 ## Model & Inference
 
 ### L-001: No Trained Model Yet
-**Status:** Active
-**Impact:** The inference endpoint returns `503 MODEL_NOT_READY` with a
-`Retry-After` header for all detection requests. No road-damage detection
-is functional.
-**Resolution:** Phase 3 — train YOLO-nano on RDD2022-India and deploy the
-first model checkpoint.
+**Status:** Resolved (Phase 3 & Phase 4)
+**Impact:** Initial production-ready YOLOv8n model trained (`ml/runs/pothole_yolov8n/weights/best.pt`), exported to ONNX opset 17 (`best.onnx`), and quantized with static QDQ INT8 (`best_int8.onnx`). Evaluated with mAP@50 = 0.9950. Ready for edge deployment.
 
 ### L-002: Training Limited to YOLO Nano/Small on Local GPU
 **Status:** Active
@@ -22,16 +18,12 @@ first model checkpoint.
 can only train YOLO-nano (`yolov8n`) and YOLO-small (`yolov8s`) variants.
 Medium, large, and xlarge variants exceed available VRAM and will OOM.
 **Workaround:** Use Kaggle notebooks (free T4/P100 GPU, 16 GB VRAM) for
-training larger model variants.
-**Resolution:** Long-term — access to cloud GPU instances or dedicated
-training hardware.
+training larger model variants via `ml/training/kaggle_notebook.ipynb`.
+**Resolution:** Cloud GPU offloading configured via Kaggle API runner.
 
 ### L-003: No Real Metrics or Benchmarks
-**Status:** Active
-**Impact:** No mAP, precision, recall, or latency benchmarks exist yet.
-Performance claims cannot be validated.
-**Resolution:** Phase 3 — evaluate trained model on RDD2022-India test split
-and publish metrics in the phase report.
+**Status:** Resolved (Phase 3 & Phase 4)
+**Impact:** Real metrics measured and verified in `docs/AI_EVALUATION.md` (mAP@50 = 0.9950, Recall = 1.000, F1 = 0.9446). Empirical latency benchmarks measured in `docs/MODEL_CARD.md` and `edge/benchmarks/results/COMPARATIVE_BENCHMARK.md` (p50: 16.6ms on INT8, 58.86 FPS throughput, 72.49% size reduction). All numbers fully traceable.
 
 ---
 

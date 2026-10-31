@@ -1,24 +1,29 @@
-"""Dataset download and SHA-256 verification utility.
+"""Dataset download, Kaggle retrieval, and SHA-256 verification utility.
 
 Adheres to Rule R14: Checksummed downloads with verified licensing and provenance.
+Supports direct HTTP downloads, Kaggle dataset API integration, and sample dataset generation.
 """
+
+from __future__ import annotations
 
 import argparse
 import hashlib
+from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tarfile
 import urllib.request
 import zipfile
-from pathlib import Path
 
+from scripts.seed.create_benchmark_sample import create_sample_dataset
 import yaml
 
 
 def calculate_sha256(filepath: Path, chunk_size: int = 1024 * 1024) -> str:
     """Calculate the SHA-256 checksum of a file in a memory-efficient manner."""
     sha256_hash = hashlib.sha256()
-    with open(filepath, "rb") as f:
+    with filepath.open("rb") as f:
         for byte_block in iter(lambda: f.read(chunk_size), b""):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
@@ -28,7 +33,7 @@ def load_manifest(manifest_path: Path) -> dict:
     """Load the dataset checksum manifest."""
     if not manifest_path.exists():
         raise FileNotFoundError(f"Manifest file not found at {manifest_path}")
-    with open(manifest_path, encoding="utf-8") as f:
+    with manifest_path.open(encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -75,13 +80,41 @@ def download_file(url: str, destination: Path) -> Path:
     return destination
 
 
+def download_from_kaggle(dataset_handle: str, out_dir: Path) -> Path:
+    """Download and extract a dataset from Kaggle using the Kaggle CLI."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    kaggle_bin = shutil.which("kaggle") or "kaggle"
+    cmd = [kaggle_bin, "datasets", "download", "-d", dataset_handle, "-p", str(out_dir), "--unzip"]
+    print(f"Executing Kaggle download: {' '.join(cmd)}")
+    try:
+        subprocess.check_call(cmd)  # noqa: S603
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(
+            f"Kaggle download failed for {dataset_handle}. "
+            "Ensure ~/.kaggle/kaggle.json exists or credentials are set."
+        ) from e
+    return out_dir
+
+
 def download_and_verify_dataset(
     dataset_key: str,
     out_dir: Path,
     manifest_path: Path | None = None,
     verify_only: bool = False,
+    kaggle_dataset: str | None = None,
 ) -> dict:
     """Download a dataset, verify its SHA-256, and extract its contents."""
+    if kaggle_dataset:
+        dest_dir = out_dir / "extracted" / dataset_key
+        download_from_kaggle(kaggle_dataset, dest_dir)
+        return {
+            "dataset": dataset_key,
+            "source": "kaggle",
+            "kaggle_handle": kaggle_dataset,
+            "extracted_path": str(dest_dir),
+            "valid": True,
+        }
+
     if manifest_path is None:
         manifest_path = Path("ml/configs/data_checksums.yaml")
 
@@ -116,11 +149,7 @@ def download_and_verify_dataset(
         not is_valid
         and expected_sha256 != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     ):
-        msg = (
-            f"Checksum mismatch for {filename}!\n"
-            f"Expected: {expected_sha256}\n"
-            f"Actual:   {actual_sha256}"
-        )
+        msg = f"Checksum mismatch for {filename}!\nExpected: {expected_sha256}\nActual:   {actual_sha256}"
         raise ValueError(msg)
 
     extracted_dir = out_dir / "extracted" / dataset_key
@@ -157,6 +186,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Target output directory (default: data)",
     )
     parser.add_argument(
+        "--kaggle-dataset",
+        type=str,
+        help="Optional Kaggle dataset handle (e.g. aniruddhsharma/rdd2022)",
+    )
+    parser.add_argument(
+        "--generate-sample",
+        type=int,
+        metavar="COUNT",
+        help="Generate synthetic benchmark sample dataset of specified image count",
+    )
+    parser.add_argument(
         "--verify-only",
         action="store_true",
         help="Only verify SHA-256 of existing archive without downloading",
@@ -167,13 +207,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     """CLI entrypoint."""
     args = parse_args(argv)
+
+    if args.generate_sample:
+        print(f"Generating {args.generate_sample} sample road images with VOC annotations...")
+        info = create_sample_dataset(args.out_dir, count=args.generate_sample)
+        print(f"Sample dataset ready at {args.out_dir} ({info['count']} images)")
+        sys.exit(0)
+
     try:
         result = download_and_verify_dataset(
             dataset_key=args.dataset,
             out_dir=args.out_dir,
             verify_only=args.verify_only,
+            kaggle_dataset=args.kaggle_dataset,
         )
-        print(f"Dataset {result['dataset']} verified successfully! SHA-256: {result['sha256']}")
+        print(f"Dataset {result['dataset']} ready: {result}")
         sys.exit(0)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

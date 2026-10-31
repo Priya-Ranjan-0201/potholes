@@ -98,3 +98,4 @@ All linter checks passed!
    - Automated face and license plate redaction before local storage or sync (Rule R15).
 4. **Offline Sync Integration (`edge/agent/sync.py`)**:
    - Connects edge tracker output to SQLite WAL outbox (`edge/agent/outbox.py`) and syncs to backend `/api/v1/sync`.
+

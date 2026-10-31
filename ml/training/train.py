@@ -215,8 +215,18 @@ def train_model(
     results = model.train(**train_args)
     duration_seconds = round(time.time() - start_time, 2)
 
-    weights_best = run_dir / "weights" / "best.pt"
-    weights_last = run_dir / "weights" / "last.pt"
+    save_dir = Path(getattr(results, "save_dir", run_dir))
+    weights_best = save_dir / "weights" / "best.pt"
+    weights_last = save_dir / "weights" / "last.pt"
+
+    target_weights_dir = run_dir / "weights"
+    target_weights_dir.mkdir(parents=True, exist_ok=True)
+    if weights_best.exists() and weights_best != (target_weights_dir / "best.pt"):
+        shutil.copy2(weights_best, target_weights_dir / "best.pt")
+        weights_best = target_weights_dir / "best.pt"
+    if weights_last.exists() and weights_last != (target_weights_dir / "last.pt"):
+        shutil.copy2(weights_last, target_weights_dir / "last.pt")
+        weights_last = target_weights_dir / "last.pt"
 
     summary = {
         "status": "COMPLETED",

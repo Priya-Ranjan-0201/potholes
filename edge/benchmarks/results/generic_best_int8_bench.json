@@ -1,0 +1,40 @@
+{
+  "timestamp_utc": "2026-10-31T02:51:46.872013+00:00",
+  "model_file": "ml\\runs\\pothole_yolov8n\\weights\\best_int8.onnx",
+  "model_format": "onnx",
+  "model_size_mb": 3.35,
+  "device_profile": "generic",
+  "runtime_providers": [
+    "CPUExecutionProvider"
+  ],
+  "input_shape": [
+    1,
+    3,
+    640,
+    640
+  ],
+  "iterations": 50,
+  "warmup": 10,
+  "bench_duration_seconds": 1.05,
+  "latency_ms": {
+    "mean": 20.84,
+    "std": 1.34,
+    "min": 17.52,
+    "max": 24.39,
+    "p50": 20.75,
+    "p90": 22.54,
+    "p95": 22.78,
+    "p99": 23.66
+  },
+  "throughput_fps": 47.98,
+  "hardware_telemetry": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 124 Stepping 0, AuthenticAMD",
+    "cpu_count_logical": 12,
+    "cpu_count_physical": 6,
+    "system_ram_total_gb": 15.23,
+    "process_ram_rss_mb": 96.54,
+    "cpu_utilization_percent": 69.2,
+    "temperatures_celsius": null
+  }
+}

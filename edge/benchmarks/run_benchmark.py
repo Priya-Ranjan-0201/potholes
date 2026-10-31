@@ -3,6 +3,7 @@
 Measures inference latency percentiles (p50, p90, p95, p99), end-to-end FPS throughput,
 peak memory (RSS in MB), and CPU usage across target devices (Android / OPPO K13,
 Raspberry Pi, Jetson, and laptop workstations).
+Supports comparative benchmarking between FP32 baseline and INT8 quantized models.
 Follows SPEC B4 and strict Rule R1 (Truth over appearance: never fabricate numbers).
 """
 
@@ -153,10 +154,80 @@ def benchmark_onnx_model(
     }
 
 
+def generate_comparison_markdown(
+    base_report: dict[str, Any],
+    comp_report: dict[str, Any],
+    output_path: Path,
+) -> None:
+    """Generate side-by-side comparative benchmark report in Markdown."""
+    b_lat = base_report["latency_ms"]
+    c_lat = comp_report["latency_ms"]
+
+    speedup_p50 = round(b_lat["p50"] / c_lat["p50"], 2) if c_lat["p50"] > 0 else 1.0
+    speedup_fps = (
+        round(comp_report["throughput_fps"] / base_report["throughput_fps"], 2)
+        if base_report["throughput_fps"] > 0
+        else 1.0
+    )
+    b_size = base_report["model_size_mb"]
+    c_size = comp_report["model_size_mb"]
+    size_reduction = round((1.0 - (c_size / b_size)) * 100, 2) if b_size > 0 else 0.0
+
+    b_rss = base_report["hardware_telemetry"]["process_ram_rss_mb"]
+    c_rss = comp_report["hardware_telemetry"]["process_ram_rss_mb"]
+
+    diff_p95 = round(b_lat["p95"] - c_lat["p95"], 2)
+    diff_mean = round(b_lat["mean"] - c_lat["mean"], 2)
+    diff_rss = round(b_rss - c_rss, 2)
+    b_fps = base_report["throughput_fps"]
+    c_fps = comp_report["throughput_fps"]
+
+    lines = [
+        "# ScamRoad Model Comparative Benchmark Report",
+        "",
+        f"**Evaluated At**: {base_report['timestamp_utc']}  ",
+        f"**Device Profile**: `{base_report['device_profile']}`  ",
+        f"**Platform**: `{base_report['hardware_telemetry']['platform']}`  ",
+        f"**Iterations**: `{base_report['iterations']}` (Warmup: `{base_report['warmup']}`)  ",
+        "",
+        "## 1. FP32 vs INT8 Performance Comparison",
+        "",
+        "| Metric | FP32 Baseline | INT8 Quantized | Delta / Improvement |",
+        "|---|---|---|---|",
+        f"| **Model Size** | {b_size} MB | {c_size} MB | **-{size_reduction}%** |",
+        f"| **Latency p50** | {b_lat['p50']} ms | {c_lat['p50']} ms | **{speedup_p50}x faster** |",
+        f"| **Latency p95** | {b_lat['p95']} ms | {c_lat['p95']} ms | -{diff_p95} ms |",
+        f"| **Latency Mean** | {b_lat['mean']} ms | {c_lat['mean']} ms | -{diff_mean} ms |",
+        f"| **Throughput (FPS)** | {b_fps} FPS | {c_fps} FPS | **+{speedup_fps}x FPS** |",
+        f"| **Peak Process RSS** | {b_rss} MB | {c_rss} MB | -{diff_rss} MB |",
+        "",
+        "## 2. Hardware Telemetry Details",
+        "",
+        f"- **Processor**: `{base_report['hardware_telemetry']['processor']}`",
+        f"- **Logical CPU Cores**: `{base_report['hardware_telemetry']['cpu_count_logical']}`",
+        f"- **System RAM**: `{base_report['hardware_telemetry']['system_ram_total_gb']} GB`",
+        f"- **Runtime Provider**: `{', '.join(base_report['runtime_providers'])}`",
+        "",
+        "---",
+        "*Report generated automatically by `edge/benchmarks/run_benchmark.py`.*  ",
+        "*Adheres strictly to Rule R1 (Truth over appearance).*",
+    ]
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse CLI arguments."""
     parser = argparse.ArgumentParser(description="Edge device inference benchmark.")
-    parser.add_argument("--model", type=Path, required=True, help="Path to ONNX or PT model.")
+    parser.add_argument("--model", type=Path, required=True, help="Path to base model.")
+    parser.add_argument(
+        "--compare-with",
+        type=Path,
+        default=None,
+        help="Optional second model for comparative benchmarking (e.g. INT8 vs FP32).",
+    )
     parser.add_argument(
         "--device",
         type=str,
@@ -184,7 +255,7 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
 
     print(f"Benchmarking {args.model.name} on profile '{args.device}' ({args.iterations} iters)...")
-    report = benchmark_onnx_model(
+    base_report = benchmark_onnx_model(
         model_path=args.model,
         iterations=args.iterations,
         warmup=args.warmup,
@@ -195,15 +266,34 @@ def main(argv: list[str] | None = None) -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     out_file = args.output_dir / f"{args.device}_{args.model.stem}_bench.json"
     with out_file.open("w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2)
+        json.dump(base_report, f, indent=2)
 
-    lat = report["latency_ms"]
-    p_rss = report["hardware_telemetry"]["process_ram_rss_mb"]
+    lat = base_report["latency_ms"]
+    p_rss = base_report["hardware_telemetry"]["process_ram_rss_mb"]
     print(
         f"Benchmark finished: p50={lat['p50']}ms, p95={lat['p95']}ms | "
-        f"Throughput: {report['throughput_fps']} FPS | Peak RSS: {p_rss} MB"
+        f"Throughput: {base_report['throughput_fps']} FPS | Peak RSS: {p_rss} MB"
     )
-    print(f"Report saved to {out_file}")
+
+    if args.compare_with and args.compare_with.exists():
+        print(
+            f"Benchmarking comparative model {args.compare_with.name} "
+            f"on profile '{args.device}' ({args.iterations} iters)..."
+        )
+        comp_report = benchmark_onnx_model(
+            model_path=args.compare_with,
+            iterations=args.iterations,
+            warmup=args.warmup,
+            imgsz=args.imgsz,
+            device_profile=args.device,
+        )
+        comp_file = args.output_dir / f"{args.device}_{args.compare_with.stem}_bench.json"
+        with comp_file.open("w", encoding="utf-8") as f:
+            json.dump(comp_report, f, indent=2)
+
+        md_path = args.output_dir / "COMPARATIVE_BENCHMARK.md"
+        generate_comparison_markdown(base_report, comp_report, md_path)
+        print(f"Comparative report generated at {md_path}")
 
 
 if __name__ == "__main__":

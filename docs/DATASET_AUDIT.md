@@ -1,6 +1,6 @@
 # ScamRoad Dataset Audit Report
 
-> **Generated at:** 2026-10-30T21:13:00.000027+00:00
+> **Generated at:** 2026-10-31T02:40:24.011941+00:00
 > **Audit Status:** Verified from disk files (Rule R1: Truth over appearance).
 
 ---
@@ -11,7 +11,7 @@
 - **Valid Images:** 30
 - **Corrupt Images:** 0
 - **Exact Duplicate Groups (SHA-256):** 0
-- **Perceptual Duplicate Pairs (pHash <= 4):** 29
+- **Perceptual Duplicate Pairs (pHash <= 4):** 24
 
 ### Common Resolutions
 

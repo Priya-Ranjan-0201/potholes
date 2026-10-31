@@ -3,6 +3,7 @@
 Quantizes FP32 ONNX graphs to INT8 or FP16 precision using ONNX Runtime.
 Supports calibration data readers for representative quantization on real road imagery
 to preserve defect detection accuracy while halving memory footprint and accelerating inference.
+Evaluates and reports output accuracy drift against the FP32 baseline.
 Follows SPEC A3, B4 and rules R1, R4.
 """
 
@@ -17,6 +18,7 @@ from typing import Any
 
 import numpy as np
 import onnx
+import onnxruntime as ort
 from onnxruntime.quantization import (
     CalibrationDataReader,
     QuantFormat,
@@ -78,6 +80,86 @@ class RoadCalibrationDataReader(CalibrationDataReader):
     def rewind(self) -> None:
         """Reset iteration."""
         self.data_iter = iter(self.enum_data)
+
+
+def evaluate_quantization_drift(
+    fp32_model_path: Path,
+    quant_model_path: Path,
+    calibration_dir: Path,
+    imgsz: int = 640,
+    max_samples: int = 30,
+) -> dict[str, Any]:
+    """Measure empirical accuracy drift of quantized ONNX model against FP32 baseline.
+
+    Feeds real road pavement images into both sessions, measuring output tensor
+    cosine similarity, Mean Squared Error (MSE), and maximum absolute error.
+    """
+    valid_exts = {".jpg", ".jpeg", ".png", ".bmp"}
+    img_paths = [
+        p for p in calibration_dir.rglob("*") if p.is_file() and p.suffix.lower() in valid_exts
+    ][:max_samples]
+
+    if not img_paths:
+        return {
+            "status": "SKIPPED",
+            "reason": "No evaluation images found in calibration directory",
+        }
+
+    opts = ort.SessionOptions()
+    opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+    sess_fp32 = ort.InferenceSession(
+        str(fp32_model_path), sess_options=opts, providers=["CPUExecutionProvider"]
+    )
+    sess_quant = ort.InferenceSession(
+        str(quant_model_path), sess_options=opts, providers=["CPUExecutionProvider"]
+    )
+
+    in_name = sess_fp32.get_inputs()[0].name
+
+    cosine_sims: list[float] = []
+    mses: list[float] = []
+    max_diffs: list[float] = []
+
+    for img_p in img_paths:
+        try:
+            with Image.open(img_p) as img:
+                rgb = img.convert("RGB").resize((imgsz, imgsz))
+                arr = (np.array(rgb, dtype=np.float32) / 255.0).transpose((2, 0, 1))
+                tensor = np.expand_dims(arr, axis=0)
+
+            out_fp32 = sess_fp32.run(None, {in_name: tensor})[0].flatten()
+            out_quant = sess_quant.run(None, {in_name: tensor})[0].flatten()
+
+            # Cosine similarity
+            norm_fp32 = np.linalg.norm(out_fp32)
+            norm_quant = np.linalg.norm(out_quant)
+            if norm_fp32 > 0 and norm_quant > 0:
+                sim = float(np.dot(out_fp32, out_quant) / (norm_fp32 * norm_quant))
+                cosine_sims.append(sim)
+
+            # MSE & Max error
+            diff = out_fp32 - out_quant
+            mses.append(float(np.mean(diff**2)))
+            max_diffs.append(float(np.max(np.abs(diff))))
+        except Exception:  # noqa: S112
+            continue
+
+    if not cosine_sims:
+        return {"status": "FAILED", "reason": "Error during session inference"}
+
+    avg_sim = round(float(np.mean(cosine_sims)), 5)
+    avg_mse = round(float(np.mean(mses)), 6)
+    max_err = round(float(np.max(max_diffs)), 5)
+
+    return {
+        "status": "EVALUATED",
+        "samples_evaluated": len(cosine_sims),
+        "mean_cosine_similarity": avg_sim,
+        "mean_squared_error": avg_mse,
+        "max_absolute_error": max_err,
+        "fidelity_status": "EXCELLENT" if avg_sim >= 0.99 else "ACCEPTABLE",
+    }
 
 
 def quantize_model(
@@ -160,6 +242,16 @@ def quantize_model(
         else 0.0
     )
 
+    accuracy_drift: dict[str, Any] = {}
+    if calibration_dir and calibration_dir.exists() and model_output.exists():
+        accuracy_drift = evaluate_quantization_drift(
+            fp32_model_path=model_input,
+            quant_model_path=model_output,
+            calibration_dir=calibration_dir,
+            imgsz=imgsz,
+            max_samples=max_calibration_samples,
+        )
+
     summary = {
         "timestamp_utc": datetime.now(UTC).isoformat(),
         "input_model": str(model_input),
@@ -170,6 +262,7 @@ def quantize_model(
         "quantized_size_mb": output_size_mb,
         "compression_percentage": compression_ratio,
         "sha256": compute_file_hash(model_output),
+        "accuracy_drift": accuracy_drift,
     }
 
     report_path = model_output.parent / f"quantization_{precision}_report.json"
@@ -229,6 +322,8 @@ def main(argv: list[str] | None = None) -> None:
         f"Quantization complete: {summary['quantized_size_mb']} MB "
         f"({summary['compression_percentage']}% smaller than FP32)"
     )
+    if summary.get("accuracy_drift"):
+        print(f"Accuracy drift evaluation: {summary['accuracy_drift']}")
 
 
 if __name__ == "__main__":

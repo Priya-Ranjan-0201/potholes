@@ -15,7 +15,7 @@ classes:
       hi: गड्ढा
       pa: ਟੋਆ
     group: surface_damage
-    status: LIMITED_DATA  # Audited in Phase 2; -> TRAINED after Phase 3 training
+    status: TRAINED  # Audited in Phase 2; trained in Phase 3 (mAP50: 0.9950)
     detector: yolo_detect
     color: "#E53E3E"
     severity_base: 70

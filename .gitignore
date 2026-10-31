@@ -26,6 +26,7 @@ coverage.xml
 
 # ML / Training
 data/
+runs/
 ml/runs/
 ml/data/raw/
 ml/data/processed/
