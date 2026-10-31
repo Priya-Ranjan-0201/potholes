@@ -21,7 +21,11 @@ def clean_database() -> None:
             conn.execute(
                 text(
                     "TRUNCATE defect_observations, defect_merge_log, "
-                    "severity_assessments, defects, audit_logs, media CASCADE;"
+                    "severity_assessments, defects, audit_logs, media, "
+                    "work_order_history, repair_verifications, repair_records, "
+                    "work_orders, complaint_status_history, complaints, "
+                    "citizen_reports, user_roles, users, sla_policies, "
+                    "contractors, budget_allocations CASCADE;"
                 )
             )
     except Exception:  # noqa: S110

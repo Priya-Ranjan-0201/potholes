@@ -58,3 +58,4 @@ review_triggers:
   min_confidence_for_auto: 0.40
   min_track_frames_for_auto: 3
   high_area_threshold_pct: 15.0 # Flag for human inspection if > 15% road area
+

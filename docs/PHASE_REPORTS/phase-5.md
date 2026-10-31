@@ -181,3 +181,4 @@ With edge detection, tracking, and outbox queuing operational, Phase 6 connects 
 2. Ingest observations into `defect_observations` and run PostGIS spatial deduplication (`ST_DWithin` with dynamic radius = $f(GPS accuracy)$).
 3. Connect `defects` canonical state machine and link observations to road segments.
 4. Add media upload endpoint accepting redacted images with SHA-256 verification.
+

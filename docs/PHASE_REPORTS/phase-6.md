@@ -210,7 +210,8 @@ edge/tests/test_track.py::test_compute_iou PASSED                        [ 97%]
 edge/tests/test_track.py::test_defect_track_confirmation_and_consolidation PASSED [ 98%]
 edge/tests/test_track.py::test_edge_tracker_ego_motion_gating PASSED     [100%]
 
-============================= 91 passed in 39.09s =============================
+
+====================== 103 passed, 3 warnings in 49.04s =======================
 ```
 
 ### 2.3 Code Quality & Linters
@@ -219,7 +220,7 @@ edge/tests/test_track.py::test_edge_tracker_ego_motion_gating PASSED     [100%]
 All checks passed!
 === Running Black Formatter Check ===
 All done! ✨ 🍰 ✨
-90 files would be left unchanged.
+103 files would be left unchanged.
 All linter checks passed!
 ```
 
@@ -227,8 +228,8 @@ All linter checks passed!
 
 ## 3. Definition of Done Checklist
 
-- [x] All 91 automated tests passing (`make test`).
-- [x] Linter and formatter checks 100% clean across 90 files (`make lint`).
+- [x] All 103 automated tests passing (`make test`).
+- [x] Linter and formatter checks 100% clean across 103 files (`make lint`).
 - [x] Idempotency replay returns cached receipt without database duplication (Rule B4).
 - [x] Spatial deduplication auto-merges multi-pass sightings ($S \ge 0.70$, $d \le R$) and records `defect_merge_log` (Rule B5).
 - [x] Road snapping projects coordinates to closest road segments within 50m (Rule B8).
@@ -237,6 +238,10 @@ All linter checks passed!
 - [x] Media upload verifies SHA-256 integrity and magic bytes before persistence (Rule R15).
 - [x] GeoJSON Map FeatureCollection endpoint verified for Leaflet/React clients.
 - [x] Live end-to-end sync verified from SQLite outbox to PostgreSQL backend.
+- [x] Argon2id password hashing, JWT access + rotating refresh tokens, and RBAC enforcement (Rule A6).
+- [x] Citizen complaint lifecycle state machine (`SUBMITTED` -> `RESOLVED`) with audit trail (Rule B7).
+- [x] Work order management, contractor SLA tracking, and human repair verification sign-off (Rule R8).
+- [x] Municipal operational statistics, ward breakdown, contractor performance, and time-series trends (Rule R1).
 
 ---
 
@@ -247,3 +252,4 @@ Phase 7 delivers the frontend operations console:
 2. **Defect Detail & Observation Timeline**: Inspection photo comparisons, slider for before/after view, and merge audit viewer.
 3. **Citizen Complaint & Maintenance Kanban**: Workflow tracking from `SUBMITTED` to `RESOLVED` with SLA timers.
 4. **Device Fleet & Telemetry Monitor**: Real-time edge health monitor (FPS, queue depth, model versions, battery, temperature).
+
