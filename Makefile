@@ -79,8 +79,12 @@ test-shared:  ## Run shared schema tests only
 
 # ─── ML ────────────────────────────────────────────────────────────────────
 .PHONY: train
-train:  ## Run ML training (Phase 3+)
-	@Write-Host "ML training not yet implemented. See Phase 3." -ForegroundColor Yellow
+train:  ## Run ML training (Phase 3)
+	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml
+
+.PHONY: train-dry
+train-dry:  ## Dry-run ML training configuration and hardware detection
+	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
 
 .PHONY: export
 export:  ## Export model to ONNX/TFLite (Phase 4+)

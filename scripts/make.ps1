@@ -75,6 +75,16 @@ switch ($Target) {
         python -m pytest shared/tests -v --tb=short
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
+    "train" {
+        Write-Host "Running ML Training (Phase 3)..." -ForegroundColor Cyan
+        python -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+    "train-dry" {
+        Write-Host "Dry-running ML Training configuration..." -ForegroundColor Cyan
+        python -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
     "disk-check" {
         Get-PSDrive C | Select-Object @{N='FreeGB';E={[math]::Round($_.Free/1GB,2)}}, @{N='UsedGB';E={[math]::Round($_.Used/1GB,2)}} | Format-Table -AutoSize
     }

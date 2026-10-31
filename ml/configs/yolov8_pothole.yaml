@@ -1,0 +1,55 @@
+# ScamRoad YOLOv8 Pothole Detection Training Configuration
+# Optimized for edge deployment on mobile (Android) and edge SBCs.
+# Follows SPEC B3 and rules R1, R2, R4, R14.
+
+# --- Model & Architecture ---
+model: "yolov8n.pt"           # Pretrained backbone on COCO for transfer learning
+task: "detect"
+
+# --- Dataset Specification ---
+# Path to the dataset descriptor YAML (created by ml/data/split.py)
+data: "ml/configs/scamroad_dataset.yaml"
+
+# --- Training Hyperparameters ---
+imgsz: 640                    # Input image resolution (640x640)
+epochs: 100                   # Total training epochs
+batch: 16                     # Batch size (set to 8 or 4 if low VRAM / CPU)
+patience: 25                  # Early stopping patience in epochs
+optimizer: "AdamW"            # AdamW optimizer with cosine learning rate schedule
+lr0: 0.001                    # Initial learning rate
+lrf: 0.01                     # Final learning rate fraction (lr0 * lrf)
+momentum: 0.937               # SGD momentum / Adam beta1
+weight_decay: 0.0005          # Weight decay L2 penalty
+warmup_epochs: 3.0            # Warmup epochs
+warmup_momentum: 0.8
+warmup_bias_lr: 0.1
+
+# --- Augmentations (Specialized for Road Pavement Scenes) ---
+hsv_h: 0.015                  # Color hue shift (road surface weathering)
+hsv_s: 0.7                    # Saturation variation (wet vs dry asphalt)
+hsv_v: 0.4                    # Brightness variation (direct sunlight vs shadow)
+degrees: 5.0                  # Subtle vehicle mount rotation
+translate: 0.10               # Bounding box translation
+scale: 0.50                   # Multi-scale defect zoom (distant vs near defects)
+shear: 2.0                    # Shear distortion
+perspective: 0.0005           # Ground-plane perspective distortion
+flipud: 0.0                   # Vertical flip disabled (roads are never upside down)
+fliplr: 0.5                   # Horizontal flip enabled (bilateral road symmetry)
+mosaic: 1.0                   # Mosaic augmentation for multi-object context
+mixup: 0.10                   # Mixup blending for texture regularization
+copy_paste: 0.10              # Copy-paste defect synthesis
+
+# --- Hardware & Acceleration ---
+device: ""                    # Auto-detected: cuda:0 if available, else cpu
+workers: 4                    # DataLoader worker subprocesses
+half: false                   # FP16 mixed precision (auto-enabled on CUDA)
+deterministic: true           # Reproducible seed-based operations
+seed: 42
+
+# --- Checkpoints & Output ---
+project: "ml/runs"            # Root directory for training runs
+name: "pothole_yolov8n"       # Run subdirectory name
+exist_ok: false               # Never silently overwrite existing runs
+save: true                    # Save best.pt and last.pt checkpoints
+save_period: 10               # Periodic checkpoint interval in epochs
+plots: true                   # Generate training curves, confusion matrix, PR curves

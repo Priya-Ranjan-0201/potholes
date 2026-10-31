@@ -1,0 +1,17 @@
+# ScamRoad Dataset Configuration for YOLOv8 Training
+# Single-source alignment with shared/taxonomy.yaml and SPEC B2.
+
+path: "../data"               # Dataset root directory (relative to run or absolute)
+train: "splits/train.txt"     # Train split image list or folder
+val: "splits/val.txt"         # Validation split image list or folder
+test: "splits/test.txt"       # Unseen test split image list or folder
+
+# Number of classes
+nc: 4
+
+# Class names indexed from 0
+names:
+  0: "pothole"
+  1: "crack_longitudinal"
+  2: "crack_transverse"
+  3: "crack_alligator"
