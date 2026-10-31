@@ -11,6 +11,7 @@ import {
   UserCheck,
   Sliders,
   Cpu,
+  TrendingUp,
 } from "./Icons";
 
 export const Navbar: React.FC = () => {
@@ -24,6 +25,7 @@ export const Navbar: React.FC = () => {
     { to: "/defects", label: "Defects", icon: AlertTriangle },
     { to: "/maintenance", label: "Work Orders", icon: ClipboardList },
     { to: "/complaints", label: "Citizen Reports", icon: MessageSquareWarning },
+    { to: "/forecasts", label: "Forecasts", icon: TrendingUp },
     { to: "/fleet", label: "Edge Fleet", icon: Radio },
     { to: "/models", label: "AI Models", icon: Cpu },
   ];

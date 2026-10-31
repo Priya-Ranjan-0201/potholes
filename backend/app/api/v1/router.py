@@ -4,9 +4,12 @@ from backend.app.api.health import router as health_router
 from backend.app.api.v1.auth import router as auth_router
 from backend.app.api.v1.complaints import router as complaints_router
 from backend.app.api.v1.defects import router as defects_router
+from backend.app.api.v1.forecasts import router as forecasts_router
 from backend.app.api.v1.maintenance import router as maintenance_router
 from backend.app.api.v1.map import router as map_router
 from backend.app.api.v1.media import router as media_router
+from backend.app.api.v1.notifications import router as notifications_router
+from backend.app.api.v1.reports import router as reports_router
 from backend.app.api.v1.stats import router as stats_router
 from backend.app.api.v1.sync import router as sync_router
 from fastapi import APIRouter
@@ -39,3 +42,12 @@ api_v1_router.include_router(map_router, prefix="", tags=["Maps & GeoJSON"])
 
 # Analytics & Statistics
 api_v1_router.include_router(stats_router, prefix="/stats", tags=["Analytics & Statistics"])
+
+# Road Health Index & Forecasts (Rule R6)
+api_v1_router.include_router(forecasts_router, prefix="", tags=["Forecasts & Health Index"])
+
+# Municipal Reporting & Exports (SPEC B10)
+api_v1_router.include_router(reports_router, prefix="", tags=["Municipal Reports"])
+
+# Alerts & Notifications
+api_v1_router.include_router(notifications_router, prefix="", tags=["Notifications"])

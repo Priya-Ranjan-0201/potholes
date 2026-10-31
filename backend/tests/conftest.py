@@ -25,7 +25,8 @@ def clean_database() -> None:
                     "work_order_history, repair_verifications, repair_records, "
                     "work_orders, complaint_status_history, complaints, "
                     "citizen_reports, user_roles, users, sla_policies, "
-                    "contractors, budget_allocations CASCADE;"
+                    "contractors, budget_allocations, notifications, "
+                    "forecasts, road_health_scores, weather_records CASCADE;"
                 )
             )
     except Exception:  # noqa: S110
