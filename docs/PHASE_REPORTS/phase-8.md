@@ -152,3 +152,4 @@ $ .\make.bat test
 | **R8** | AI never closes work orders | Mobile app enforces citizen and inspector feedback channels; work order verification requires authorized engineer sign-off. |
 | **R15** | Privacy by design | All media captured or queued in outbox is automatically redacted for faces and license plates on-device before sync. |
 | **R16** | Driver Safety | Driver mode features hands-free operation; touch interaction is disabled during motion; glanceable visual hazard banners alert the driver safely. |
+

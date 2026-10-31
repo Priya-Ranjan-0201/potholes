@@ -8,6 +8,8 @@ import { DefectsPage } from "./pages/DefectsPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ComplaintsPage } from "./pages/ComplaintsPage";
 import { FleetPage } from "./pages/FleetPage";
+import { InspectionPage } from "./pages/InspectionPage";
+import { ModelsPage } from "./pages/ModelsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +35,8 @@ function App() {
                 <Route path="/maintenance" element={<MaintenancePage />} />
                 <Route path="/complaints" element={<ComplaintsPage />} />
                 <Route path="/fleet" element={<FleetPage />} />
+                <Route path="/inspection" element={<InspectionPage />} />
+                <Route path="/models" element={<ModelsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

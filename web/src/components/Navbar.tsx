@@ -9,6 +9,8 @@ import {
   MessageSquareWarning,
   Radio,
   UserCheck,
+  Sliders,
+  Cpu,
 } from "./Icons";
 
 export const Navbar: React.FC = () => {
@@ -18,10 +20,12 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { to: "/", label: "Overview", icon: Compass },
     { to: "/map", label: "GIS Map", icon: MapPin },
+    { to: "/inspection", label: "Inspection", icon: Sliders },
     { to: "/defects", label: "Defects", icon: AlertTriangle },
     { to: "/maintenance", label: "Work Orders", icon: ClipboardList },
     { to: "/complaints", label: "Citizen Reports", icon: MessageSquareWarning },
     { to: "/fleet", label: "Edge Fleet", icon: Radio },
+    { to: "/models", label: "AI Models", icon: Cpu },
   ];
 
   const roleColors: Record<string, string> = {

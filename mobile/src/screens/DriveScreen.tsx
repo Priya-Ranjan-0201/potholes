@@ -5,6 +5,7 @@ import { defectTracker } from "../services/tracker";
 import { locationService } from "../services/location";
 import { privacyRedactor } from "../services/privacy";
 import { outboxService } from "../services/outbox";
+import { audioAlertService } from "../services/audio";
 import { t } from "../i18n";
 import { AlertTriangleIcon, ActivityIcon } from "../components/Icons";
 
@@ -59,8 +60,9 @@ export const DriveScreen: React.FC = () => {
         const newlyConfirmed = defectTracker.update(result.boxes);
 
         if (newlyConfirmed.length > 0) {
-          // Trigger glanceable visual alert for driver safety (Rule R16)
+          // Trigger glanceable visual and audio alert for driver safety (Rule R16)
           setActiveAlert(t("drive_hazard_alert"));
+          audioAlertService.playHazardChime();
           setTimeout(() => setActiveAlert(null), 2500);
 
           for (const track of newlyConfirmed) {
