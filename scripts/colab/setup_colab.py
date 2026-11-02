@@ -111,6 +111,18 @@ def mount_google_drive(mount_point: str = "/content/drive") -> Path | None:
         return storage_root
 
 
+def _clean_token(raw_token: str | None) -> str | None:
+    """Sanitize token string, stripping shell commands like 'export VAR=' and surrounding quotes."""
+    if not raw_token:
+        return None
+    token = raw_token.strip()
+    is_shell_export = token.startswith("export ") and "=" in token
+    is_assignment = "=" in token and not token.startswith("{")
+    if is_shell_export or is_assignment:
+        token = token.split("=", 1)[1].strip()
+    return token.strip("\"'")
+
+
 def _resolve_colab_secrets(userdata: any) -> tuple[str | None, str | None]:
     """Retrieve Kaggle username and token from Colab Secrets across naming conventions."""
     username = None
@@ -126,7 +138,14 @@ def _resolve_colab_secrets(userdata: any) -> tuple[str | None, str | None]:
         single_token = userdata.get("KAGGLE_API_TOKEN")
 
     custom_token = None
-    for candidate in ["priyaranja", "priyaranjan", "kaggle", "kaggle_token"]:
+    candidates = [
+        "priyaranja",
+        "priyaranjanng",
+        "priyaranjan",
+        "kaggle",
+        "kaggle_token",
+    ]
+    for candidate in candidates:
         try:
             val = userdata.get(candidate)
             if val:
@@ -135,7 +154,7 @@ def _resolve_colab_secrets(userdata: any) -> tuple[str | None, str | None]:
         except Exception as exc:
             logger.debug("Secret '%s' not present: %s", candidate, exc)
 
-    token = key or single_token or custom_token
+    token = _clean_token(key or single_token or custom_token)
     user = username or "priyaranja"
     return user, token
 
