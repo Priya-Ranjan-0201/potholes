@@ -23,3 +23,35 @@ datasets:
     size_mb: 4800
     classes: ["D00", "D10", "D20", "D40"]
     format: "pascal_voc"
+
+  rdd2022_kaggle:
+    name: "RDD2022 Unified (Kaggle Mirror)"
+    description: "Multi-national road damage dataset hosted on Kaggle."
+    license: "CC BY-SA 4.0"
+    kaggle_handle: "aliabdelmenam/rdd-2022"
+    classes: ["D00", "D10", "D20", "D40"]
+    format: "pascal_voc"
+
+  pothole_makeml:
+    name: "MakeML Pothole Detection Dataset"
+    description: "Bounding box annotated pothole dataset from diverse urban road contexts."
+    license: "Public Domain / CC0"
+    kaggle_handle: "larxel/pothole-detection"
+    classes: ["pothole"]
+    format: "pascal_voc"
+
+  indian_roads_eyantra:
+    name: "Indian Roads Semantic Segmentation (e-Yantra IIT Bombay)"
+    description: "Pixel-level instance & semantic segmentation on Indian urban and highway roads."
+    license: "CC BY 4.0"
+    kaggle_handle: "e-yantra-iit-bombay/semantic-segmentation-datasets-of-indian-roads"
+    classes: ["road", "pothole", "footpath"]
+    format: "segmentation_mask"
+
+  iitgoa_pothole:
+    name: "IIT Goa Pothole Detection & Classification"
+    description: "Indian road pothole dataset with localized geometry and damage severity."
+    license: "Research Use"
+    kaggle_handle: "iitgoa/iit-goa-pothole-detection-classification-dataset"
+    classes: ["pothole"]
+    format: "pascal_voc"
