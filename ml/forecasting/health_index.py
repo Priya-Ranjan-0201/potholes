@@ -127,4 +127,3 @@ def compute_length_weighted_rollup(
 
     weighted_average = round(total_weighted_score / total_length, 2)
     return weighted_average, len(valid_results), round(total_length, 2)
-

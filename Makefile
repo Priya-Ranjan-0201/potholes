@@ -112,3 +112,12 @@ disk-check:  ## Show disk usage
 clean:  ## Clean caches
 	Get-ChildItem -Path . -Include __pycache__, .pytest_cache, .mypy_cache, .ruff_cache -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
 	@Write-Host "Clean complete." -ForegroundColor Green
+
+# ─── Demonstration ─────────────────────────────────────────────────────────
+.PHONY: seed
+seed:  ## Seed demo municipal dataset into PostgreSQL
+	$(PYTHON) -m scripts.seed.seed_demo_data
+
+.PHONY: demo
+demo:  ## Run full 12-subsystem operational live demo
+	$(PYTHON) scripts/demo.py

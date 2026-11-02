@@ -22,6 +22,8 @@ function Show-Help {
     Write-Host "  edge-run     - Start ScamRoad Edge Agent (Phase 5)"
     Write-Host "  disk-check   - Display current drive free space"
     Write-Host "  clean        - Clean python cache files"
+    Write-Host "  seed         - Seed municipal demo dataset into PostgreSQL"
+    Write-Host "  demo         - Run full 12-subsystem operational live demo"
 }
 
 switch ($Target) {
@@ -114,6 +116,16 @@ switch ($Target) {
         Write-Host "Cleaning __pycache__ and build caches..." -ForegroundColor Cyan
         Get-ChildItem -Path . -Include __pycache__, .pytest_cache, .mypy_cache, .ruff_cache -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
         Write-Host "Clean complete." -ForegroundColor Green
+    }
+    "seed" {
+        Write-Host "Seeding municipal demo dataset..." -ForegroundColor Cyan
+        python -m scripts.seed.seed_demo_data
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+    "demo" {
+        Write-Host "Starting ScamRoad full operational live demo..." -ForegroundColor Cyan
+        python scripts/demo.py
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     }
     default {
         Write-Host "Unknown target: $Target" -ForegroundColor Red

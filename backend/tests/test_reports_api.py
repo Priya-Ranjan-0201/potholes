@@ -34,4 +34,3 @@ def test_executive_summary_payload_number_parity(client: TestClient) -> None:
     # Verify strict parity
     is_valid = reporting_service.verify_summary_numbers_parity(payload)
     assert is_valid is True, f"Narrative failed parity check: {payload['narrative_summary']}"
-

@@ -24,11 +24,14 @@ def compile_jsonb_sqlite(type_, compiler, **kw):  # type: ignore[no-untyped-def]
 
 
 if os.getenv("POSTGIS_COMPAT_MODE", "1") == "1":
+    Geometry.as_binary = "ST_AsBinary"
     from geoalchemy2.functions import (
         ST_AsBinary,
         ST_AsEWKB,
         ST_GeogFromText,
+        ST_GeomFromEWKT,
         ST_GeomFromText,
+        ST_GeomFromWKB,
     )
 
     @compiles(Geography, "postgresql")
@@ -40,6 +43,8 @@ if os.getenv("POSTGIS_COMPAT_MODE", "1") == "1":
     @compiles(ST_AsEWKB, "postgresql")
     @compiles(ST_GeogFromText, "postgresql")
     @compiles(ST_GeomFromText, "postgresql")
+    @compiles(ST_GeomFromEWKT, "postgresql")
+    @compiles(ST_GeomFromWKB, "postgresql")
     def compile_st_spatial(element, compiler, **kw):  # type: ignore[no-untyped-def]
         return compiler.process(element.clauses.clauses[0], **kw)
 

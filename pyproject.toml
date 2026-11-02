@@ -38,7 +38,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["backend/tests", "ml/tests", "edge/tests", "shared/tests"]
+testpaths = ["backend/tests", "ml/tests", "edge/tests", "shared/tests", "scripts/e2e"]
 addopts = "-v --tb=short --strict-markers"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",

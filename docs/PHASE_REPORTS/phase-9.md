@@ -143,3 +143,4 @@ Tests       15 passed (15)
 | **R7** | Missing data is NULL | Uninspected segments return `score: None` with `coverage_status: "NO_INSPECTION"` rather than default numbers. |
 | **R8** | AI never closes work orders | Forecasts and health scores are advisory only; work order closing remains an authoritative human engineer responsibility. |
 | **R10** | Verify before claiming done | All 113 unit and integration tests passed cleanly; real CLI outputs cited. |
+
