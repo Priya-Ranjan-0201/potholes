@@ -137,7 +137,18 @@ class MediaDetector:
         self.yolo_model = None
 
         if not self.weights_path.exists():
-            raise FileNotFoundError(f"Model weights not found: {self.weights_path}")
+            if self.is_onnx:
+                raise FileNotFoundError(f"ONNX model weights not found: {self.weights_path}")
+            from ultralytics import YOLO  # noqa: PLC0415
+
+            try:
+                self.yolo_model = YOLO(str(self.weights_path.name))
+            except Exception as exc:
+                raise FileNotFoundError(f"Model weights not found: {self.weights_path}") from exc
+            else:
+                self.weights_path = Path(self.weights_path.name)
+                print(f"[INFO] Initialized PyTorch YOLO engine: {self.weights_path.name}")
+                return
 
         if self.is_onnx:
             import onnxruntime as ort  # noqa: PLC0415

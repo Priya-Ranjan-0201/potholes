@@ -1,0 +1,17 @@
+{
+  "id": "priyaranjanng/scamroad-gpu-training-pipeline",
+  "title": "ScamRoad GPU Training Pipeline",
+  "code_file": "../notebooks/ScamRoad_Kaggle_GPU_Pipeline.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "larxel/pothole-detection"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
