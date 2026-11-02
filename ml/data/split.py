@@ -143,12 +143,29 @@ def create_sequence_splits(
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse splitting CLI arguments."""
     parser = argparse.ArgumentParser(description="Sequence-aware stratified train/val/test split.")
-    parser.add_argument("--image-dir", type=Path, required=True, help="Input directory of images.")
     parser.add_argument(
-        "--label-dir", type=Path, required=True, help="Input directory of YOLO txt labels."
+        "--image-dir",
+        "--images-dir",
+        dest="image_dir",
+        type=Path,
+        required=True,
+        help="Input directory of images.",
     )
     parser.add_argument(
-        "--output-dir", type=Path, required=True, help="Output directory for processed splits."
+        "--label-dir",
+        "--labels-dir",
+        dest="label_dir",
+        type=Path,
+        required=True,
+        help="Input directory of YOLO txt labels.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        "--out-dir",
+        dest="output_dir",
+        type=Path,
+        required=True,
+        help="Output directory for processed splits.",
     )
     parser.add_argument("--train-ratio", type=float, default=0.70)
     parser.add_argument("--val-ratio", type=float, default=0.15)

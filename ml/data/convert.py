@@ -132,7 +132,7 @@ def convert_box_to_yolo(
     return (x_center, y_center, norm_w, norm_h)
 
 
-def convert_annotations_directory(
+def convert_annotations_directory(  # noqa: PLR0912, PLR0915
     xml_dir: Path,
     output_labels_dir: Path,
     taxonomy_path: Path | None = None,
@@ -254,7 +254,7 @@ def convert_annotations_directory(
     return summary
 
 
-def convert_coco_json(
+def convert_coco_json(  # noqa: PLR0915
     coco_json_path: Path,
     output_labels_dir: Path,
     taxonomy_path: Path | None = None,
@@ -440,7 +440,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Input annotation format.",
     )
     parser.add_argument(
-        "--xml-dir", type=Path, default=None, help="Directory containing VOC XML files."
+        "--xml-dir",
+        "--input-dir",
+        dest="xml_dir",
+        type=Path,
+        default=None,
+        help="Directory containing VOC XML files.",
     )
     parser.add_argument(
         "--coco-json", type=Path, default=None, help="Path to COCO instances JSON file."
@@ -452,9 +457,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Source directory for YOLO remapping.",
     )
     parser.add_argument(
-        "--output-dir", type=Path, required=True, help="Directory to save YOLO .txt labels."
+        "--output-dir",
+        "--out-dir",
+        dest="output_dir",
+        type=Path,
+        required=True,
+        help="Directory to save YOLO .txt labels.",
     )
-    parser.add_argument("--image-dir", type=Path, default=None, help="Directory containing images.")
+    parser.add_argument(
+        "--image-dir",
+        "--images-dir",
+        dest="image_dir",
+        type=Path,
+        default=None,
+        help="Directory containing images.",
+    )
     parser.add_argument(
         "--taxonomy",
         type=Path,

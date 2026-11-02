@@ -8,16 +8,16 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tarfile
 import urllib.request
 import zipfile
+from pathlib import Path
 
-from scripts.seed.create_benchmark_sample import create_sample_dataset
 import yaml
+from scripts.seed.create_benchmark_sample import create_sample_dataset
 
 
 def calculate_sha256(filepath: Path, chunk_size: int = 1024 * 1024) -> str:
@@ -149,7 +149,11 @@ def download_and_verify_dataset(
         not is_valid
         and expected_sha256 != "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     ):
-        msg = f"Checksum mismatch for {filename}!\nExpected: {expected_sha256}\nActual:   {actual_sha256}"
+        msg = (
+            f"Checksum mismatch for {filename}!\n"
+            f"Expected: {expected_sha256}\n"
+            f"Actual:   {actual_sha256}"
+        )
         raise ValueError(msg)
 
     extracted_dir = out_dir / "extracted" / dataset_key

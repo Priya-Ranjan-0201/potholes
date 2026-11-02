@@ -314,9 +314,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse audit CLI arguments."""
     parser = argparse.ArgumentParser(description="Audit dataset images, annotations, and leakage.")
     parser.add_argument(
-        "--image-dir", type=Path, required=True, help="Directory containing images."
+        "--image-dir",
+        "--images-dir",
+        dest="image_dir",
+        type=Path,
+        required=True,
+        help="Directory containing images.",
     )
-    parser.add_argument("--label-dir", type=Path, default=None, help="Directory containing labels.")
+    parser.add_argument(
+        "--label-dir",
+        "--labels-dir",
+        dest="label_dir",
+        type=Path,
+        default=None,
+        help="Directory containing labels.",
+    )
     parser.add_argument(
         "--train-dir", type=Path, default=None, help="Train split directory for leakage test."
     )
