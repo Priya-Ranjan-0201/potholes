@@ -226,9 +226,7 @@ def convert_annotations_directory(
                 f"{cls_idx} {yolo_box[0]:.6f} {yolo_box[1]:.6f} {yolo_box[2]:.6f} {yolo_box[3]:.6f}"
             )
             summary["total_objects_converted"] += 1
-            summary["per_class_counts"][cls_code] = (
-                summary["per_class_counts"].get(cls_code, 0) + 1
-            )
+            summary["per_class_counts"][cls_code] = summary["per_class_counts"].get(cls_code, 0) + 1
 
         # Write output YOLO label file
         out_txt = output_labels_dir / (xml_file.stem + ".txt")
@@ -291,9 +289,7 @@ def convert_coco_json(
     }
 
     # Build category map: id -> category_name
-    coco_cat_map: dict[int, str] = {
-        cat["id"]: cat["name"] for cat in coco.get("categories", [])
-    }
+    coco_cat_map: dict[int, str] = {cat["id"]: cat["name"] for cat in coco.get("categories", [])}
 
     summary: dict[str, Any] = {
         "format": "coco",
@@ -327,8 +323,12 @@ def convert_coco_json(
 
             # Resolve canonical taxonomy target
             target_code = None
-            if custom_category_map and (cat_id in custom_category_map or raw_cat_name in custom_category_map):
-                target_code = custom_category_map.get(cat_id) or custom_category_map.get(raw_cat_name)
+            if custom_category_map and (
+                cat_id in custom_category_map or raw_cat_name in custom_category_map
+            ):
+                target_code = custom_category_map.get(cat_id) or custom_category_map.get(
+                    raw_cat_name
+                )
             elif raw_cat_name in class_map:
                 target_code = class_map[raw_cat_name]["code"]
             elif str(cat_id) in class_map:
@@ -454,9 +454,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir", type=Path, required=True, help="Directory to save YOLO .txt labels."
     )
-    parser.add_argument(
-        "--image-dir", type=Path, default=None, help="Directory containing images."
-    )
+    parser.add_argument("--image-dir", type=Path, default=None, help="Directory containing images.")
     parser.add_argument(
         "--taxonomy",
         type=Path,

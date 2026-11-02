@@ -1,0 +1,53 @@
+source_mappings:
+  D00:
+    code: CRACK_LONG
+    index: 1
+  D10:
+    code: CRACK_TRANS
+    index: 2
+  D20:
+    code: CRACK_ALLIGATOR
+    index: 3
+  D40:
+    code: POTHOLE
+    index: 0
+  Pothole:
+    code: POTHOLE
+    index: 0
+  alligator crack:
+    code: CRACK_ALLIGATOR
+    index: 3
+  alligator_crack:
+    code: CRACK_ALLIGATOR
+    index: 3
+  crocodile crack:
+    code: CRACK_ALLIGATOR
+    index: 3
+  deep_pothole:
+    code: POTHOLE
+    index: 0
+  longitudinal crack:
+    code: CRACK_LONG
+    index: 1
+  longitudinal_crack:
+    code: CRACK_LONG
+    index: 1
+  pothole:
+    code: POTHOLE
+    index: 0
+  potholes:
+    code: POTHOLE
+    index: 0
+  transverse crack:
+    code: CRACK_TRANS
+    index: 2
+  transverse_crack:
+    code: CRACK_TRANS
+    index: 2
+target_classes:
+  0: POTHOLE
+  1: CRACK_LONG
+  2: CRACK_TRANS
+  3: CRACK_ALLIGATOR
+updated: '2026-11-02'
+version: 1.0.0

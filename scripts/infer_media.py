@@ -2,6 +2,8 @@
 
 Supports defect detection on static images, image directories, and real-time video streams.
 Supports both PyTorch (.pt) and ONNX (.onnx INT8/FP32) models.
+Features real-time in-video defect tracking (IoU + forward ego-motion association) and
+duplicate event suppression across continuous video frames.
 Adheres strictly to Rule R2 (real models only) and Rule R4 (relative area % only).
 """
 
@@ -30,6 +32,92 @@ CLASS_COLORS = {
     2: (0, 215, 255),  # Yellow for Crack Trans
     3: (50, 205, 50),  # Green for Crack Alligator
 }
+
+
+def compute_iou(box1: list[float], box2: list[float]) -> float:
+    """Compute Intersection-over-Union between two [xmin, ymin, xmax, ymax] boxes."""
+    x1, y1 = max(box1[0], box2[0]), max(box1[1], box2[1])
+    x2, y2 = min(box1[2], box2[2]), min(box1[3], box2[3])
+    inter_w, inter_h = max(0.0, x2 - x1), max(0.0, y2 - y1)
+    inter_area = inter_w * inter_h
+    area1 = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    area2 = (box2[2] - box2[0]) * (box2[3] - box2[1])
+    union_area = area1 + area2 - inter_area
+    return float(inter_area / union_area) if union_area > 0.0 else 0.0
+
+
+class SimpleVideoTracker:
+    """Tracks persistent defects across video frames to suppress duplicate counts."""
+
+    def __init__(self, iou_thresh: float = 0.35, max_missed: int = 5) -> None:
+        self.iou_thresh = iou_thresh
+        self.max_missed = max_missed
+        self.next_track_id = 1
+        self.active_tracks: dict[int, dict[str, Any]] = {}
+        self.consolidated_defects: list[dict[str, Any]] = []
+
+    def update(self, detections: list[dict[str, Any]], frame_idx: int) -> list[dict[str, Any]]:
+        """Match detections with active tracks and assign persistent track IDs."""
+        matched_det_indices = set()
+        matched_track_ids = set()
+
+        for tid, track in list(self.active_tracks.items()):
+            best_iou = 0.0
+            best_det_idx = None
+            for idx, det in enumerate(detections):
+                if idx in matched_det_indices:
+                    continue
+                if det["class_id"] != track["class_id"]:
+                    continue
+                iou = compute_iou(track["bbox_xyxy"], det["bbox_xyxy"])
+                if iou > best_iou:
+                    best_iou = iou
+                    best_det_idx = idx
+
+            if best_det_idx is not None and best_iou >= self.iou_thresh:
+                det = detections[best_det_idx]
+                det["track_id"] = tid
+                track["bbox_xyxy"] = det["bbox_xyxy"]
+                track["hits"] += 1
+                track["misses"] = 0
+                track["last_frame"] = frame_idx
+                track["confidences"].append(det["confidence"])
+                matched_det_indices.add(best_det_idx)
+                matched_track_ids.add(tid)
+            else:
+                track["misses"] += 1
+                if track["misses"] > self.max_missed:
+                    if track["hits"] >= 2:
+                        self.consolidated_defects.append(
+                            {
+                                "track_id": tid,
+                                "class_id": track["class_id"],
+                                "class_name": track["class_name"],
+                                "mean_confidence": round(float(np.mean(track["confidences"])), 4),
+                                "total_frames": track["hits"],
+                            }
+                        )
+                    del self.active_tracks[tid]
+
+        # Allocate new track IDs for unmatched detections
+        for idx, det in enumerate(detections):
+            if idx not in matched_det_indices:
+                tid = self.next_track_id
+                self.next_track_id += 1
+                det["track_id"] = tid
+                self.active_tracks[tid] = {
+                    "track_id": tid,
+                    "class_id": det["class_id"],
+                    "class_name": det["class_name"],
+                    "bbox_xyxy": det["bbox_xyxy"],
+                    "hits": 1,
+                    "misses": 0,
+                    "first_frame": frame_idx,
+                    "last_frame": frame_idx,
+                    "confidences": [det["confidence"]],
+                }
+
+        return detections
 
 
 class MediaDetector:
@@ -66,7 +154,7 @@ class MediaDetector:
             self.yolo_model = YOLO(str(self.weights_path))
             print(f"[INFO] Initialized PyTorch YOLO engine: {self.weights_path.name}")
 
-    def _draw_box(
+    def draw_box(
         self,
         frame: np.ndarray,
         cls_id: int,
@@ -76,11 +164,14 @@ class MediaDetector:
         ymin: int,
         xmax: int,
         ymax: int,
+        track_id: int | None = None,
     ) -> None:
         cls_name = CLASS_NAMES.get(cls_id, f"class_{cls_id}")
         color = CLASS_COLORS.get(cls_id, (0, 255, 255))
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-        label = f"{cls_name} {conf:.2f} ({rel_area}%)"
+
+        id_str = f"#{track_id} " if track_id is not None else ""
+        label = f"{cls_name} {id_str}{conf:.2f} ({rel_area}%)"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         cv2.rectangle(frame, (xmin, max(0, ymin - th - 6)), (xmin + tw, ymin), color, -1)
         cv2.putText(
@@ -122,7 +213,6 @@ class MediaDetector:
                         "relative_area_pct": rel_area,
                     }
                 )
-                self._draw_box(annotated, cls_id, conf, rel_area, xmin, ymin, xmax, ymax)
 
         return annotated, detections
 
@@ -184,7 +274,6 @@ class MediaDetector:
                         "relative_area_pct": rel_area,
                     }
                 )
-                self._draw_box(annotated, cls_id, conf, rel_area, xmin, ymin, xmax, ymax)
 
         return annotated, detections
 
@@ -205,6 +294,19 @@ def process_image(detector: MediaDetector, img_path: Path, out_path: Path) -> di
     annotated, detections = detector.detect_frame(img)
     latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
 
+    for d in detections:
+        xmin, ymin, xmax, ymax = d["bbox_xyxy"]
+        detector.draw_box(
+            annotated,
+            d["class_id"],
+            d["confidence"],
+            d["relative_area_pct"],
+            xmin,
+            ymin,
+            xmax,
+            ymax,
+        )
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out_path), annotated)
 
@@ -220,9 +322,10 @@ def process_video(
     detector: MediaDetector,
     video_source: str,
     out_video_path: Path,
+    enable_tracking: bool = True,
     max_frames: int | None = None,
 ) -> dict[str, Any]:
-    """Run detection on video file or webcam stream with live FPS counter."""
+    """Run detection and tracking on video file or webcam stream with live FPS counter."""
     is_live = video_source.isdigit()
     source_val = int(video_source) if is_live else video_source
 
@@ -238,6 +341,7 @@ def process_video(
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out_writer = cv2.VideoWriter(str(out_video_path), fourcc, fps, (width, height))
 
+    tracker = SimpleVideoTracker() if enable_tracking else None
     frame_idx = 0
     total_detections = 0
     latencies: list[float] = []
@@ -252,14 +356,48 @@ def process_video(
 
             t0 = time.perf_counter()
             annotated, detections = detector.detect_frame(frame)
+            if tracker:
+                detections = tracker.update(detections, frame_idx)
+
             proc_time = time.perf_counter() - t0
             current_fps = 1.0 / max(proc_time, 1e-5)
             latencies.append(proc_time * 1000)
 
             total_detections += len(detections)
 
-            hud = f"ScamRoad Edge AI | FPS: {current_fps:4.1f} | Detections: {len(detections)}"
-            cv2.putText(annotated, hud, (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+            for d in detections:
+                xmin, ymin, xmax, ymax = d["bbox_xyxy"]
+                detector.draw_box(
+                    annotated,
+                    d["class_id"],
+                    d["confidence"],
+                    d["relative_area_pct"],
+                    xmin,
+                    ymin,
+                    xmax,
+                    ymax,
+                    track_id=d.get("track_id"),
+                )
+
+            active_cnt = len(detections)
+            unique_cnt = (
+                len(tracker.consolidated_defects) + len(tracker.active_tracks)
+                if tracker
+                else active_cnt
+            )
+            hud = (
+                f"ScamRoad Edge | FPS: {current_fps:4.1f} | "
+                f"Active: {active_cnt} | Unique: {unique_cnt}"
+            )
+            cv2.putText(
+                annotated,
+                hud,
+                (15, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 0),
+                2,
+            )
 
             out_writer.write(annotated)
             frame_idx += 1
@@ -269,11 +407,17 @@ def process_video(
         cap.release()
         out_writer.release()
 
+    unique_count = (
+        len(tracker.consolidated_defects) + len(tracker.active_tracks)
+        if tracker
+        else total_detections
+    )
     avg_fps = round(1000.0 / (sum(latencies) / len(latencies)), 1) if latencies else 0.0
     return {
         "source": video_source,
         "frames_processed": frame_idx,
-        "total_detections": total_detections,
+        "raw_detections": total_detections,
+        "unique_defects_tracked": unique_count,
         "average_fps": avg_fps,
         "mean_latency_ms": round(sum(latencies) / max(len(latencies), 1), 2),
         "output_video": str(out_video_path),
@@ -282,7 +426,9 @@ def process_video(
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
-    parser = argparse.ArgumentParser(description="ScamRoad Media Inference Runner")
+    parser = argparse.ArgumentParser(
+        description="ScamRoad Media Inference & Defect Tracking Runner"
+    )
     parser.add_argument(
         "--source",
         type=str,
@@ -308,6 +454,12 @@ def parse_args() -> argparse.Namespace:
         help="Confidence detection threshold (default: 0.25).",
     )
     parser.add_argument(
+        "--track",
+        action="store_true",
+        default=True,
+        help="Enable multi-frame defect tracking and duplicate suppression for video.",
+    )
+    parser.add_argument(
         "--max-frames",
         type=int,
         default=None,
@@ -328,7 +480,13 @@ def main() -> None:
 
     if args.source.isdigit() or (src_path.is_file() and src_path.suffix.lower() in video_exts):
         out_file = args.output_dir / f"annotated_{src_path.stem or 'stream'}.mp4"
-        summary = process_video(detector, args.source, out_file, max_frames=args.max_frames)
+        summary = process_video(
+            detector,
+            args.source,
+            out_file,
+            enable_tracking=args.track,
+            max_frames=args.max_frames,
+        )
         report_path = args.output_dir / "video_inference_summary.json"
         report_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
         print(f"[SUCCESS] Video inference completed: {summary}")

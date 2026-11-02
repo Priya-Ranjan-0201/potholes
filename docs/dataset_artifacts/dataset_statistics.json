@@ -1,0 +1,21 @@
+{
+  "audit_timestamp": "2026-11-02T17:34:01.213965+00:00",
+  "total_samples": 30,
+  "splits": {
+    "train": 21,
+    "val": 9,
+    "test": 0
+  },
+  "class_distribution": {
+    "POTHOLE": 18,
+    "CRACK_LONG": 15
+  },
+  "object_scale_categories": {
+    "large": 33
+  },
+  "resolution_frequencies": {
+    "720x720": 30
+  },
+  "quarantined_files": 0,
+  "duplicate_groups": 24
+}
