@@ -111,44 +111,91 @@ def mount_google_drive(mount_point: str = "/content/drive") -> Path | None:
         return storage_root
 
 
+def _resolve_colab_secrets(userdata: any) -> tuple[str | None, str | None]:
+    """Retrieve Kaggle username and token from Colab Secrets across naming conventions."""
+    username = None
+    with contextlib.suppress(Exception):
+        username = userdata.get("KAGGLE_USERNAME")
+
+    key = None
+    with contextlib.suppress(Exception):
+        key = userdata.get("KAGGLE_KEY")
+
+    single_token = None
+    with contextlib.suppress(Exception):
+        single_token = userdata.get("KAGGLE_API_TOKEN")
+
+    custom_token = None
+    for candidate in ["priyaranja", "priyaranjan", "kaggle", "kaggle_token"]:
+        try:
+            val = userdata.get(candidate)
+            if val:
+                custom_token = val
+                break
+        except Exception as exc:
+            logger.debug("Secret '%s' not present: %s", candidate, exc)
+
+    token = key or single_token or custom_token
+    user = username or "priyaranja"
+    return user, token
+
+
 def configure_kaggle_credentials() -> bool:
-    """Check and configure Kaggle API credentials."""
+    """Check and configure Kaggle API credentials across multiple secret naming conventions."""
     kaggle_dir = Path.home() / ".kaggle"
     kaggle_json = kaggle_dir / "kaggle.json"
+    access_token_file = kaggle_dir / "access_token"
 
-    # 1. Check existing ~/.kaggle/kaggle.json
     if kaggle_json.exists():
         print(f"[SUCCESS] Kaggle credentials found at {kaggle_json}")
         with contextlib.suppress(Exception):
             os.chmod(kaggle_json, 0o600)
         return True
 
-    # 2. Check Colab User Secrets
+    if access_token_file.exists():
+        print(f"[SUCCESS] Kaggle access token found at {access_token_file}")
+        with contextlib.suppress(Exception):
+            os.chmod(access_token_file, 0o600)
+        return True
+
     if is_colab():
         try:
             from google.colab import userdata  # noqa: PLC0415
 
-            username = userdata.get("KAGGLE_USERNAME")
-            key = userdata.get("KAGGLE_KEY")
-            if username and key:
+            uname, token = _resolve_colab_secrets(userdata)
+            if token:
                 kaggle_dir.mkdir(parents=True, exist_ok=True)
+                with open(access_token_file, "w", encoding="utf-8") as f:
+                    f.write(token.strip())
+                with contextlib.suppress(Exception):
+                    os.chmod(access_token_file, 0o600)
+
                 with open(kaggle_json, "w", encoding="utf-8") as f:
-                    json.dump({"username": username, "key": key}, f)
+                    json.dump({"username": uname, "key": token.strip()}, f)
                 with contextlib.suppress(Exception):
                     os.chmod(kaggle_json, 0o600)
-                print("[SUCCESS] Kaggle credentials populated from Google Colab Secrets.")
+
+                os.environ["KAGGLE_USERNAME"] = uname
+                os.environ["KAGGLE_KEY"] = token.strip()
+                os.environ["KAGGLE_API_TOKEN"] = token.strip()
+
+                print(
+                    f"[SUCCESS] Kaggle credentials configured from Colab Secrets "
+                    f"(identifier: '{uname}')."
+                )
                 return True
         except Exception as exc:
-            logger.debug("Colab secrets unavailable: %s", exc)
+            logger.debug("Colab secrets lookup error: %s", exc)
 
-    # 3. Check environment variables
-    if os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY"):
+    if os.environ.get("KAGGLE_API_TOKEN") or (
+        os.environ.get("KAGGLE_USERNAME") and os.environ.get("KAGGLE_KEY")
+    ):
         print("[SUCCESS] Kaggle credentials detected in environment variables.")
         return True
 
     print("[WARNING] Kaggle credentials not configured.")
     print("         To enable Kaggle dataset downloads, add KAGGLE_USERNAME and KAGGLE_KEY")
-    print("         via Colab Secrets (Left Key icon) or place kaggle.json in ~/.kaggle/")
+    print("         (or 'priyaranja' / 'KAGGLE_API_TOKEN') in Colab Secrets (Left Key icon).")
     return False
 
 

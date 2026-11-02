@@ -84,3 +84,4 @@ This automatically verifies system memory, GPU acceleration, persistent Drive di
 1. **No Heavy Local Workloads**: Model training and multi-gigabyte dataset processing must never run on local laptop hardware (CPU-only, limited free disk).
 2. **Persistent Checkpointing**: All training scripts must write directly to `/content/drive/MyDrive/ScamRoad/runs/` to prevent loss of progress during Colab session timeouts.
 3. **No Hardcoded Secrets**: Tokens and API keys are read via environment variables or Colab Secrets, never hardcoded in notebooks or committed to GitHub.
+
