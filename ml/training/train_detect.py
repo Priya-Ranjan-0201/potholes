@@ -480,10 +480,16 @@ def train_detector(
         print(f"[START] Initializing new training for {model_name}...")
         try:
             model = YOLO(model_name)
-        except Exception:
-            alt_model = "yolov8n.pt" if "s" not in model_name else "yolov8s.pt"
-            print(f"[WARNING] Model {model_name} unavailable. Falling back to {alt_model}.")
-            model = YOLO(alt_model)
+        except Exception as exc:
+            print(f"[NOTICE] Pretrained weight load failed ({exc}). Falling back to architecture build...")
+            try:
+                yaml_candidate = model_name.replace(".pt", ".yaml")
+                print(f"[INFO] Initializing architecture directly from {yaml_candidate}...")
+                model = YOLO(yaml_candidate)
+            except Exception:
+                alt_model = "yolov8n.yaml"
+                print(f"[WARNING] Falling back to default architecture {alt_model}...")
+                model = YOLO(alt_model)
 
         model.add_callback("on_fit_epoch_end", cb)
         results = model.train(
