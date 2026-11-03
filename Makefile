@@ -10,35 +10,40 @@ PYTHON := python
 PIP := pip
 DOCKER_COMPOSE := docker compose
 
-# ─── Help ──────────────────────────────────────────────────────────────────
+# --- Help -------------------------------------------------------------------
 .PHONY: help
 help:  ## Show this help
 	@Write-Host "ScamRoad Make Targets:" -ForegroundColor Cyan
-	@Write-Host "  setup        - Install Python and Node dependencies"
+	@Write-Host "  setup        - Install full stack dependencies"
+	@Write-Host "  setup-ml     - Install pinned ML training dependencies (requirements.txt)"
 	@Write-Host "  dev          - Start Docker Compose dev stack"
 	@Write-Host "  down         - Stop Docker Compose"
 	@Write-Host "  lint         - Run ruff, black --check, mypy"
 	@Write-Host "  format       - Auto-format with ruff and black"
 	@Write-Host "  test         - Run all tests with pytest"
-	@Write-Host "  test-backend - Run backend tests only"
-	@Write-Host "  test-shared  - Run shared schema tests only"
-	@Write-Host "  train        - Run ML training (Phase 3)"
-	@Write-Host "  export       - Export model to ONNX/TFLite (Phase 4)"
-	@Write-Host "  bench        - Run edge benchmarks (Phase 4)"
-	@Write-Host "  edge-run     - Start edge agent (Phase 5)"
-	@Write-Host "  disk-check   - Show disk usage"
+	@Write-Host "  test-ml      - Run ML tests only"
+	@Write-Host "  download-data- Download datasets (RDD2022 / Pothole)"
+	@Write-Host "  audit-data   - Audit dataset classes, hashes, duplicates"
+	@Write-Host "  convert-data - Convert annotations to standard YOLO format"
+	@Write-Host "  train        - Run ML training"
+	@Write-Host "  export       - Export model to ONNX"
+	@Write-Host "  bench        - Run edge benchmarks"
 	@Write-Host "  clean        - Remove caches and temp files"
-	@Write-Host "  demo         - Run full demo"
 
-# ─── Setup ─────────────────────────────────────────────────────────────────
+# --- Setup ------------------------------------------------------------------
 .PHONY: setup
-setup:  ## Install dependencies
+setup:  ## Install full backend and dev dependencies
 	$(PYTHON) -m pip install --upgrade pip
-	$(PYTHON) -m pip install ruff black mypy pytest pytest-asyncio pytest-cov httpx jsonschema pyyaml pydantic pydantic-settings
+	$(PYTHON) -m pip install -r requirements.txt
 	$(PYTHON) -m pip install -r backend/requirements.txt
 	@if (Test-Path "web/package.json") { Set-Location web; npm install; Set-Location .. }
 
-# ─── Docker ────────────────────────────────────────────────────────────────
+.PHONY: setup-ml
+setup-ml:  ## Install pinned ML training dependencies
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install -r requirements.txt
+
+# --- Docker -----------------------------------------------------------------
 .PHONY: dev
 dev:  ## Start Docker Compose dev stack
 	$(DOCKER_COMPOSE) up -d
@@ -50,36 +55,42 @@ dev:  ## Start Docker Compose dev stack
 down:  ## Stop Docker Compose
 	$(DOCKER_COMPOSE) down
 
-# ─── Lint ──────────────────────────────────────────────────────────────────
+# --- Lint & Format ----------------------------------------------------------
 .PHONY: lint
 lint:  ## Run linters
 	@Write-Host "=== Ruff ===" -ForegroundColor Cyan
-	$(PYTHON) -m ruff check backend ml edge shared --config pyproject.toml
-	@Write-Host "=== Black (check) ===" -ForegroundColor Cyan
-	$(PYTHON) -m black --check backend ml edge shared --config pyproject.toml
+	$(PYTHON) -m ruff check backend ml edge shared configs --config pyproject.toml
 	@Write-Host "=== All checks passed ===" -ForegroundColor Green
 
 .PHONY: format
 format:  ## Auto-format code
-	$(PYTHON) -m ruff check --fix backend ml edge shared --config pyproject.toml
-	$(PYTHON) -m black backend ml edge shared --config pyproject.toml
+	$(PYTHON) -m ruff check --fix backend ml edge shared configs --config pyproject.toml
+	$(PYTHON) -m black backend ml edge shared configs --config pyproject.toml
 
-# ─── Tests ─────────────────────────────────────────────────────────────────
+# --- Tests ------------------------------------------------------------------
 .PHONY: test
 test:  ## Run all tests
 	$(PYTHON) -m pytest backend/tests shared/tests ml/tests edge/tests --tb=short -v
 
-.PHONY: test-backend
-test-backend:  ## Run backend tests only
-	$(PYTHON) -m pytest backend/tests/ --tb=short -v
+.PHONY: test-ml
+test-ml:  ## Run ML pipeline tests only
+	$(PYTHON) -m pytest ml/tests/ --tb=short -v
 
-.PHONY: test-shared
-test-shared:  ## Run shared schema tests only
-	$(PYTHON) -m pytest shared/tests/ --tb=short -v
+# --- ML Workflow ------------------------------------------------------------
+.PHONY: download-data
+download-data:  ## Download datasets
+	$(PYTHON) -m ml.data.download
 
-# ─── ML ────────────────────────────────────────────────────────────────────
+.PHONY: audit-data
+audit-data:  ## Audit dataset classes and image integrity
+	$(PYTHON) -m ml.data.audit
+
+.PHONY: convert-data
+convert-data:  ## Convert dataset annotations to YOLO format
+	$(PYTHON) -m ml.data.convert
+
 .PHONY: train
-train:  ## Run ML training (Phase 3)
+train:  ## Run ML detector training
 	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml
 
 .PHONY: train-dry
@@ -87,37 +98,15 @@ train-dry:  ## Dry-run ML training configuration and hardware detection
 	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
 
 .PHONY: export
-export:  ## Export model to ONNX (Phase 4)
+export:  ## Export model to ONNX
 	$(PYTHON) -m ml.export.export_onnx --weights ml/runs/pothole_yolov8n/weights/best.pt --imgsz 640
 
 .PHONY: quantize
-quantize:  ## Quantize ONNX model to INT8 (Phase 4)
+quantize:  ## Quantize ONNX model to INT8
 	$(PYTHON) -m ml.quantization.quantize --model ml/runs/pothole_yolov8n/weights/best.onnx --precision int8
 
-.PHONY: bench
-bench:  ## Run edge inference benchmarks (Phase 4)
-	$(PYTHON) -m edge.benchmarks.run_benchmark --model ml/runs/pothole_yolov8n/weights/best.onnx --device generic
-
-# ─── Edge ──────────────────────────────────────────────────────────────────
-.PHONY: edge-run
-edge-run:  ## Start edge agent (Phase 5)
-	$(PYTHON) -m edge.agent.main --mock-gps --max-frames 30
-
-# ─── Utilities ─────────────────────────────────────────────────────────────
-.PHONY: disk-check
-disk-check:  ## Show disk usage
-	Get-PSDrive C | Select-Object @{N='FreeGB';E={[math]::Round($$.Free/1GB,2)}}, @{N='UsedGB';E={[math]::Round($$.Used/1GB,2)}} | Format-Table -AutoSize
-
+# --- Utilities --------------------------------------------------------------
 .PHONY: clean
-clean:  ## Clean caches
+clean:  ## Clean temporary caches
 	Get-ChildItem -Path . -Include __pycache__, .pytest_cache, .mypy_cache, .ruff_cache -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
 	@Write-Host "Clean complete." -ForegroundColor Green
-
-# ─── Demonstration ─────────────────────────────────────────────────────────
-.PHONY: seed
-seed:  ## Seed demo municipal dataset into PostgreSQL
-	$(PYTHON) -m scripts.seed.seed_demo_data
-
-.PHONY: demo
-demo:  ## Run full 12-subsystem operational live demo
-	$(PYTHON) scripts/demo.py

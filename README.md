@@ -55,13 +55,16 @@ ScamRoad provides turnkey cloud GPU training pipelines on both **Google Colab** 
 # Clone repository
 git clone https://github.com/Priya-Ranjan-0201/potholes.git && cd potholes
 
-# Create virtual environment & install dependencies
+# Create virtual environment & install pinned ML dependencies
 python -m venv .venv
 source .venv/bin/activate  # Or on Windows: .venv\Scripts\activate
-pip install -e .
+pip install -r requirements.txt
 
-# Run complete 124-test verification suite
+# Run complete verification test suite
 pytest
+
+# Test multi-environment path auto-resolution
+python -c "from configs.paths import get_paths; print(get_paths())"
 
 # Test video/image inference runner
 python scripts/infer_media.py --source data/sample/splits/images/val --weights yolov8n.pt --output-dir runs/demo --conf 0.25

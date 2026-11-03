@@ -24,15 +24,18 @@ htmlcov/
 .coverage.*
 coverage.xml
 
-# ML / Training
+# ML / Training & Checkpoints
 /data/
+!/data/sample/
 runs/
 ml/runs/
+!ml/runs/.gitkeep
 ml/data/raw/
 ml/data/processed/
 ml/data/external/
 *.pt
 *.pth
+*.ckpt
 *.onnx
 *.tflite
 *.engine
@@ -40,6 +43,18 @@ ml/data/external/
 *.ncnn.param
 wandb/
 mlruns/
+
+# Large Datasets & Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+
+# Cloud Ephemeral Mounts
+/content/
+/kaggle/working/
+/kaggle/temp/
 
 # Node / Web / Mobile
 node_modules/
@@ -64,28 +79,23 @@ mobile/dist/
 Thumbs.db
 desktop.ini
 
-# Environment
+# Environment & Secrets
 .env
 .env.local
 .env.*.local
 !.env.example
-
-# Media uploads (local dev)
-uploads/
-media_store/
-
-# Secrets
+kaggle.json
+access_token
+*token*
 *.pem
 *.key
 *.crt
 !infra/nginx/certs/.gitkeep
 
-# MinIO data
+# Storage & DB
+uploads/
+media_store/
 minio_data/
-
-# Postgres data
 pgdata/
-
-# Backup
 *.sql.gz
 *.dump

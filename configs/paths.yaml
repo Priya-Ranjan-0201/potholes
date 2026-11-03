@@ -1,0 +1,31 @@
+# ScamRoad Multi-Environment Path Configuration
+# Automatically switches between Local, Google Colab, and Kaggle environments.
+
+local:
+  env_name: local
+  datasets_dir: ./data/datasets
+  local_cache_dir: ./data/cache
+  runs_dir: ./ml/runs
+  weights_dir: ./ml/runs/weights
+  exports_dir: ./ml/runs/exports
+  checkpoints_dir: ./ml/runs/checkpoints
+
+colab:
+  env_name: colab
+  drive_root: /content/drive/MyDrive/scam_road
+  datasets_dir: /content/drive/MyDrive/scam_road/datasets
+  local_cache_dir: /content/data
+  runs_dir: /content/drive/MyDrive/scam_road/runs
+  weights_dir: /content/drive/MyDrive/scam_road/weights
+  exports_dir: /content/drive/MyDrive/scam_road/exports
+  checkpoints_dir: /content/drive/MyDrive/scam_road/runs
+
+kaggle:
+  env_name: kaggle
+  drive_root: /kaggle/working/scam_road
+  datasets_dir: /kaggle/input
+  local_cache_dir: /kaggle/working/data
+  runs_dir: /kaggle/working/scam_road/runs
+  weights_dir: /kaggle/working/scam_road/weights
+  exports_dir: /kaggle/working/scam_road/exports
+  checkpoints_dir: /kaggle/working/scam_road/runs
