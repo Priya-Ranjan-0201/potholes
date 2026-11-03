@@ -1,0 +1,9 @@
+path: .
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: POTHOLE
+  1: CRACK_LONG
+  2: CRACK_TRANS
+  3: CRACK_ALLIGATOR
