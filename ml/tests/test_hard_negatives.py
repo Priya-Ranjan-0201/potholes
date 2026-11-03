@@ -6,6 +6,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ml.training.hard_negative_mining import mine_hard_negatives
+from ml.training.hard_negative_workflow import (
+    create_mock_background_candidates,
+    execute_hard_negative_cycle,
+)
 
 
 def test_mine_hard_negatives_file_not_found(tmp_path: Path) -> None:
@@ -75,3 +79,66 @@ def test_mine_hard_negatives_harvests_samples(tmp_path: Path) -> None:
     assert label_file.exists()
     # Must be 0 bytes (empty background label)
     assert label_file.stat().st_size == 0
+
+
+def test_create_mock_background_candidates(tmp_path: Path) -> None:
+    """Verify background candidate generation creates expected JPEG images."""
+    cand_dir = tmp_path / "candidates"
+    paths = create_mock_background_candidates(cand_dir, count=5)
+    assert len(paths) == 5
+    for p in paths:
+        assert p.exists()
+        assert p.suffix.lower() == ".jpg"
+        assert p.stat().st_size > 0
+
+
+def test_execute_hard_negative_cycle_dry_run(tmp_path: Path) -> None:
+    """Verify hard negative cycle execution in dry-run mode."""
+    weights = tmp_path / "yolo.pt"
+    weights.touch()
+
+    # Create dummy dataset structure
+    splits_dir = tmp_path / "splits"
+    train_img = splits_dir / "images" / "train"
+    train_lbl = splits_dir / "labels" / "train"
+    train_img.mkdir(parents=True, exist_ok=True)
+    train_lbl.mkdir(parents=True, exist_ok=True)
+
+    data_yaml = splits_dir / "dataset.yaml"
+    data_yaml.write_text(
+        f"path: {splits_dir.as_posix()}\ntrain: images/train\n"
+        "val: images/train\nnames: [POTHOLE]\n",
+        encoding="utf-8",
+    )
+
+    cand_dir = tmp_path / "candidates"
+    create_mock_background_candidates(cand_dir, count=3)
+
+    # Mock YOLO in mine_hard_negatives to produce 1 detection on candidate
+    mock_box = MagicMock()
+    mock_box.conf = [0.75]
+    mock_box.cls = [0]
+    mock_boxes = MagicMock()
+    mock_boxes.__len__.return_value = 1
+    mock_boxes.conf.tolist.return_value = [0.75]
+    mock_boxes.cls.tolist.return_value = [0]
+    mock_res = MagicMock()
+    mock_res.boxes = mock_boxes
+
+    mock_model_instance = MagicMock()
+    mock_model_instance.predict.return_value = [mock_res]
+
+    with patch("ml.training.hard_negative_mining.YOLO", return_value=mock_model_instance):
+        summary = execute_hard_negative_cycle(
+            model_weights=weights,
+            data_yaml=data_yaml,
+            negative_candidates_dir=cand_dir,
+            output_dir=tmp_path / "runs_hn",
+            dry_run=True,
+        )
+
+    assert summary["mined_samples_count"] > 0
+    assert "precision_delta" in summary
+    assert (tmp_path / "runs_hn" / "summary.json").exists()
+    assert Path("docs/HARD_NEGATIVES.md").exists()
+
