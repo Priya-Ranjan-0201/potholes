@@ -28,6 +28,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+# Ensure project root is in sys.path
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
 import torch
 import yaml
 from configs.paths import get_paths

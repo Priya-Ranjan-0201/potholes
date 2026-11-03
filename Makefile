@@ -77,17 +77,24 @@ test-ml:  ## Run ML pipeline tests only
 	$(PYTHON) -m pytest ml/tests/ --tb=short -v
 
 # --- ML Workflow ------------------------------------------------------------
-.PHONY: download-data
+.PHONY: data download-data
+data: download-data
 download-data:  ## Download datasets
 	$(PYTHON) -m ml.data.download
 
-.PHONY: audit-data
+.PHONY: audit audit-data
+audit: audit-data
 audit-data:  ## Audit dataset classes and image integrity
 	$(PYTHON) -m ml.data.audit
 
-.PHONY: convert-data
+.PHONY: convert convert-data
+convert: convert-data
 convert-data:  ## Convert dataset annotations to YOLO format
 	$(PYTHON) -m ml.data.convert
+
+.PHONY: split
+split:  ## Create sequence-aware train/val/test splits
+	$(PYTHON) -m ml.data.split
 
 .PHONY: train
 train:  ## Run ML detector training
@@ -97,6 +104,10 @@ train:  ## Run ML detector training
 train-dry:  ## Dry-run ML training configuration and hardware detection
 	$(PYTHON) -m ml.training.train --cfg ml/configs/yolov8_pothole.yaml --dry-run
 
+.PHONY: eval
+eval:  ## Evaluate model performance on validation and test splits
+	$(PYTHON) -m ml.evaluation.evaluate
+
 .PHONY: export
 export:  ## Export model to ONNX
 	$(PYTHON) -m ml.export.export_onnx --weights ml/runs/pothole_yolov8n/weights/best.pt --imgsz 640
@@ -104,6 +115,14 @@ export:  ## Export model to ONNX
 .PHONY: quantize
 quantize:  ## Quantize ONNX model to INT8
 	$(PYTHON) -m ml.quantization.quantize --model ml/runs/pothole_yolov8n/weights/best.onnx --precision int8
+
+.PHONY: report
+report:  ## Generate comprehensive AI evaluation report
+	$(PYTHON) -m ml.evaluation.evaluate
+
+.PHONY: reproduce
+reproduce:  ## Run clean reproduction check
+	$(PYTHON) -m pytest ml/tests/ -v
 
 # --- Utilities --------------------------------------------------------------
 .PHONY: clean

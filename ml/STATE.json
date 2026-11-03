@@ -1,0 +1,140 @@
+{
+  "current_pass": 1,
+  "current_stage": 1,
+  "gpu_hours_used": 0.0,
+  "dataset_version": "dataset_v1.0",
+  "budget": {
+    "max_total_gpu_hours": 30.0,
+    "max_gpu_hours_per_stage": 5.0,
+    "max_refinement_passes": 3,
+    "max_wall_clock_days": 7
+  },
+  "stages": {
+    "stage_0": {
+      "name": "ENVIRONMENT CHECK",
+      "status": "passed",
+      "gpu_hours_est": 0.1,
+      "gpu_hours_actual": 0.0037,
+      "exit_criteria_met": true,
+      "evidence_files": [
+        "runs/env_check/env_report.json",
+        "runs/env_check/vram_probe.json",
+        "docs/PHASE_REPORTS/pass1-stage0.md"
+      ]
+    },
+    "stage_1": {
+      "name": "DATA ACQUISITION",
+      "status": "pending",
+      "gpu_hours_est": 0.2,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_2": {
+      "name": "DATA AUDIT AND CLEANING",
+      "status": "pending",
+      "gpu_hours_est": 0.3,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_3": {
+      "name": "SPLITS AND EVALUATION PROTOCOL",
+      "status": "pending",
+      "gpu_hours_est": 0.2,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_4": {
+      "name": "BASELINES",
+      "status": "pending",
+      "gpu_hours_est": 2.0,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_5": {
+      "name": "SYSTEMATIC IMPROVEMENT",
+      "status": "pending",
+      "gpu_hours_est": 4.0,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_6": {
+      "name": "MODEL FAMILY COMPARISON",
+      "status": "pending",
+      "gpu_hours_est": 2.5,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_7": {
+      "name": "SEGMENTATION AND MEASUREMENT",
+      "status": "pending",
+      "gpu_hours_est": 1.5,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_8": {
+      "name": "LOCAL (INDIA/PUNJAB) DATA PIPELINE",
+      "status": "pending",
+      "gpu_hours_est": 0.5,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_9": {
+      "name": "EXPORT, QUANTIZATION, EDGE BENCHMARK",
+      "status": "pending",
+      "gpu_hours_est": 0.8,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_10": {
+      "name": "VIDEO, TRACKING AND REAL-WORLD TESTING",
+      "status": "pending",
+      "gpu_hours_est": 1.0,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_11": {
+      "name": "ROBUSTNESS AND SAFETY TESTS",
+      "status": "pending",
+      "gpu_hours_est": 1.2,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    },
+    "stage_12": {
+      "name": "FINAL REPORT",
+      "status": "pending",
+      "gpu_hours_est": 0.2,
+      "gpu_hours_actual": 0.0,
+      "exit_criteria_met": false,
+      "evidence_files": []
+    }
+  },
+  "run_ids": [
+    "pothole_yolov8n_20261031_024047",
+    "yolo11n_20261103_050820"
+  ],
+  "best_model_per_family": {
+    "yolov8n": {
+      "weights": "runs/pothole_yolov8n/weights/best.pt",
+      "mAP50_95": 0.512,
+      "precision": 0.825
+    },
+    "yolo11n": {
+      "weights": "runs/yolo11n_20261103_050820/weights/best.pt",
+      "mAP50_95": 0.552,
+      "precision": 0.864
+    }
+  },
+  "open_issues": [],
+  "next_action": "Execute Pass 1 Stage 1: Data Acquisition"
+}
