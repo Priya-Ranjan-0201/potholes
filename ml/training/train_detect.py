@@ -41,6 +41,13 @@ try:
 except (ImportError, AttributeError):
     pass
 
+try:
+    import torch._inductor.config
+    if not hasattr(torch._inductor.config, "deterministic"):
+        torch._inductor.config.deterministic = False
+except Exception:
+    pass
+
 import yaml
 from configs.paths import get_paths
 from ultralytics import YOLO
@@ -504,7 +511,7 @@ def train_detector(
             save_period=1,
             exist_ok=True,
             seed=seed,
-            deterministic=True,
+            deterministic=False,
             plots=True,
             verbose=True,
         )

@@ -25,6 +25,13 @@ try:
 except (ImportError, AttributeError):
     pass
 
+try:
+    import torch._inductor.config
+    if not hasattr(torch._inductor.config, "deterministic"):
+        torch._inductor.config.deterministic = False
+except Exception:
+    pass
+
 import yaml
 from checkpoint_manager import CheckpointManager
 from environment_manager import EnvironmentManager
