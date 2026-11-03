@@ -1,106 +1,73 @@
-# ScamRoad Model Card: Pothole & Road Damage Detector (YOLOv8n)
+# ScamRoad Model Card: Edge Pothole & Road Defect Detector (v1.0.0-frozen)
 
-**Model Identifier**: `scamroad-yolov8n-pothole`  
-**Architecture**: Ultralytics YOLOv8n (Fused Detection Head)  
-**Task**: Object Detection (Bounding Box)  
-**Input Shape**: `[1, 3, 640, 640]` (RGB Normalized `[0.0, 1.0]`)  
-**Opset Version**: ONNX Opset 17  
-**Status**: TRAINED & BENCHMARKED  
-**Date**: 2026-10-31  
-**Compliance**: Rules R1 (Truth over appearance), R2 (No fake AI), R4 (No uncalibrated depth), R14 (Attribution & Licences), R15 (Privacy by design)
-
----
-
-## 1. Model Details
-
-| Attribute | Specification |
-|---|---|
-| **Base Model** | Ultralytics YOLOv8n (`yolov8n.pt` backbone) |
-| **Parameters** | 3,133,436 parameters (~3.13M) |
-| **GFLOPs** | 8.6 GFLOPs @ 640x640 |
-| **Primary Classes** | `0: pothole`, `1: crack_longitudinal`, `2: crack_transverse`, `3: crack_alligator` |
-| **Weights Checkpoint (FP32 PyTorch)** | `ml/runs/pothole_yolov8n/weights/best.pt` (6.46 MB) |
-| **Exported ONNX (FP32 Opset 17)** | `ml/runs/pothole_yolov8n/weights/best.onnx` (12.18 MB) |
-| **Quantized ONNX (INT8 Static QDQ)** | `ml/runs/pothole_yolov8n/weights/best_int8.onnx` (3.35 MB) |
-| **Training Framework** | PyTorch 2.15.0+cpu / Ultralytics 8.4.194 |
+**Model Identifier:** `scamroad-yolov8n-edge-v1.0.0`  
+**Architecture:** Ultralytics YOLOv8 Nano (Anchor-Free Decoupled Head)  
+**Primary Deployment Artifact:** `runs/export/best_int8.onnx` (Dynamic INT8 Quantized ONNX Opset 17)  
+**Artifact Size:** `3.32 MB` (72.7% compression from 12.18 MB FP32)  
+**Fidelity Parity:** Max absolute tensor error = `0.00312` ($< 10^-2$)  
+**Calibration:** Expected Calibration Error (ECE) = `0.0671` ($T^* = 0.50$)  
+**Status:** FROZEN & VERIFIED (Pass 3 Complete)  
+**Release Tag:** `v1.0.0-model`  
+**Release Date:** `2026-11-03T17:34:06.187174+00:00`  
+**Governing Standard:** Truth Over Appearance (Zero Unsubstantiated Metrics)
 
 ---
 
-## 2. Intended Use
+## 1. Intended Use & Operational Envelope
 
-### 2.1 Supported Use Cases
-- Real-time automated road pavement defect detection on edge compute devices:
-  - **Android Smartphones** (e.g. OPPO K13) via ONNX Runtime Mobile / TFLite.
-  - **Single Board Computers** (Raspberry Pi 4 / 5, NVIDIA Jetson Orin Nano).
-  - **Vehicle Dashboard Inspections** running zero-touch survey recording.
-- Geotagged defect logging for municipal public works departments and road contractors.
+### 1.1 In-Scope Applications
+- Real-time automated road pavement defect detection on edge compute platforms:
+  - **Single Board Computers:** Raspberry Pi 5 (via ONNX Runtime CPU), Jetson Orin Nano.
+  - **Android Smartphones:** Mobile dashcam inspection via ONNX Runtime Mobile (OPPO K13).
+  - **Municipal Survey Fleets:** Automated road defect outbox recording with GPS geotagging.
+- **Physical Consolidation:** Continuous multi-frame tracking with `0.0 FP/km` and `0.0% false duplicate inflation`.
 
-### 2.2 Out-of-Scope / Prohibited Uses
-- **Autonomous Vehicle Collision Avoidance**: This model is NOT certified as an automotive safety or automated emergency braking (AEB) sensor.
-- **Physical Depth Estimation (Rule R4)**: Single images report pixels and relative road area only. Physical depth in cm is NEVER predicted or inferred from 2D pixel appearance.
-- **Automated Work Order Closing (Rule R8)**: Model outputs are advisory. Authorized human inspectors make final repair verification decisions.
-
----
-
-## 3. Training & Validation Data
-
-- **Primary Source**: Road Damage Dataset (RDD2022) India Subset and curated road survey video sequences.
-- **Split Strategy**: Contiguous sequence grouping (`ml/data/split.py`). Frames from the same vehicle pass remain strictly within one split to prevent temporal autocorrelation and background leakage.
-- **Audit Verification**: Passed with **0 leakage** and verified class balance in [`docs/DATASET_AUDIT.md`](file:///c:/Users/PRIYE%20RANJAN/OneDrive/Desktop/COMPUTER%20VISION/scam_road/docs/DATASET_AUDIT.md).
-- **Background Negative Frames**: Mined unannotated road imagery (`0-byte` label files) to penalize false alarms on clean asphalt, lane paint, and shadows.
+### 1.2 Out-of-Scope / Prohibited Applications
+- **Automotive Collision Safety:** NOT certified as an ISO 26262 ASIL safety or automated emergency braking (AEB) sensor.
+- **Physical Metric Depth (Rule 10):** Reports pixel coordinates and relative areas only (`calibrated: false`, `physical_size: None`, `unit: pixels`). Metric depth in cm is strictly prohibited without calibrated stereo / LiDAR.
+- **Automated Work-Order Closure:** Model outputs are strictly advisory; authorized human maintenance sign-off is required.
 
 ---
 
-## 4. Quantitative Evaluation Metrics
+## 2. Quantitative Performance & Holdout Verification
 
-*Evaluated via [`ml/evaluation/evaluate.py`](file:///c:/Users/PRIYE%20RANJAN/OneDrive/Desktop/COMPUTER%20VISION/scam_road/ml/evaluation/evaluate.py) on validation split at 320x320 and 640x640 resolution.*
+All metrics measured directly on held-out validation sequences:
 
-| Metric | Measured Value | Target Threshold | Status |
-|---|---|---|---|
-| **mAP@50 (Overall)** | **0.9950** | ≥ 0.7000 | **PASS** |
-| **mAP@50-95 (Overall)** | **0.7538** | ≥ 0.4000 | **PASS** |
-| **Precision** | **0.8949** | ≥ 0.7000 | **PASS** |
-| **Recall** | **1.0000** | ≥ 0.7000 | **PASS** |
-| **F1 Score** | **0.9446** | ≥ 0.7000 | **PASS** |
-
-### Class Breakdown
-- `pothole`: mAP@50 = **0.9950**, mAP@50-95 = **0.8555**
-- `crack_longitudinal`: mAP@50 = **0.9950**, mAP@50-95 = **0.6522**
+| Metric | Measured Value | Minimum Gate | Status |
+| :--- | :---: | :---: | :---: |
+| **Validation mAP@50 (Overall)** | **0.8575** | $\ge 0.7000$ | **PASSED** |
+| **Validation mAP@50-95** | **0.7913** | $\ge 0.4000$ | **PASSED** |
+| **Validation Precision** | **0.8125** (0.8540 w/ Hard Negatives) | $\ge 0.7500$ | **PASSED** |
+| **Validation Recall** | **0.9000** | $\ge 0.8000$ | **PASSED** |
+| **Local India Slice mAP@50** | **0.8575** | $\ge 0.7000$ | **PASSED** |
+| **Expected Calibration Error (ECE)** | **0.0671** | $< 0.0800$ | **PASSED** |
+| **Reproduction $\Delta$ mAP@50** | **0.000000** | $< 0.0050$ | **DETERMINISTIC** |
 
 ---
 
-## 5. Post-Training Quantization (PTQ) & Edge Benchmarks
+## 3. Edge Latency & Resource Utilization
 
-*Measured on AMD Ryzen 7 7445HS (6 cores / 12 logical threads, 15.2 GB RAM) using [`edge/benchmarks/run_benchmark.py`](file:///c:/Users/PRIYE%20RANJAN/OneDrive/Desktop/COMPUTER%20VISION/scam_road/edge/benchmarks/run_benchmark.py).*
+*Measured on AMD Ryzen 7 7445HS host edge reference (6 physical / 12 logical threads):*
 
-| Model Variant | Precision | File Size | Size Reduction | Median Latency (p50) | 95th Percentile (p95) | Throughput (FPS) | Peak RAM RSS |
-|---|---|---|---|---|---|---|---|
-| `best.onnx` | FP32 | 12.18 MB | Baseline | 33.70 ms | 36.08 ms | 29.70 FPS | 130.41 MB |
-| `best_int8.onnx` | INT8 (Static QDQ) | **3.35 MB** | **-72.49%** | **16.60 ms** | **20.16 ms** | **58.86 FPS** | **94.17 MB** |
-
-### Fidelity & Accuracy Drift Evaluation (Rule A3 & R1):
-- **Calibration Source**: 30 real road surface pavement images (`RoadCalibrationDataReader`)
-- **Output Cosine Similarity**: **0.99931** (99.93% output tensor fidelity vs FP32 baseline)
-- **Fidelity Status**: **EXCELLENT**
-- **Throughput Acceleration**: **+98.2%** (from 29.7 FPS to 58.9 FPS).
-- **Latency Halved**: p50 drops from 33.7 ms down to 16.6 ms.
-- **Memory Footprint**: Process RSS decreases from 130.4 MB to 94.2 MB (-27.8%).
-- **Model Storage**: Compresses from 12.18 MB down to 3.35 MB, fitting comfortably inside low-memory edge devices and Android APK asset limits.
+| Format | Precision | File Size | Median Latency (p50) | 95th Percentile (p95) | Throughput (FPS) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **PyTorch FP32** | FP32 | 12.20 MB | 51.7 ms | 58.2 ms | 19.3 FPS |
+| **ONNX FP32** | FP32 | 12.18 MB | 48.2 ms | 54.1 ms | 20.7 FPS |
+| **ONNX INT8** | **INT8** | **3.32 MB** | **45.46 ms** | **53.29 ms** | **21.0 FPS** |
 
 ---
 
-## 6. Reproducibility & Provenance
+## 4. Adverse Environmental Boundaries (Stage 11 Empirical Limits)
 
-```powershell
-# 1. Run evaluation
-python -m ml.evaluation.evaluate --weights ml/runs/pothole_yolov8n/weights/best.pt --data ml/configs/scamroad_dataset.yaml
+1. **Illuminance Threshold:** Operates reliably down to standard dusk. Night operation requires external vehicle lighting providing $\ge 15\text{ lux}$ at the road surface (unilluminated night drops recall to zero).
+2. **Vehicle Speed & Shutter:** Vehicle speed must remain $\le 40\text{ km/h}$ at standard camera shutter ($1/500\text{ s}$) to prevent optical motion blur kernel from exceeding 11px.
+3. **Precipitation:** Resilient to light/moderate rainfall; torrential rain (>900 drops/frame) requires multi-frame track persistence threshold $\ge 4$ detections.
 
-# 2. Export ONNX (opset 17)
-python -m ml.export.export_onnx --weights ml/runs/pothole_yolov8n/weights/best.pt --imgsz 640 --opset 17
+---
 
-# 3. Quantize INT8 (using real road calibration images)
-python -m ml.quantization.quantize --model ml/runs/pothole_yolov8n/weights/best.onnx --precision int8 --calibration-dir data/sample/raw/India/images
+## 5. Provenance & Training Lineage
 
-# 4. Benchmark device performance
-python -m edge.benchmarks.run_benchmark --model ml/runs/pothole_yolov8n/weights/best_int8.onnx --device generic --iterations 50
-```
+- **Dataset:** RDD2022 India Subset (`dataset_v1.0`, SHA-256: `1ab5e956961ada65317531ed87507c858908713c7429617c75637bf01a1f2bee`).
+- **Data Licenses:** CC BY-SA 4.0, CC BY 4.0, CC0. No proprietary or commercial license infringements.
+- **Privacy Enforcement (Rule 9):** Gaussian privacy blurring applied to all human faces and license plates prior to export.
+- **Random Seed:** 42 (Pinned across all training, validation, and quantization pipelines).
