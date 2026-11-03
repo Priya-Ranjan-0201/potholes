@@ -3,6 +3,7 @@
 import json
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import torch
@@ -21,6 +22,13 @@ from ml.training.train import (
     load_config,
     record_provenance,
     train_model,
+)
+from ml.training.train_detect import (
+    extract_metrics_json,
+    train_detector,
+)
+from ml.training.train_detect import (
+    parse_args as parse_train_detect_args,
 )
 
 
@@ -241,4 +249,76 @@ def test_backup_and_restore_dataset(tmp_path: Path) -> None:
     assert ok
     assert (local_splits / "dataset.yaml").exists()
     assert (local_splits / "train.txt").exists()
+
+
+def test_train_detect_parse_args() -> None:
+    """Verify parse_args default and custom argument parsing."""
+    args = parse_train_detect_args(
+        [
+            "--model",
+            "yolo11s.pt",
+            "--epochs",
+            "100",
+            "--batch",
+            "32",
+            "--resume",
+            "--dry-run",
+        ]
+    )
+    assert args.model == "yolo11s.pt"
+    assert args.epochs == 100
+    assert args.batch == 32
+    assert args.resume is True
+    assert args.dry_run is True
+
+
+def test_extract_metrics_json_mock() -> None:
+    """Verify metrics extraction with mock Ultralytics results."""
+    mock_box = SimpleNamespace(
+        mp=0.85,
+        mr=0.80,
+        map50=0.82,
+        map=0.65,
+        p=[0.85, 0.90],
+        r=[0.80, 0.75],
+        f1=[0.824, 0.818],
+        maps=[0.65, 0.60],
+    )
+    mock_results = SimpleNamespace(
+        box=mock_box,
+        names={0: "POTHOLE", 1: "CRACK_LONG"},
+    )
+
+    metrics = extract_metrics_json(mock_results)
+    assert metrics["all"]["precision"] == 0.85
+    assert metrics["all"]["recall"] == 0.80
+    assert metrics["all"]["map50"] == 0.82
+    assert metrics["all"]["map50_95"] == 0.65
+    assert "POTHOLE" in metrics["per_class"]
+    assert metrics["per_class"]["POTHOLE"]["precision"] == 0.85
+
+
+def test_train_detector_dry_run(tmp_path: Path) -> None:
+    """Verify train_detector executes dry-run validation and saves configs."""
+    data_yaml = tmp_path / "dataset.yaml"
+    data_yaml.write_text("names: [pothole]\nnc: 1\n", encoding="utf-8")
+    runs_dir = tmp_path / "runs"
+
+    res = train_detector(
+        model_name="yolo11n.pt",
+        data_yaml=data_yaml,
+        epochs=10,
+        imgsz=640,
+        batch=8,
+        run_id="test_run_1",
+        runs_dir=runs_dir,
+        dry_run=True,
+    )
+
+    assert res["status"] == "DRY_RUN_PASSED"
+    assert res["run_id"] == "test_run_1"
+    run_dir = Path(res["run_dir"])
+    assert (run_dir / "config.yaml").exists()
+    assert (run_dir / "provenance.json").exists()
+
 
