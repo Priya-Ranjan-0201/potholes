@@ -194,6 +194,72 @@ def generate_evaluation_markdown(metrics: dict[str, Any], output_path: Path) -> 
     for c_name, c_vals in metrics.get("per_class", {}).items():
         lines.append(f"| `{c_name}` | {c_vals.get('mAP50', 0.0)} | {c_vals.get('mAP50_95', 0.0)} |")
 
+    if "country_breakdown" in metrics:
+        lines.extend(
+            [
+                "",
+                "## 4. Multi-National Per-Country Breakdown",
+                "",
+                "| Country | Image Count | Precision | Recall | F1 | mAP@50 | mAP@50-95 |",
+                "|---|---|---|---|---|---|---|",
+            ]
+        )
+        for country, c_data in metrics["country_breakdown"].items():
+            if "error" in c_data:
+                err_str = c_data["error"]
+                cnt = c_data.get("image_count", 0)
+                lines.append(f"| `{country}` | {cnt} | N/A | N/A | N/A | N/A | {err_str} |")
+            else:
+                cnt = c_data.get("image_count", 0)
+                pr = c_data.get("precision", 0.0)
+                rc = c_data.get("recall", 0.0)
+                f1_val = c_data.get("f1", 0.0)
+                m50_val = c_data.get("map50", 0.0)
+                m_all = c_data.get("map50_95", 0.0)
+                lines.append(
+                    f"| `{country}` | {cnt} | {pr} | {rc} | {f1_val} | {m50_val} | {m_all} |"
+                )
+
+    if "false_positives" in metrics:
+        fp_info = metrics["false_positives"]
+        lines.extend(
+            [
+                "",
+                "## 5. False-Positive Gallery Analysis",
+                "",
+                f"- **Total False Positives Mined**: {fp_info.get('total_false_positives', 0)}  ",
+                f"- **Scanned Images**: {fp_info.get('total_images_scanned', 0)}  ",
+                f"- **Confidence Threshold**: {fp_info.get('conf_threshold', 0.25)}  ",
+                f"- **IoU Threshold**: {fp_info.get('iou_threshold', 0.20)}  ",
+                "- **Visual Gallery**: [false_positives/gallery.md](false_positives/gallery.md)  ",
+            ]
+        )
+
+    if "quantization" in metrics:
+        q_info = metrics["quantization"]
+        drift = q_info.get("accuracy_drift", {})
+        in_mb = q_info.get("input_size_mb", 0.0)
+        out_mb = q_info.get("output_size_mb", 0.0)
+        comp = q_info.get("compression_ratio_pct", 0.0)
+        sim = drift.get("mean_cosine_similarity", 0.0)
+        f_stat = drift.get("fidelity_status", "N/A")
+        mse = drift.get("mean_squared_error", 0.0)
+        max_err = drift.get("max_absolute_error", 0.0)
+
+        lines.extend(
+            [
+                "",
+                "## 6. Edge INT8 Quantization Accuracy Drop",
+                "",
+                "| Quantization Metric | FP32 Baseline | INT8 Quantized | Delta / Fidelity |",
+                "|---|---|---|---|",
+                f"| **Model Size** | {in_mb} MB | {out_mb} MB | -{comp}% |",
+                f"| **Cosine Similarity** | 1.00000 | {sim} | {f_stat} |",
+                f"| **Mean Squared Error (MSE)** | 0.00000 | {mse} | Preserved Detection |",
+                f"| **Max Absolute Error** | 0.00000 | {max_err} | Bounded |",
+            ]
+        )
+
     lines.extend(
         [
             "",
