@@ -1,0 +1,76 @@
+# ScamRoad Multi-Cloud Continuous Training & Automatic Recovery Configuration
+version: "1.0"
+project: "ScamRoad"
+
+storage:
+  # Centralized directory structure required by SPEC Section 2
+  structure:
+    datasets: "datasets"
+    dataset_manifests: "dataset_manifests"
+    checkpoints: "checkpoints"
+    latest_checkpoint: "latest_checkpoint"
+    best_checkpoint: "best_checkpoint"
+    experiment_configs: "experiment_configs"
+    training_logs: "training_logs"
+    evaluation_results: "evaluation_results"
+    recovery_logs: "recovery_logs"
+    environment_configs: "environment_configs"
+    model_exports: "model_exports"
+
+  colab:
+    mount_point: "/content/drive"
+    root: "/content/drive/MyDrive/scam_road"
+    temp_workspace: "/content/scam_road"
+    temp_cache: "/content/data"
+
+  kaggle:
+    root: "/kaggle/working/scam_road"
+    temp_workspace: "/kaggle/working/repo"
+    input_dir: "/kaggle/input"
+    temp_cache: "/kaggle/working/data"
+
+  local:
+    root: "./data/cloud_storage_simulation"
+    temp_workspace: "."
+    temp_cache: "./data/cache"
+
+orchestration:
+  lock_filename: "training.lock"
+  lease_duration_seconds: 900       # 15 minute lease before stale lock recovery
+  heartbeat_interval_seconds: 60    # Updated every epoch/interval
+  max_failover_retries: 5
+  checkpoint_interval_epochs: 1     # Atomic persistent write every single epoch
+
+models:
+  yolo11n:
+    architecture: "yolo11n"
+    base_weights: "yolo11n.pt"
+    default_epochs: 50
+    default_imgsz: 640
+    default_batch: 16
+  yolo11s:
+    architecture: "yolo11s"
+    base_weights: "yolo11s.pt"
+    default_epochs: 50
+    default_imgsz: 640
+    default_batch: 16
+  yolo26n:
+    architecture: "yolo26n"
+    base_weights: "yolo11n.pt"      # Forward-compatible alias
+    default_epochs: 50
+    default_imgsz: 640
+    default_batch: 16
+  rt_detr:
+    architecture: "rtdetr-l"
+    base_weights: "rtdetr-l.pt"
+    default_epochs: 50
+    default_imgsz: 640
+    default_batch: 8
+
+datasets:
+  default_taxonomy: "configs/taxonomy.yaml"
+  classes:
+    0: "POTHOLE"
+    1: "CRACK_LONG"
+    2: "CRACK_TRANS"
+    3: "CRACK_ALLIGATOR"
