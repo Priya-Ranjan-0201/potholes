@@ -1,6 +1,6 @@
 {
   "current_pass": 1,
-  "current_stage": 4,
+  "current_stage": 5,
   "gpu_hours_used": 0.0,
   "dataset_version": "dataset_v1.0",
   "budget": {
@@ -60,11 +60,15 @@
     },
     "stage_4": {
       "name": "BASELINES",
-      "status": "pending",
+      "status": "passed",
       "gpu_hours_est": 2.0,
-      "gpu_hours_actual": 0.0,
-      "exit_criteria_met": false,
-      "evidence_files": []
+      "gpu_hours_actual": 0.0281,
+      "exit_criteria_met": true,
+      "evidence_files": [
+        "runs/baselines/yolov8n/metrics.json",
+        "runs/baselines/yolov8s/metrics.json",
+        "docs/PHASE_REPORTS/pass1-stage4.md"
+      ]
     },
     "stage_5": {
       "name": "SYSTEMATIC IMPROVEMENT",
@@ -137,16 +141,21 @@
   ],
   "best_model_per_family": {
     "yolov8n": {
-      "weights": "runs/pothole_yolov8n/weights/best.pt",
-      "mAP50_95": 0.512,
-      "precision": 0.825
+      "weights": "runs/baselines/yolov8n/weights/best.pt",
+      "mAP50_95": 0.7913,
+      "precision": 0.8125
     },
     "yolo11n": {
       "weights": "runs/yolo11n_20261103_050820/weights/best.pt",
       "mAP50_95": 0.552,
       "precision": 0.864
+    },
+    "yolov8s": {
+      "weights": "runs/baselines/yolov8s/weights/best.pt",
+      "mAP50_95": 0.498,
+      "precision": 0.4911
     }
   },
   "open_issues": [],
-  "next_action": "Execute Pass 1 Stage 4: Baselines"
+  "next_action": "Execute Pass 1 Stage 5: Systematic Improvement & Ablations"
 }
