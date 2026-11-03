@@ -135,10 +135,11 @@ def test_execute_hard_negative_cycle_dry_run(tmp_path: Path) -> None:
             negative_candidates_dir=cand_dir,
             output_dir=tmp_path / "runs_hn",
             dry_run=True,
+            doc_output_path=tmp_path / "HARD_NEGATIVES.md",
         )
 
     assert summary["mined_samples_count"] > 0
     assert "precision_delta" in summary
     assert (tmp_path / "runs_hn" / "summary.json").exists()
-    assert Path("docs/HARD_NEGATIVES.md").exists()
+    assert (tmp_path / "HARD_NEGATIVES.md").exists()
 

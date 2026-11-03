@@ -150,6 +150,7 @@ def execute_hard_negative_cycle(
     retrain_epochs: int = 5,
     device: str = "cpu",
     dry_run: bool = False,
+    doc_output_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute complete mining, background integration, retraining, and precision diff."""
     if not model_weights.exists():
@@ -216,7 +217,7 @@ def execute_hard_negative_cycle(
     f1_delta = round(ret_f1 - base_f1, 4)
     map50_delta = round(ret_map50 - base_map50, 4)
 
-    doc_path = Path("docs/HARD_NEGATIVES.md")
+    doc_path = doc_output_path or Path("docs/HARD_NEGATIVES.md")
     doc_path.parent.mkdir(parents=True, exist_ok=True)
     status_str = _build_hard_negative_markdown(
         model_weights=model_weights,

@@ -17,14 +17,7 @@ ScamRoad provides a turnkey Google Colab pipeline with full session resume capab
 3. **Training Auto-Resume (`resume=True`):**
    - If a model is already trained and has `best.pt`, training is skipped.
    - If training was interrupted mid-run, `last.pt` is detected and training immediately resumes from the exact interrupted epoch.
-4. **Anti-Disconnect Keep-Alive:** To prevent Colab from disconnecting during long runs when the browser tab is idle, open Developer Tools (F12) in Chrome, select **Console**, and run:
-   ```javascript
-   function ClickConnect(){
-     console.log("Colab Keep-Alive active");
-     document.querySelector("colab-connect-button")?.click();
-   }
-   setInterval(ClickConnect, 60000);
-   ```
+   - Checkpoints and optimizer states are validated before resuming to prevent crashes from truncated files.
 
 ---
 

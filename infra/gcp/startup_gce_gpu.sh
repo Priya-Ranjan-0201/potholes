@@ -43,20 +43,30 @@ if command -v gsutil &> /dev/null; then
     gsutil -m rsync -r "${GCS_BUCKET}/runs/" "${CHECKPOINTS_DIR}/" || true
 fi
 
-# 5. Execute Resumable Multi-Model Training
-echo "[INFO] Starting / Resuming Multi-Model Training Pipeline..."
+# 5. Resolve Dataset Path
+if [ -f "${WORK_DIR}/data/splits/dataset.yaml" ]; then
+    DATA_YAML="${WORK_DIR}/data/splits/dataset.yaml"
+elif [ -f "${WORK_DIR}/data/sample/splits/dataset.yaml" ]; then
+    DATA_YAML="${WORK_DIR}/data/sample/splits/dataset.yaml"
+else
+    echo "[INFO] Dataset not found locally. Preparing dataset from sample splits..."
+    DATA_YAML="${WORK_DIR}/data/sample/splits/dataset.yaml"
+fi
+echo "[INFO] Using dataset descriptor: ${DATA_YAML}"
+
+# 6. Execute Resumable Training Pipeline with train_detect
+echo "[INFO] Starting / Resuming Training Pipeline..."
 python -c "
 from pathlib import Path
-from ultralytics import YOLO
+from ml.training.train_detect import train_detector
 from scripts.colab.setup_colab import PipelineState
 
 runs_dir = Path('${CHECKPOINTS_DIR}')
 state = PipelineState(runs_dir / 'pipeline_state.json')
 
 models = [
-    ('model_yolo11n', 'yolo11n.pt'),
-    ('model_yolo11s', 'yolo11s.pt'),
-    ('model_yolo11n_seg', 'yolo11n-seg.pt'),
+    ('yolo11n', 'yolo11n.pt'),
+    ('yolo11s', 'yolo11s.pt'),
 ]
 
 for model_key, base_weight in models:
@@ -64,21 +74,38 @@ for model_key, base_weight in models:
     if action == 'skip':
         print(f'[SKIP] {model_key} is already fully trained: {target}')
         continue
-    elif action == 'resume':
-        print(f'[RESUME] Interrupted checkpoint found: {target}! Resuming training...')
-        m = YOLO(str(target))
-        m.train(resume=True)
-    else:
-        print(f'[START] Fresh training session for {model_key} using {base_weight}...')
-        m = YOLO(base_weight)
-        m.train(data='data/splits/dataset.yaml', epochs=50, imgsz=640, batch=16, device=0, project=str(runs_dir), name=model_key, save=True)
-    state.mark_completed(model_key, {'weights': str(runs_dir / model_key / 'weights' / 'best.pt')})
+    resume_flag = (action == 'resume')
+    print(f'[{action.upper()}] Training {model_key} (resume={resume_flag})...')
+    train_detector(
+        model_name=base_weight,
+        data_yaml=Path('${DATA_YAML}'),
+        epochs=50,
+        imgsz=640,
+        batch=16,
+        device='0',
+        resume=resume_flag,
+        run_id=model_key,
+        runs_dir=runs_dir,
+    )
+    best_weight = runs_dir / model_key / 'weights' / 'best.pt'
+    if best_weight.exists():
+        state.mark_completed(model_key, {'best_weights': str(best_weight)})
 "
 
-# 6. Sync Completed Artifacts Back to Google Cloud Storage
+# 7. Export Best Models to ONNX
+for model_key in yolo11n yolo11s; do
+    BEST_WEIGHT="${CHECKPOINTS_DIR}/${model_key}/weights/best.pt"
+    if [ -f "${BEST_WEIGHT}" ]; then
+        echo "[INFO] Exporting ${model_key} to ONNX opset 17..."
+        python -m ml.export.export_onnx --weights "${BEST_WEIGHT}" --format onnx --opset 17 --output-dir "${WORK_DIR}/weights" || true
+    fi
+done
+
+# 8. Sync Completed Artifacts Back to Google Cloud Storage
 if command -v gsutil &> /dev/null; then
     echo "[INFO] Uploading finalized weights and logs back to ${GCS_BUCKET}/runs/..."
     gsutil -m rsync -r "${CHECKPOINTS_DIR}/" "${GCS_BUCKET}/runs/" || true
+    gsutil -m rsync -r "${WORK_DIR}/weights/" "${GCS_BUCKET}/weights/" || true
 fi
 
 echo "[SUCCESS] ScamRoad Google Cloud Compute Engine pipeline execution finished."

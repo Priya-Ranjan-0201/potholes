@@ -169,6 +169,19 @@ def _save_evaluation_artifacts(
     return metrics_data, metrics_path
 
 
+def _resolve_valid_resume_checkpoint(weights_dir: Path) -> Path | None:
+    """Find valid last.pt or best.pt checkpoint for resume, filtering corrupt files."""
+    for cand in [weights_dir / "last.pt", weights_dir / "best.pt"]:
+        if cand.exists() and cand.stat().st_size > 100_000:
+            try:
+                torch.load(str(cand), map_location="cpu", weights_only=False)
+            except Exception as err:
+                print(f"[WARNING] Checkpoint {cand.name} corrupted ({err}). Trying fallback...")
+            else:
+                return cand
+    return None
+
+
 def train_detector(
     model_name: str = "yolo11n.pt",
     data_yaml: Path | str = "data/sample/splits/dataset.yaml",
@@ -230,16 +243,16 @@ def train_detector(
             json.dump(summary, f, indent=2)
         return summary
 
-    last_pt = weights_dir / "last.pt"
     start_time = time.time()
+    resume_target = _resolve_valid_resume_checkpoint(weights_dir) if resume else None
 
-    # Determine whether resuming
-    is_resuming = resume or (resume and last_pt.exists())
-    if is_resuming and last_pt.exists():
-        print(f"[RESUME] Resuming from existing checkpoint: {last_pt}")
-        model = YOLO(str(last_pt))
+    if resume_target is not None:
+        print(f"[RESUME] Resuming from verified checkpoint: {resume_target}")
+        model = YOLO(str(resume_target))
         results = model.train(resume=True)
     else:
+        if resume:
+            print("[NOTICE] --resume requested but no valid checkpoint was found. Starting fresh.")
         print(f"[START] Initializing new training for {model_name}...")
         try:
             model = YOLO(model_name)
