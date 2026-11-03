@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from scripts.colab.setup_colab import PipelineState
 
 from ml.training.train import (
     compute_file_hash,
@@ -121,3 +122,41 @@ def test_train_model_dry_run(tmp_path: Path) -> None:
     assert run_dir.exists()
     assert (run_dir / "provenance.json").exists()
     assert (run_dir / "summary.json").exists()
+
+
+def test_pipeline_state_save_and_resume(tmp_path: Path) -> None:
+    """Verify PipelineState checkpoint management and resume target resolution."""
+    state_file = tmp_path / "pipeline_state.json"
+    ps = PipelineState(state_file)
+
+    # Initial state
+    assert not ps.is_completed("yolo11n")
+    runs_dir = tmp_path / "runs"
+    model_dir = runs_dir / "yolo11n"
+    weights_dir = model_dir / "weights"
+    weights_dir.mkdir(parents=True, exist_ok=True)
+
+    action, target = ps.get_resume_target("yolo11n", runs_dir)
+    assert action == "fresh"
+    assert target is None
+
+    # Simulate interruption with last.pt
+    last_pt = weights_dir / "last.pt"
+    last_pt.write_text("fake_last_weights", encoding="utf-8")
+    action, target = ps.get_resume_target("yolo11n", runs_dir)
+    assert action == "resume"
+    assert target == last_pt
+
+    # Simulate completion with best.pt and marked status
+    best_pt = weights_dir / "best.pt"
+    best_pt.write_text("fake_best_weights", encoding="utf-8")
+    ps.mark_completed("yolo11n", {"best_pt": str(best_pt)})
+    assert ps.is_completed("yolo11n")
+
+    action, target = ps.get_resume_target("yolo11n", runs_dir)
+    assert action == "skip"
+    assert target == best_pt
+
+    # Re-instantiate to verify disk persistence
+    ps2 = PipelineState(state_file)
+    assert ps2.is_completed("yolo11n")

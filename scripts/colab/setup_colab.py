@@ -14,9 +14,92 @@ import platform
 import shutil
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
+UTC = getattr(datetime, "UTC", UTC)
 logger = logging.getLogger("scamroad.colab")
+
+
+class PipelineState:
+    """Persistent execution state manager stored in Google Drive.
+
+    Tracks stage completion and enables transparent session resuming across
+    Colab preemptions, network drops, or runtime timeouts.
+    """
+
+    def __init__(self, state_file: Path | str) -> None:
+        self.path = Path(state_file)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.data: dict[str, Any] = self._load()
+
+    def _load(self) -> dict[str, Any]:
+        if self.path.exists():
+            with contextlib.suppress(Exception):
+                return json.loads(self.path.read_text(encoding="utf-8"))
+        return {
+            "version": "1.0",
+            "stages": {},
+            "created_at": datetime.now(UTC).isoformat(),
+            "last_resumed_at": datetime.now(UTC).isoformat(),
+        }
+
+    def save(self) -> None:
+        """Persist state to disk or Google Drive."""
+        self.data["last_updated_at"] = datetime.now(UTC).isoformat()
+        with contextlib.suppress(Exception):
+            self.path.write_text(json.dumps(self.data, indent=2), encoding="utf-8")
+
+    def is_completed(self, stage_name: str) -> bool:
+        """Check if a pipeline stage or model training is completed."""
+        return self.data.get("stages", {}).get(stage_name, {}).get("status") == "completed"
+
+    def mark_completed(self, stage_name: str, metadata: dict[str, Any] | None = None) -> None:
+        """Mark stage as completed with arbitrary execution metadata."""
+        if "stages" not in self.data:
+            self.data["stages"] = {}
+        self.data["stages"][stage_name] = {
+            "status": "completed",
+            "completed_at": datetime.now(UTC).isoformat(),
+            **(metadata or {}),
+        }
+        self.save()
+
+    def get_resume_target(self, model_name: str, runs_dir: Path | str) -> tuple[str, Path | None]:
+        """Determine whether to skip, resume from checkpoint, or start fresh.
+
+        Returns:
+            Tuple of (action, path):
+            - ('skip', best_pt_path): model is already trained and complete
+            - ('resume', last_pt_path): prior interrupted run detected; resume from last.pt
+            - ('fresh', None): no prior checkpoint; start new training run
+        """
+        model_dir = Path(runs_dir) / model_name
+        last_pt = model_dir / "weights" / "last.pt"
+        best_pt = model_dir / "weights" / "best.pt"
+
+        if self.is_completed(model_name) and best_pt.exists():
+            return "skip", best_pt
+
+        if last_pt.exists():
+            return "resume", last_pt
+
+        return "fresh", None
+
+    def print_summary(self) -> None:
+        """Format and print an executive resume summary."""
+        print("\n" + "=" * 65)
+        print("          SCAMROAD PERSISTENT PIPELINE SESSION STATE          ")
+        print("=" * 65)
+        print(f" State Hub File  : {self.path}")
+        stages = self.data.get("stages", {})
+        if not stages:
+            print(" Active Stages   : None recorded yet (fresh pipeline initialization).")
+        for stg, meta in stages.items():
+            status_symbol = "✔ COMPLETED" if meta.get("status") == "completed" else "⏳ PENDING"
+            print(f" • {stg:<20}: {status_symbol}")
+        print("=" * 65 + "\n")
 
 
 def is_colab() -> bool:
