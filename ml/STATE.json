@@ -1,6 +1,6 @@
 {
   "current_pass": 1,
-  "current_stage": 9,
+  "current_stage": 10,
   "gpu_hours_used": 0.0,
   "dataset_version": "dataset_v1.0",
   "budget": {
@@ -119,11 +119,16 @@
     },
     "stage_9": {
       "name": "EXPORT, QUANTIZATION, EDGE BENCHMARK",
-      "status": "pending",
+      "status": "passed",
       "gpu_hours_est": 0.8,
-      "gpu_hours_actual": 0.0,
-      "exit_criteria_met": false,
-      "evidence_files": []
+      "gpu_hours_actual": 0.02,
+      "exit_criteria_met": true,
+      "evidence_files": [
+        "runs/export/edge_benchmark_report.json",
+        "runs\\baselines\\yolov8n\\weights\\best.onnx",
+        "runs\\export\\best_int8.onnx",
+        "docs/PHASE_REPORTS/pass1-stage9.md"
+      ]
     },
     "stage_10": {
       "name": "VIDEO, TRACKING AND REAL-WORLD TESTING",
@@ -178,5 +183,5 @@
     }
   },
   "open_issues": [],
-  "next_action": "Execute Pass 1 Stage 9: Export, Quantization, Edge Benchmark"
+  "next_action": "Execute Pass 1 Stage 10: Video, Tracking & Real-World Testing"
 }
