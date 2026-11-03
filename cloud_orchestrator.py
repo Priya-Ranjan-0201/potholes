@@ -12,8 +12,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
+import types
 from pathlib import Path
 from typing import Any
+
+import torch
+if not hasattr(torch.utils, "serialization"):
+    _ser_mod = types.ModuleType("torch.utils.serialization")
+    sys.modules["torch.utils.serialization"] = _ser_mod
+    torch.utils.serialization = _ser_mod
 
 import yaml
 from checkpoint_manager import CheckpointManager

@@ -34,6 +34,14 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 import torch
+import types
+
+# Ensure compatibility shim for legacy unpickling checks
+if not hasattr(torch.utils, "serialization"):
+    _ser_mod = types.ModuleType("torch.utils.serialization")
+    sys.modules["torch.utils.serialization"] = _ser_mod
+    torch.utils.serialization = _ser_mod
+
 import yaml
 from configs.paths import get_paths
 from ultralytics import YOLO
