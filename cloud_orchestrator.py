@@ -18,14 +18,12 @@ from pathlib import Path
 from typing import Any
 
 import torch
+
 try:
     import torch.utils.serialization
-except ImportError:
-    _ser_mod = types.ModuleType("torch.utils.serialization")
-    _ser_mod.config = types.ModuleType("config")
-    sys.modules["torch.utils.serialization"] = _ser_mod
-    sys.modules["torch.utils.serialization.config"] = _ser_mod.config
-    torch.utils.serialization = _ser_mod
+    import torch.utils.serialization.config
+except (ImportError, AttributeError):
+    pass
 
 import yaml
 from checkpoint_manager import CheckpointManager

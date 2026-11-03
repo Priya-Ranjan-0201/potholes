@@ -35,16 +35,11 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import torch
 
-# Ensure compatibility shim for legacy PyTorch unpickling if missing
 try:
     import torch.utils.serialization
-except ImportError:
-    import types
-    _ser_mod = types.ModuleType("torch.utils.serialization")
-    _ser_mod.config = types.ModuleType("config")
-    sys.modules["torch.utils.serialization"] = _ser_mod
-    sys.modules["torch.utils.serialization.config"] = _ser_mod.config
-    torch.utils.serialization = _ser_mod
+    import torch.utils.serialization.config
+except (ImportError, AttributeError):
+    pass
 
 import yaml
 from configs.paths import get_paths
