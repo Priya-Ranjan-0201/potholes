@@ -1,7 +1,7 @@
 # ScamRoad — Autonomous AI Model Evaluation & Lineage Report
 
-**Evaluation Timestamp (UTC):** `2026-11-03T17:29:43.693863+00:00`  
-**Git Commit SHA:** `de21de8974b32181ad0af1e733adede7c781e7e5`  
+**Evaluation Timestamp (UTC):** `2026-11-03T17:30:54.595602+00:00`  
+**Git Commit SHA:** `e7271c8f0ee38d58b1f3e37c81754c47fb13db9e`  
 **Dataset Version:** `dataset_v1.0 (SHA-256: 1ab5e956961ada65317531ed87507c858908713c7429617c75637bf01a1f2bee)`  
 **Hardware Profile:** AMD Ryzen 7 7445HS / NVIDIA RTX 3050 Laptop GPU (6.0 GB VRAM)  
 **Primary Edge Target:** Jetson Nano / Raspberry Pi 5 / Android Edge (OPPO K13)  

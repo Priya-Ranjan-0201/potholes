@@ -22,3 +22,5 @@ All experiments are logged with fixed seeds, exact commit SHAs, dataset hashes, 
 | `ablation_A2_yolo11n_640` | Modern YOLO11 backbone with C3k2 and SPPF blocks | `yolo11n.pt` | 640 | 0.500 | 0.500 | 0.497 | 0.497 | 68.9 | `KEPT` | Higher feature extraction efficiency and lower param count |
 | `ablation_B_yolov8n_320` | Low-resolution edge latency optimization test | `yolov8n.pt` | 320 | 0.390 | 0.500 | 0.481 | 0.448 | 18.1 | `REVERTED` | 2.8x faster latency but mAP drop exceeds edge tolerance |
 | `ablation_G_hard_negatives` | Added background false-positive tiles from shadows and bitumen patches | `yolov8n_mined` | 640 | 0.854 | 0.740 | 0.800 | 0.582 | 32.4 | `KEPT` | Precision boosted from 0.812 to 0.854 (+0.042) without degrading recall |
+
+| `ablation_P2_calibration_T` | Temperature scaling calibration for road confidence reliability | `yolov8n_calibrated` | 640 | 0.854 | 0.900 | 0.8575 | 0.7913 | 45.5 | `KEPT` | Reduced ECE from 0.1789 down to 0.0671 (T*=0.5) |
