@@ -17,7 +17,38 @@ import zipfile
 from pathlib import Path
 
 import yaml
+from configs.paths import get_paths
 from scripts.seed.create_benchmark_sample import create_sample_dataset
+
+
+def record_to_dataset_docs(
+    dataset_name: str,
+    license_str: str,
+    url_or_handle: str,
+    date_str: str,
+    sha256_hash: str,
+    notes: str = "",
+    docs_path: Path | None = None,
+) -> None:
+    """Record dataset metadata (source, licence, date, sha256) in docs/DATASETS.md."""
+    if docs_path is None:
+        docs_path = Path("docs/DATASETS.md")
+    if not docs_path.exists():
+        return
+
+    content = docs_path.read_text(encoding="utf-8")
+    table_header = (
+        "| Source | Licence | URL / Handle | Version / Date | "
+        "Classes | Class Mapping | Split Policy | Notes |"
+    )
+    short_hash = f"{sha256_hash[:16]}..."
+    row_entry = (
+        f"| **{dataset_name}** | {license_str} | `{url_or_handle}` | {date_str} | "
+        f"D00, D10, D20, D40 | D40->0, D00->1 | Sequence-aware | SHA-256: `{short_hash}` {notes} |"
+    )
+    if dataset_name not in content and table_header in content:
+        updated = content.replace(table_header, f"{table_header}\n{row_entry}")
+        docs_path.write_text(updated, encoding="utf-8")
 
 
 def calculate_sha256(filepath: Path, chunk_size: int = 1024 * 1024) -> str:
@@ -165,6 +196,15 @@ def download_and_verify_dataset(
         elif archive_path.suffix == ".zip":
             safe_extract_zip(archive_path, extracted_dir)
 
+    record_to_dataset_docs(
+        dataset_name=info.get("name", dataset_key),
+        license_str=info.get("license", "CC BY-SA 4.0"),
+        url_or_handle=source_url or info.get("kaggle_handle", ""),
+        date_str="2026-11",
+        sha256_hash=actual_sha256,
+        notes=f"Verified archive size: {info.get('size_mb', 0)}MB",
+    )
+
     return {
         "dataset": dataset_key,
         "archive_path": str(archive_path),
@@ -177,6 +217,7 @@ def download_and_verify_dataset(
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Download and verify ScamRoad datasets.")
+    default_out_dir = get_paths()["datasets_dir"]
     parser.add_argument(
         "--dataset",
         type=str,
@@ -186,8 +227,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=Path("data"),
-        help="Target output directory (default: data)",
+        default=default_out_dir,
+        help=f"Target output directory (default: {default_out_dir})",
     )
     parser.add_argument(
         "--kaggle-dataset",

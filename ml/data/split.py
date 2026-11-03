@@ -127,6 +127,22 @@ def create_sequence_splits(
     with open(dataset_yaml_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(yolo_config, f, sort_keys=False)
 
+    # Strict sequence and image leakage verification
+    train_stems = {p.stem for p in splits["train"]}
+    val_stems = {p.stem for p in splits["val"]}
+    test_stems = {p.stem for p in splits["test"]}
+
+    leakage_train_val = train_stems.intersection(val_stems)
+    leakage_train_test = train_stems.intersection(test_stems)
+    leakage_val_test = val_stems.intersection(test_stems)
+
+    if leakage_train_val or leakage_train_test or leakage_val_test:
+        err = (
+            f"Data leakage detected! Train-Val: {len(leakage_train_val)}, "
+            f"Train-Test: {len(leakage_train_test)}, Val-Test: {len(leakage_val_test)}"
+        )
+        raise ValueError(err)
+
     return {
         "total_images": len(images),
         "total_sequences": total_seqs,
@@ -136,6 +152,7 @@ def create_sequence_splits(
         "train_sequences": len(train_seqs),
         "val_sequences": len(val_seqs),
         "test_sequences": len(test_seqs),
+        "leakage_verified": True,
         "dataset_yaml": str(dataset_yaml_path),
     }
 

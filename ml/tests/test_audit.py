@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image
 
 from ml.data.audit import audit_images, audit_yolo_labels, check_split_leakage
+from ml.data.download import record_to_dataset_docs
 
 
 def create_dummy_image(path: Path, color: tuple[int, int, int] = (100, 100, 100)) -> None:
@@ -95,3 +96,33 @@ def test_check_split_leakage(tmp_path: Path) -> None:
     assert leaked_result["has_leakage"]
     assert leaked_result["train_val_overlap_count"] == 1
     assert "India_001" in leaked_result["leaked_files"]
+
+
+def test_record_to_dataset_docs(tmp_path: Path) -> None:
+    """Verify appending dataset provenance records to docs/DATASETS.md."""
+    doc_file = tmp_path / "DATASETS.md"
+    hdr = (
+        "| Source | Licence | URL / Handle | Version / Date | "
+        "Classes | Class Mapping | Split Policy | Notes |\n"
+    )
+    doc_file.write_text(
+        f"# Dataset Registry\n\n{hdr}|---|---|---|---|---|---|---|---|\n"
+        "| **Old Set** | CC0 | `http://ex.com` | 2024 | D40 | D40->0 | Stratified | Init |\n",
+        encoding="utf-8",
+    )
+
+    record_to_dataset_docs(
+        dataset_name="RDD2022 - India",
+        license_str="CC BY-SA 4.0",
+        url_or_handle="https://figshare.com/articles/dataset/RDD2022/21431547",
+        date_str="2026-11",
+        sha256_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        notes="Automated provenance entry",
+        docs_path=doc_file,
+    )
+
+    updated_text = doc_file.read_text(encoding="utf-8")
+    assert "RDD2022 - India" in updated_text
+    assert "CC BY-SA 4.0" in updated_text
+    assert "e3b0c44298fc1c14" in updated_text
+

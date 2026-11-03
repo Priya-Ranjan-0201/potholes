@@ -29,3 +29,4 @@ kaggle:
   weights_dir: /kaggle/working/scam_road/weights
   exports_dir: /kaggle/working/scam_road/exports
   checkpoints_dir: /kaggle/working/scam_road/runs
+

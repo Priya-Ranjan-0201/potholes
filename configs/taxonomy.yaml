@@ -1,0 +1,224 @@
+# ScamRoad Damage Taxonomy
+# Single source of truth for all damage classes.
+# Loaded by: ml pipeline, edge agent, backend API, web/mobile frontends.
+# Update status ONLY from measured evidence (Phase 2 data audit, Phase 3 training).
+
+version: "1.0.0"
+updated: "2026-10-31"
+
+classes:
+  # ─── Tier 1: Build first, must reach production quality ───────────────
+  - id: 1
+    code: POTHOLE
+    name:
+      en: Pothole
+      hi: गड्ढा
+      pa: ਟੋਆ
+    group: surface_damage
+    status: TRAINED  # Audited in Phase 2; trained in Phase 3 (mAP50: 0.9950)
+    detector: yolo_detect
+    color: "#E53E3E"
+    severity_base: 70
+
+  # ─── Tier 2: From RDD2022 labels ─────────────────────────────────────
+  - id: 2
+    code: CRACK_LONG
+    name:
+      en: Longitudinal Crack
+      hi: अनुदैर्ध्य दरार
+      pa: ਲੰਬਕਾਰੀ ਦਰਾਰ
+    group: crack
+    rdd_class: D00
+    status: LIMITED_DATA  # Audited in Phase 2
+    detector: yolo_detect
+    color: "#DD6B20"
+    severity_base: 30
+
+  - id: 3
+    code: CRACK_TRANS
+    name:
+      en: Transverse Crack
+      hi: अनुप्रस्थ दरार
+      pa: ਆੜੀ ਦਰਾਰ
+    group: crack
+    rdd_class: D10
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#D69E2E"
+    severity_base: 30
+
+  - id: 4
+    code: CRACK_ALLIGATOR
+    name:
+      en: Alligator Crack
+      hi: मगरमच्छ दरार
+      pa: ਮਗਰਮੱਛ ਦਰਾਰ
+    group: crack
+    rdd_class: D20
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#38A169"
+    severity_base: 50
+
+  # ─── Tier 3: Only if labelled data is collected and evaluated ─────────
+  - id: 5
+    code: WATERLOGGING
+    name:
+      en: Waterlogging
+      hi: जलभराव
+      pa: ਪਾਣੀ ਭਰਨਾ
+    group: hazard
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#3182CE"
+    severity_base: 60
+
+  - id: 6
+    code: MANHOLE_DAMAGED
+    name:
+      en: Damaged Manhole
+      hi: क्षतिग्रस्त मैनहोल
+      pa: ਖਰਾਬ ਮੈਨਹੋਲ
+    group: infrastructure
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#805AD5"
+    severity_base: 80
+
+  - id: 7
+    code: MARKING_FADED
+    name:
+      en: Faded Road Marking
+      hi: फीका सड़क चिह्न
+      pa: ਫਿੱਕੀ ਸੜਕ ਨਿਸ਼ਾਨੀ
+    group: marking
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#718096"
+    severity_base: 20
+
+  - id: 8
+    code: SPEEDBREAKER_DAMAGED
+    name:
+      en: Damaged Speed Breaker
+      hi: क्षतिग्रस्त स्पीड ब्रेकर
+      pa: ਖਰਾਬ ਸਪੀਡ ਬ੍ਰੇਕਰ
+    group: infrastructure
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#E53E3E"
+    severity_base: 50
+
+  - id: 9
+    code: EDGE_DAMAGE
+    name:
+      en: Edge Damage
+      hi: किनारा क्षति
+      pa: ਕਿਨਾਰੇ ਦਾ ਨੁਕਸਾਨ
+    group: surface_damage
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#C05621"
+    severity_base: 40
+
+  - id: 10
+    code: SURFACE_DETERIORATION
+    name:
+      en: Surface Deterioration
+      hi: सतह क्षरण
+      pa: ਸਤ੍ਹਾ ਦਾ ਵਿਗਾੜ
+    group: surface_damage
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#9B2C2C"
+    severity_base: 45
+
+  - id: 11
+    code: SHOULDER_DETERIORATION
+    name:
+      en: Shoulder Deterioration
+      hi: कंधा क्षरण
+      pa: ਮੋਢੇ ਦਾ ਵਿਗਾੜ
+    group: surface_damage
+    status: NOT_AVAILABLE
+    detector: yolo_detect
+    color: "#744210"
+    severity_base: 35
+
+  # ─── Tier 4: Experimental / hook only (need depth/IMU data) ──────────
+  - id: 12
+    code: RUTTING
+    name:
+      en: Rutting
+      hi: लीक बनना
+      pa: ਰੱਟਿੰਗ
+    group: deformation
+    status: NOT_AVAILABLE
+    detector: null  # Requires depth/IMU sensor
+    color: "#553C9A"
+    severity_base: 55
+
+  - id: 13
+    code: UNEVEN_SURFACE
+    name:
+      en: Uneven Surface
+      hi: असमतल सतह
+      pa: ਅਸਮਤਲ ਸਤ੍ਹਾ
+    group: deformation
+    status: NOT_AVAILABLE
+    detector: null  # Requires depth/IMU sensor
+    color: "#4A5568"
+    severity_base: 40
+
+# ─── Groups ────────────────────────────────────────────────────────────────
+groups:
+  - code: surface_damage
+    name:
+      en: Surface Damage
+      hi: सतह क्षति
+      pa: ਸਤ੍ਹਾ ਨੁਕਸਾਨ
+
+  - code: crack
+    name:
+      en: Cracks
+      hi: दरारें
+      pa: ਦਰਾਰਾਂ
+
+  - code: hazard
+    name:
+      en: Hazards
+      hi: खतरे
+      pa: ਖ਼ਤਰੇ
+
+  - code: infrastructure
+    name:
+      en: Infrastructure Damage
+      hi: बुनियादी ढांचा क्षति
+      pa: ਬੁਨਿਆਦੀ ਢਾਂਚੇ ਦਾ ਨੁਕਸਾਨ
+
+  - code: marking
+    name:
+      en: Road Markings
+      hi: सड़क चिह्न
+      pa: ਸੜਕ ਨਿਸ਼ਾਨੀਆਂ
+
+  - code: deformation
+    name:
+      en: Deformation
+      hi: विरूपण
+      pa: ਵਿਗਾੜ
+
+# ─── Severity levels ──────────────────────────────────────────────────────
+severity_levels:
+  - range: [0, 25]
+    level: Minor
+    color: "#38A169"
+  - range: [26, 50]
+    level: Moderate
+    color: "#D69E2E"
+  - range: [51, 75]
+    level: Severe
+    color: "#DD6B20"
+  - range: [76, 100]
+    level: Critical
+    color: "#E53E3E"

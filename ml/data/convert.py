@@ -161,6 +161,8 @@ def convert_annotations_directory(  # noqa: PLR0912, PLR0915
     }
 
     xml_files = sorted(xml_dir.glob("*.xml"))
+    if not xml_files:
+        xml_files = sorted(xml_dir.rglob("*.xml"))
     summary["total_xml_files"] = len(xml_files)
 
     for xml_file in xml_files:
@@ -472,11 +474,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Directory containing images.",
     )
+    tax_default = (
+        Path("configs/taxonomy.yaml")
+        if Path("configs/taxonomy.yaml").exists()
+        else Path("shared/taxonomy.yaml")
+    )
     parser.add_argument(
         "--taxonomy",
         type=Path,
-        default=Path("shared/taxonomy.yaml"),
-        help="Path to taxonomy.yaml.",
+        default=tax_default,
+        help="Path to taxonomy.yaml (default: configs/taxonomy.yaml).",
     )
     parser.add_argument(
         "--report",

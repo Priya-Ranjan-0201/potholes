@@ -1,6 +1,6 @@
 # ScamRoad Dataset Audit Report
 
-> **Generated at:** 2026-10-31T02:40:24.011941+00:00
+> **Generated at:** 2026-11-03T05:00:59.967413+00:00
 > **Audit Status:** Verified from disk files (Rule R1: Truth over appearance).
 
 ---

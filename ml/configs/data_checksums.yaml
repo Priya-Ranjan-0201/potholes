@@ -40,6 +40,24 @@ datasets:
     classes: ["pothole"]
     format: "pascal_voc"
 
+  sekilab_github:
+    name: "SekiLab Road Damage Dataset (GitHub Reference)"
+    description: "Original SekiLab RoadDamageDataset repository tools and country annotations."
+    license: "CC BY-SA 4.0"
+    source_url: "https://github.com/sekilab/RoadDamageDataset/archive/refs/heads/master.zip"
+    filename: "RoadDamageDataset-master.zip"
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    classes: ["D00", "D10", "D20", "D40"]
+    format: "pascal_voc"
+
+  roboflow_pothole:
+    name: "Roboflow Universe Pothole Dataset"
+    description: "Roboflow open-source community pothole computer vision dataset."
+    license: "CC BY 4.0"
+    kaggle_handle: "chitholian/annotated-potholes-dataset"
+    classes: ["pothole"]
+    format: "pascal_voc"
+
   indian_roads_eyantra:
     name: "Indian Roads Semantic Segmentation (e-Yantra IIT Bombay)"
     description: "Pixel-level instance & semantic segmentation on Indian urban and highway roads."

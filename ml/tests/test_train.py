@@ -7,7 +7,12 @@ from pathlib import Path
 import pytest
 import torch
 import yaml
-from scripts.colab.setup_colab import PipelineState
+from scripts.colab.setup_colab import (
+    PipelineState,
+    backup_dataset_to_drive,
+    restore_dataset_from_drive,
+    verify_checkpoint,
+)
 
 from ml.training.train import (
     compute_file_hash,
@@ -166,8 +171,6 @@ def test_pipeline_state_save_and_resume(tmp_path: Path) -> None:
 
 def test_verify_checkpoint_integrity(tmp_path: Path) -> None:
     """Verify check_point validation for missing, truncated, corrupted, and valid weights."""
-    from scripts.colab.setup_colab import verify_checkpoint
-
     # 1. Missing file
     missing = tmp_path / "does_not_exist.pt"
     res = verify_checkpoint(missing)
@@ -214,8 +217,6 @@ def test_verify_checkpoint_integrity(tmp_path: Path) -> None:
 
 def test_backup_and_restore_dataset(tmp_path: Path) -> None:
     """Verify persistent dataset mirroring between local NVMe and Drive storage."""
-    from scripts.colab.setup_colab import backup_dataset_to_drive, restore_dataset_from_drive
-
     local_splits = tmp_path / "content" / "data" / "splits"
     drive_splits = tmp_path / "drive" / "MyDrive" / "ScamRoad" / "datasets" / "splits"
 
