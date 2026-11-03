@@ -64,3 +64,4 @@ python infra/gcp/deploy_vertex_ai.py \
 ```
 
 Vertex AI automatically manages VM provisioning, executes the resumable pipeline, and logs all outputs to Google Cloud Storage.
+

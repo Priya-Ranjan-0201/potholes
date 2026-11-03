@@ -1,9 +1,11 @@
 """Unit tests for ML training pipeline and hardware detection."""
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
+import torch
 import yaml
 from scripts.colab.setup_colab import PipelineState
 
@@ -160,3 +162,82 @@ def test_pipeline_state_save_and_resume(tmp_path: Path) -> None:
     # Re-instantiate to verify disk persistence
     ps2 = PipelineState(state_file)
     assert ps2.is_completed("yolo11n")
+
+
+def test_verify_checkpoint_integrity(tmp_path: Path) -> None:
+    """Verify check_point validation for missing, truncated, corrupted, and valid weights."""
+    from scripts.colab.setup_colab import verify_checkpoint
+
+    # 1. Missing file
+    missing = tmp_path / "does_not_exist.pt"
+    res = verify_checkpoint(missing)
+    assert not res["valid"]
+    assert "does not exist" in res["error"]
+
+    # 2. Truncated small file (< 100KB)
+    small_file = tmp_path / "small.pt"
+    small_file.write_bytes(b"PK\x03\x04" + b"\x00" * 50)
+    res = verify_checkpoint(small_file)
+    assert not res["valid"]
+    assert "suspiciously small" in res["error"]
+
+    # 3. Corrupted file (> 100KB of random gibberish)
+    corrupted_file = tmp_path / "corrupted.pt"
+    corrupted_file.write_bytes(b"GARBAGE_HEADER" * 10000)
+    res = verify_checkpoint(corrupted_file)
+    assert not res["valid"]
+    assert "Corrupted PyTorch checkpoint" in res["error"]
+
+    # 4. Valid mock PyTorch checkpoint
+    valid_file = tmp_path / "valid.pt"
+    mock_ckpt = {
+        "epoch": 4,
+        "best_fitness": 0.825,
+        "model": {"dummy_layer.weight": torch.zeros(3, 3)},
+        "optimizer": {"state": {}},
+        "train_args": {"epochs": 50, "imgsz": 640},
+    }
+    torch.save(mock_ckpt, valid_file)
+    # Ensure it meets size threshold by padding if needed
+    if valid_file.stat().st_size < 100_000:
+        mock_ckpt["model"]["large_tensor"] = torch.zeros(100, 300)
+        torch.save(mock_ckpt, valid_file)
+
+    res = verify_checkpoint(valid_file)
+    assert res["valid"]
+    assert res["epoch"] == 4
+    assert res["next_epoch"] == 5
+    assert res["best_fitness"] == 0.825
+    assert res["has_optimizer"]
+    assert res["has_model"]
+
+
+def test_backup_and_restore_dataset(tmp_path: Path) -> None:
+    """Verify persistent dataset mirroring between local NVMe and Drive storage."""
+    from scripts.colab.setup_colab import backup_dataset_to_drive, restore_dataset_from_drive
+
+    local_splits = tmp_path / "content" / "data" / "splits"
+    drive_splits = tmp_path / "drive" / "MyDrive" / "ScamRoad" / "datasets" / "splits"
+
+    # Create dummy local dataset
+    local_splits.mkdir(parents=True, exist_ok=True)
+    yaml_file = local_splits / "dataset.yaml"
+    yaml_file.write_text("names: ['pothole']\n", encoding="utf-8")
+    (local_splits / "train.txt").write_text("img1.jpg\n", encoding="utf-8")
+
+    # Backup to drive
+    ok = backup_dataset_to_drive(local_splits, drive_splits)
+    assert ok
+    assert (drive_splits / "dataset.yaml").exists()
+    assert (drive_splits / "train.txt").exists()
+
+    # Simulate Colab VM recycling (wipe local splits)
+    shutil.rmtree(local_splits)
+    assert not local_splits.exists()
+
+    # Restore from drive cache
+    ok = restore_dataset_from_drive(drive_splits, local_splits)
+    assert ok
+    assert (local_splits / "dataset.yaml").exists()
+    assert (local_splits / "train.txt").exists()
+

@@ -82,3 +82,4 @@ if command -v gsutil &> /dev/null; then
 fi
 
 echo "[SUCCESS] ScamRoad Google Cloud Compute Engine pipeline execution finished."
+
