@@ -281,6 +281,7 @@ class CloudOrchestrator:
                 resume=(session["action"] == "resume"),
                 run_id=experiment_id,
                 runs_dir=self.cloud_root / "training_logs",
+                persistent_cloud_dir=self.cloud_root,
             )
 
             metrics = train_res.get("metrics", {}).get("all", {})

@@ -8,9 +8,20 @@ echo "=========================================================="
 echo " Starting ScamRoad Google Cloud Compute Engine Deployment "
 echo "=========================================================="
 
+# 0. Setup graceful exit trap for GCE Spot/Preemption
+cleanup_on_interrupt() {
+    echo "[PREEMPTION TRAP] Caught termination signal. Syncing checkpoints to GCS immediately..."
+    if command -v gsutil &> /dev/null; then
+        gsutil -m rsync -r "${CHECKPOINTS_DIR}/" "${GCS_BUCKET}/runs/" || true
+    fi
+    exit 0
+}
+trap cleanup_on_interrupt SIGTERM SIGINT
+
 REPO_URL="https://github.com/Priya-Ranjan-0201/potholes.git"
 WORK_DIR="/opt/scamroad"
 GCS_BUCKET="${GCS_BUCKET:-gs://scamroad-cloud-storage}"
+AUTO_SHUTDOWN="${AUTO_SHUTDOWN:-true}"
 
 # 1. Verify NVIDIA Driver & CUDA
 if ! command -v nvidia-smi &> /dev/null; then
@@ -86,6 +97,7 @@ for model_key, base_weight in models:
         resume=resume_flag,
         run_id=model_key,
         runs_dir=runs_dir,
+        gcs_bucket='${GCS_BUCKET}',
     )
     best_weight = runs_dir / model_key / 'weights' / 'best.pt'
     if best_weight.exists():
@@ -109,4 +121,10 @@ if command -v gsutil &> /dev/null; then
 fi
 
 echo "[SUCCESS] ScamRoad Google Cloud Compute Engine pipeline execution finished."
+
+# 9. Auto-shutdown instance if requested to prevent idle billing
+if [ "${AUTO_SHUTDOWN}" = "true" ]; then
+    echo "[INFO] Auto-shutdown enabled. Terminating VM to save compute costs..."
+    sudo shutdown -h now || true
+fi
 

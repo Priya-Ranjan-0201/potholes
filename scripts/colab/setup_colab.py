@@ -357,7 +357,8 @@ def safe_train_with_auto_resume(
         print("=" * 65)
         try:
             model = YOLO(str(ckpt_path))
-            results = model.train(resume=True)
+            # CRITICAL FIX: pass resume=str(ckpt_path) so Ultralytics loads the exact checkpoint arguments
+            results = model.train(resume=str(ckpt_path))
             best_weights = runs_p / model_key / "weights" / "best.pt"
             state.mark_completed(
                 model_key,

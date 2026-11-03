@@ -60,3 +60,4 @@ All media ingested into persistent storage must pass through privacy blurring:
    $$\text{Acceptance Rate} = \frac{\text{Unmodified Accepted Boxes}}{\text{Total Pre-labelled Boxes}} \times 100\%$$
 4. **Local Holdout Split:**
    - Reserve $\ge 20\%$ of local data by distinct route/day as the untouched `LOCAL_TEST` set. Never train or tune hyperparameters on this slice.
+

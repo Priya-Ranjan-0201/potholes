@@ -10,3 +10,4 @@ The autonomous agent prepares all tooling, scripts, protocols, and mock tests, t
 | **HT-03** | Stage 9 | Physical edge device benchmarking (Raspberry Pi 4/5, Jetson Nano/Orin) | `QUEUED` | Physical hardware access | Copy exported `best.onnx` / `best_int8.tflite` to target device and run `python -m ml.export.bench_device`. |
 | **HT-04** | Stage 10 | Ground-truth defect count on real-world test videos | `QUEUED` | Physical odometer / ground truth log | Provide exact defect count on reference 1 km test video to calculate verified FP/km. |
 | **HT-05** | Stage 0 | GitHub Secret / Cloud Token Setup (if deploying directly from remote cloud) | `READY` | Verified configured | Ensure `GITHUB_TOKEN` is present in Colab Secrets / Kaggle Secrets when running remote notebooks. |
+

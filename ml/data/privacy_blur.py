@@ -60,3 +60,4 @@ def evaluate_blur_recall_sample(
                         break
 
     return round(detected_hits / total_gt, 4)
+

@@ -64,3 +64,4 @@ def select_active_learning_batch(prelabeled_results: list[dict[str, Any]], top_k
         reverse=True,
     )
     return sorted_candidates[:top_k]
+
