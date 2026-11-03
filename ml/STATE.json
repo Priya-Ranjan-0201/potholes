@@ -1,6 +1,6 @@
 {
   "current_pass": 1,
-  "current_stage": 11,
+  "current_stage": 12,
   "gpu_hours_used": 0.0,
   "dataset_version": "dataset_v1.0",
   "budget": {
@@ -143,11 +143,15 @@
     },
     "stage_11": {
       "name": "ROBUSTNESS AND SAFETY TESTS",
-      "status": "pending",
+      "status": "passed",
       "gpu_hours_est": 1.2,
       "gpu_hours_actual": 0.0,
-      "exit_criteria_met": false,
-      "evidence_files": []
+      "exit_criteria_met": true,
+      "evidence_files": [
+        "runs/robustness/robustness_report.json",
+        "docs/PHASE_REPORTS/pass1-stage11.md",
+        "docs/LIMITATIONS.md"
+      ]
     },
     "stage_12": {
       "name": "FINAL REPORT",
@@ -186,5 +190,5 @@
     }
   },
   "open_issues": [],
-  "next_action": "Execute Pass 1 Stage 11: Robustness and Safety Tests"
+  "next_action": "Execute Pass 1 Stage 12: Final AI Evaluation Report & Pass 1 Freeze"
 }

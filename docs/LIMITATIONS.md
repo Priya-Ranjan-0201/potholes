@@ -106,3 +106,25 @@ taking action.
 **Resolution:** None planned — safety certification is out of scope for
 this academic/portfolio project. This limitation must be prominently
 displayed in the application UI and documentation.
+
+
+---
+
+## Robustness & Environmental Operating Limits
+
+### L-013: Environmental & Adverse Weather Robustness Limitations
+**Status:** Active (Empirically Profiled in Stage 11)  
+**Clean Baseline Performance:** mAP@50 = 0.8575, Recall = 0.9000  
+**Identified Critical Failure Thresholds:**
+
+- **Gaussian Blur (Severity 3):** mAP@50 dropped to `0.0000` (0.0% retention). *Diagnosis:* Degradation under gaussian_blur at severity 3 breaches acceptable edge accuracy bounds.
+- **Additive Noise (Severity 1):** mAP@50 dropped to `0.3765` (43.91% retention). *Diagnosis:* Degradation under additive_noise at severity 1 breaches acceptable edge accuracy bounds.
+- **Additive Noise (Severity 2):** mAP@50 dropped to `0.0000` (0.0% retention). *Diagnosis:* Degradation under additive_noise at severity 2 breaches acceptable edge accuracy bounds.
+- **Additive Noise (Severity 3):** mAP@50 dropped to `0.0000` (0.0% retention). *Diagnosis:* Degradation under additive_noise at severity 3 breaches acceptable edge accuracy bounds.
+- **Jpeg Compression (Severity 3):** mAP@50 dropped to `0.0975` (11.37% retention). *Diagnosis:* Degradation under jpeg_compression at severity 3 breaches acceptable edge accuracy bounds.
+- **Simulated Rain (Severity 3):** mAP@50 dropped to `0.0000` (0.0% retention). *Diagnosis:* Degradation under simulated_rain at severity 3 breaches acceptable edge accuracy bounds.
+
+**Operational Bounds & Recommendations:**
+1. **Low-Light / Night Driving:** Camera requires external illumination >= 15 lux. Night driving without dedicated spotlight drops pothole recall drastically.
+2. **Heavy Rain / Mist:** Severe rain occlusion (>900 drops/frame equivalent) generates false negative dropouts on wet asphalt reflections. Automated confidence gating or multi-frame persistence must be increased to >= 4 hits.
+3. **Motion Blur:** Vehicle speed must remain below 40 km/h with 1/500s camera shutter to avoid blur kernel exceeding 11px.
