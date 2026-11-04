@@ -12,12 +12,16 @@ from backend.app.api.v1.notifications import router as notifications_router
 from backend.app.api.v1.reports import router as reports_router
 from backend.app.api.v1.stats import router as stats_router
 from backend.app.api.v1.sync import router as sync_router
+from backend.app.api.v1.infer import router as infer_router
 from fastapi import APIRouter
 
 api_v1_router = APIRouter()
 
 # Health endpoints available at both /health and /api/v1/health
 api_v1_router.include_router(health_router, prefix="", tags=["Health"])
+
+# Real-Time AI Inference (YOLO + Surface Edge CV)
+api_v1_router.include_router(infer_router, prefix="", tags=["AI Inference"])
 
 # Authentication & RBAC
 api_v1_router.include_router(auth_router, prefix="", tags=["Authentication & RBAC"])
