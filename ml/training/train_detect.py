@@ -416,6 +416,18 @@ def train_detector(
     hardware = detect_hardware()
     target_device = device if device is not None else hardware["recommended_device"]
 
+    # Auto-resolve dataset.yaml path attribute to avoid path mismatches across OS/cloud runtimes
+    try:
+        with open(data_path, "r", encoding="utf-8") as f:
+            d_cfg = yaml.safe_load(f) or {}
+        expected_path = str(data_path.parent.resolve()).replace("\\", "/")
+        if d_cfg.get("path") != expected_path:
+            d_cfg["path"] = expected_path
+            with open(data_path, "w", encoding="utf-8") as f:
+                yaml.safe_dump(d_cfg, f)
+    except Exception:
+        pass
+
     # Save training configuration
     train_cfg = {
         "model": model_name,
