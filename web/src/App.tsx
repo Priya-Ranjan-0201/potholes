@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { Navbar } from "./components/Navbar";
 import { DashboardPage } from "./pages/DashboardPage";
 import { MapPage } from "./pages/MapPage";
+import { ScannerPage } from "./pages/ScannerPage";
 import { DefectsPage } from "./pages/DefectsPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ComplaintsPage } from "./pages/ComplaintsPage";
@@ -32,6 +33,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/map" element={<MapPage />} />
+                <Route path="/scanner" element={<ScannerPage />} />
                 <Route path="/defects" element={<DefectsPage />} />
                 <Route path="/maintenance" element={<MaintenancePage />} />
                 <Route path="/complaints" element={<ComplaintsPage />} />
