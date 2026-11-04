@@ -332,6 +332,8 @@ class CloudOrchestrator:
             raise
 
         except Exception as exc:
+            import traceback
+            traceback.print_exc()
             err_msg = str(exc)
             print(f"\n[ERROR] Training halted on {self.platform}: {err_msg}")
             exp_mgr.mark_interrupted(reason=f"error_{err_msg[:60]}")

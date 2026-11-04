@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   CheckCircle2,
   Shield,
@@ -9,66 +9,40 @@ import {
   EyeOff,
   Sparkles,
 } from "../components/Icons";
-import { detectDefects, DefectBox, InspectionResult } from "../utils/cvDetector";
+import { detectDefects, InspectionResult } from "../utils/cvDetector";
 
 interface SampleImage {
   id: string;
   title: string;
   src: string;
   road: string;
-  initialBoxes: DefectBox[];
 }
 
 const BENCHMARK_SAMPLES: SampleImage[] = [
   {
-    id: "sample-1",
-    title: "Highway Crater (NH-44)",
-    src: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=1000&auto=format&fit=crop&q=80",
+    id: "sample-craters",
+    title: "Rural Unpaved Craters",
+    src: "/samples/unpaved_craters.jpg",
+    road: "Rural Connector Sector 32",
+  },
+  {
+    id: "sample-highway",
+    title: "Highway Asphalt Pit",
+    src: "/samples/clean_road.jpg",
     road: "NH-44 Ludhiana Bypass KM 312",
-    initialBoxes: [
-      {
-        id: "b1",
-        label: "POTHOLE",
-        confidence: 0.942,
-        box: [38, 52, 28, 22],
-        severity: "Critical",
-        score: 91,
-        areaPx: 1840,
-        action: "Immediate 24-hr asphalt compaction. Severe tire blowout risk.",
-      },
-    ],
   },
   {
-    id: "sample-2",
-    title: "Structural Cracks (PAU)",
-    src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1000&auto=format&fit=crop&q=80",
+    id: "sample-cracks",
+    title: "Structural Cracks",
+    src: "/samples/pothole_nh44.jpg",
     road: "Ferozepur Road (PAU Gate 2)",
-    initialBoxes: [
-      {
-        id: "b2",
-        label: "CRACK_ALLIGATOR",
-        confidence: 0.887,
-        box: [25, 45, 45, 30],
-        severity: "Severe",
-        score: 76,
-        areaPx: 2650,
-        action: "48-hr bituminous sealing required to prevent water ingress damage.",
-      },
-    ],
-  },
-  {
-    id: "sample-3",
-    title: "Repaired Bitumen (Clean)",
-    src: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1000&auto=format&fit=crop&q=80",
-    road: "Mall Road / Civil Lines",
-    initialBoxes: [],
   },
 ];
 
 export const ScannerPage: React.FC = () => {
   const [activeImageSrc, setActiveImageSrc] = useState<string>(BENCHMARK_SAMPLES[0].src);
   const [activeRoadName, setActiveRoadName] = useState<string>(BENCHMARK_SAMPLES[0].road);
-  const [selectedSampleId, setSelectedSampleId] = useState<string>("sample-1");
+  const [selectedSampleId, setSelectedSampleId] = useState<string>(BENCHMARK_SAMPLES[0].id);
   const [isCustomUpload, setIsCustomUpload] = useState<boolean>(false);
 
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -76,16 +50,16 @@ export const ScannerPage: React.FC = () => {
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
   const [isDispatched, setIsDispatched] = useState<boolean>(false);
 
-  // Dynamic Detections & Telemetry
+  // Dynamic Detections & Telemetry (computed live from ONNX model)
   const [inspection, setInspection] = useState<InspectionResult>({
     source: "neural_api",
-    totalDefects: 1,
-    potholeCount: 1,
+    totalDefects: 0,
+    potholeCount: 0,
     crackCount: 0,
-    maxSeverity: "Critical",
-    overallScore: 91,
-    boxes: BENCHMARK_SAMPLES[0].initialBoxes,
-    latencyMs: 58,
+    maxSeverity: "Minor",
+    overallScore: 0,
+    boxes: [],
+    latencyMs: 0,
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -110,6 +84,11 @@ export const ScannerPage: React.FC = () => {
     }
   };
 
+  // Run detection dynamically on initial component mount
+  useEffect(() => {
+    analyzeImage(BENCHMARK_SAMPLES[0].src, BENCHMARK_SAMPLES[0].road);
+  }, []);
+
   // Handle local file upload (drag & drop or file picker)
   const handleFileUpload = (file: File) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -126,20 +105,7 @@ export const ScannerPage: React.FC = () => {
     setSelectedSampleId(sample.id);
     setActiveImageSrc(sample.src);
     setActiveRoadName(sample.road);
-    setIsDispatched(false);
-
-    // If sample has pre-configured initial boxes, show them or re-analyze
-    setInspection({
-      source: "neural_api",
-      totalDefects: sample.initialBoxes.length,
-      potholeCount: sample.initialBoxes.filter((b) => b.label === "POTHOLE").length,
-      crackCount: sample.initialBoxes.filter((b) => b.label !== "POTHOLE").length,
-      maxSeverity: sample.initialBoxes.length > 0 ? sample.initialBoxes[0].severity : "Minor",
-      overallScore: sample.initialBoxes.length > 0 ? sample.initialBoxes[0].score : 12,
-      boxes: sample.initialBoxes,
-      latencyMs: 42,
-    });
-    setSelectedBoxId(sample.initialBoxes[0]?.id || null);
+    analyzeImage(sample.src, sample.road);
   };
 
   // Drag and drop handlers

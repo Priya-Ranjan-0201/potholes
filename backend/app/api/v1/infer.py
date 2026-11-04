@@ -40,13 +40,15 @@ def get_inference_engine():
     from edge.agent.infer import EdgeInferenceEngine
     onnx_paths = [
         "runs/export/best_int8.onnx",
-        "runs/baselines/yolov8n/weights/best.onnx",
-        "runs/export/best.onnx"
+        "ml/runs/pothole_yolov8n/weights/best_int8.onnx",
+        "runs/export/best.onnx",
+        "ml/runs/pothole_yolov8n/weights/best.onnx",
+        "runs/baselines/yolov8n/weights/best.onnx"
     ]
     for p in onnx_paths:
         if os.path.exists(p):
             try:
-                return EdgeInferenceEngine(model_path=p, conf_threshold=0.18, iou_threshold=0.40)
+                return EdgeInferenceEngine(model_path=p, conf_threshold=0.25, iou_threshold=0.45)
             except Exception:
                 continue
     return None
@@ -55,7 +57,7 @@ def get_inference_engine():
 @router.post("/infer", response_model=InferenceResponse)
 async def infer_road_defects(
     file: UploadFile = File(...),
-    conf_thresh: float = Query(0.18, ge=0.05, le=0.95),
+    conf_thresh: float = Query(0.20, ge=0.05, le=0.95),
     iou_thresh: float = Query(0.35, ge=0.1, le=0.9)
 ):
     """Run real-time defect detection on an uploaded image using pure ONNX Runtime + Edge CV."""
@@ -78,7 +80,10 @@ async def infer_road_defects(
                     bx = d.bbox_xyxy
                     bw_b = bx[2] - bx[0]
                     bh_b = bx[3] - bx[1]
-                    if bh_b > h * 0.75 or bw_b > w * 0.75:
+                    # Filter out oversized or out-of-road boxes
+                    if bh_b > h * 0.60 or bw_b > w * 0.60:
+                        continue
+                    if bx[1] < h * 0.12:  # Sky/horizon
                         continue
                     candidates.append({
                         "label": d.class_name,
@@ -93,8 +98,8 @@ async def infer_road_defects(
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         road_mask = np.zeros_like(gray)
         pts = np.array([
-            [int(w * 0.12), int(h * 0.20)],
-            [int(w * 0.88), int(h * 0.20)],
+            [int(w * 0.08), int(h * 0.18)],
+            [int(w * 0.92), int(h * 0.18)],
             [int(w * 0.99), h],
             [int(w * 0.01), h]
         ], np.int32)
@@ -112,22 +117,25 @@ async def infer_road_defects(
 
         for cnt in contours:
             area = cv2.contourArea(cnt)
-            if area < 300:
+            if area < 160 or area > (w * h * 0.10):
                 continue
             cx, cy, cbw, cbh = cv2.boundingRect(cnt)
-            if cbw > w * 0.40 or cbh > h * 0.40:
+            if cbw > w * 0.35 or cbh > h * 0.30:
+                continue
+            if cy < h * 0.15:
                 continue
             aspect = cbw / float(cbh)
-            if 0.45 <= aspect <= 3.2:
+            if 0.38 <= aspect <= 3.3:
                 roi = blackhat[cy:cy+cbh, cx:cx+cbw]
                 mean_d = float(np.mean(roi))
-                cf = round(min(0.96, max(0.72, 0.70 + (mean_d / 80.0) * 0.25)), 3)
-                candidates.append({
-                    "label": "POTHOLE",
-                    "conf": cf,
-                    "box_xywh": [cx, cy, cbw, cbh],
-                    "area": int(area),
-                })
+                if mean_d >= 13.5:
+                    cf = round(min(0.96, max(0.72, 0.70 + (mean_d / 70.0) * 0.25)), 3)
+                    candidates.append({
+                        "label": "POTHOLE",
+                        "conf": cf,
+                        "box_xywh": [cx, cy, cbw, cbh],
+                        "area": int(area),
+                    })
 
         # 3. Non-Maximum Suppression (NMS)
         def iou(b1, b2):
@@ -139,10 +147,11 @@ async def infer_road_defects(
             union = (b1[2] * b1[3]) + (b2[2] * b2[3]) - inter
             return inter / union if union > 0 else 0
 
-        candidates = sorted(candidates, key=lambda c: c["conf"], reverse=True)
+        # Sort so high-confidence potholes and defects are prioritized
+        candidates = sorted(candidates, key=lambda c: (1 if c["label"] == "POTHOLE" else 0, c["conf"]), reverse=True)
         kept = []
         for cand in candidates:
-            if any(iou(cand["box_xywh"], k["box_xywh"]) > 0.32 for k in kept):
+            if any(iou(cand["box_xywh"], k["box_xywh"]) > 0.35 for k in kept):
                 continue
             kept.append(cand)
 
@@ -150,7 +159,7 @@ async def infer_road_defects(
         pothole_cnt = 0
         crack_cnt = 0
 
-        for i, k in enumerate(kept[:12]):
+        for i, k in enumerate(kept[:10]):
             bx, by, bw_k, bh_k = k["box_xywh"]
             x_pct = round((bx / w) * 100, 1)
             y_pct = round((by / h) * 100, 1)
@@ -167,8 +176,8 @@ async def infer_road_defects(
                 crack_cnt += 1
                 action = "48-hr bituminous sealing to prevent water penetration"
 
-            severity = "Critical" if (cf > 0.85 or area_px > 2000) else ("Severe" if (cf > 0.72 or area_px > 800) else "Moderate")
-            score = int(cf * 60 + min(40, (area_px / 3000) * 40))
+            severity = "Critical" if (cf > 0.85 or area_px > 2000) else ("Severe" if (cf > 0.72 or area_px > 600) else "Moderate")
+            score = int(cf * 60 + min(40, (area_px / 2500) * 40))
             score = min(100, max(25, score))
 
             detections.append(
@@ -208,4 +217,3 @@ async def infer_road_defects(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
-

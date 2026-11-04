@@ -51,6 +51,20 @@ except Exception:
 import yaml
 from configs.paths import get_paths
 from ultralytics import YOLO
+from ultralytics.engine.trainer import BaseTrainer
+
+# Bulletproof BaseTrainer.run_callbacks against non-callable booleans
+_orig_run_callbacks = BaseTrainer.run_callbacks
+
+def _safe_run_callbacks(self, event: str) -> None:
+    for callback in self.callbacks.get(event, []):
+        if callable(callback):
+            try:
+                callback(self)
+            except Exception as exc:
+                print(f"[CALLBACK NOTICE] Non-fatal callback issue on '{event}': {exc}")
+
+BaseTrainer.run_callbacks = _safe_run_callbacks
 
 
 def get_git_revision() -> str:
@@ -201,8 +215,10 @@ def create_persistent_checkpoint_callback(
         total_epochs = getattr(trainer, "epochs", 0)
         last_pt = getattr(trainer, "last", None)
         best_pt = getattr(trainer, "best", None)
-        fitness = float(getattr(trainer, "fitness", 0.0) or 0.0)
-        loss = float(getattr(trainer, "loss", 0.0) or 0.0)
+        fit_raw = getattr(trainer, "fitness", 0.0)
+        fitness = float(fit_raw.detach().cpu().item()) if hasattr(fit_raw, "detach") else float(fit_raw or 0.0)
+        loss_raw = getattr(trainer, "loss", 0.0)
+        loss = float(loss_raw.detach().cpu().item()) if hasattr(loss_raw, "detach") else float(loss_raw or 0.0)
 
         epoch_info = {
             "run_id": run_id,
@@ -511,22 +527,31 @@ def train_detector(
                 model = YOLO(alt_model)
 
         model.add_callback("on_fit_epoch_end", cb)
-        results = model.train(
-            data=str(data_path),
-            epochs=epochs,
-            imgsz=imgsz,
-            batch=batch,
-            device=target_device,
-            project=str(base_runs_dir),
-            name=resolved_run_id,
-            save=True,
-            save_period=1,
-            exist_ok=True,
-            seed=seed,
-            deterministic=False,
-            plots=True,
-            verbose=True,
-        )
+        for ev in list(model.callbacks.keys()):
+            model.callbacks[ev] = [c for c in model.callbacks[ev] if callable(c)]
+
+        try:
+            results = model.train(
+                data=str(data_path),
+                epochs=epochs,
+                imgsz=imgsz,
+                batch=batch,
+                device=target_device,
+                project=str(base_runs_dir),
+                name=resolved_run_id,
+                save=True,
+                save_period=1,
+                exist_ok=True,
+                seed=seed,
+                deterministic=False,
+                optimizer="AdamW",
+                plots=True,
+                verbose=True,
+            )
+        except Exception as train_exc:
+            import traceback
+            traceback.print_exc()
+            raise train_exc
 
     duration_seconds = round(time.time() - start_time, 2)
     save_dir = Path(getattr(results, "save_dir", target_run_dir))

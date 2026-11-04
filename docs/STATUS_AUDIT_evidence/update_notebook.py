@@ -34,7 +34,7 @@ for i, cell in enumerate(nb['cells']):
             "orchestrator = CloudOrchestrator(config_path='cloud_config.yaml')\n",
             "results = orchestrator.execute_training(\n",
             "    experiment_id='scamroad_yolo11n_multicloud',\n",
-            "    model_name='yolo11n.yaml',\n",
+            "    model_name='yolo11n.pt',\n",
             "    data_yaml=active_yaml,\n",
             "    target_epochs=50,\n",
             "    batch_size=16,\n",
@@ -47,3 +47,4 @@ with open('notebooks/ScamRoad_Colab_Training.ipynb', 'w', encoding='utf-8') as f
     json.dump(nb, f, indent=2)
 
 print('Updated ScamRoad_Colab_Training.ipynb successfully')
+
