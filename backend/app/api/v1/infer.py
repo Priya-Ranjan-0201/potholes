@@ -48,7 +48,7 @@ def get_inference_engine():
     for p in onnx_paths:
         if os.path.exists(p):
             try:
-                return EdgeInferenceEngine(model_path=p, conf_threshold=0.25, iou_threshold=0.45)
+                return EdgeInferenceEngine(model_path=p, conf_threshold=0.15, iou_threshold=0.35)
             except Exception:
                 continue
     return None
@@ -57,10 +57,10 @@ def get_inference_engine():
 @router.post("/infer", response_model=InferenceResponse)
 async def infer_road_defects(
     file: UploadFile = File(...),
-    conf_thresh: float = Query(0.20, ge=0.05, le=0.95),
-    iou_thresh: float = Query(0.35, ge=0.1, le=0.9)
+    conf_thresh: float = Query(0.15, ge=0.05, le=0.95),
+    iou_thresh: float = Query(0.30, ge=0.1, le=0.9)
 ):
-    """Run real-time defect detection on an uploaded image using pure ONNX Runtime + Edge CV."""
+    """Run real-time defect detection on an uploaded image using pure ONNX Runtime + Bilateral Cavity Morphology."""
     try:
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
@@ -71,73 +71,105 @@ async def infer_road_defects(
         h, w = img.shape[:2]
         candidates = []
 
-        # 1. Pure ONNX Runtime Inference
+        # 1. Perspective Road Corridor Mask
+        # Drivable road corridor tapers towards vanishing point/horizon (16-18% height)
+        # Discards background trees, forest banks, sky, and power lines.
+        road_mask = np.zeros((h, w), dtype=np.uint8)
+        corridor_pts = np.array([
+            [int(w * 0.30), int(h * 0.16)],
+            [int(w * 0.70), int(h * 0.16)],
+            [int(w * 0.94), int(h * 0.98)],
+            [int(w * 0.06), int(h * 0.98)]
+        ], np.int32)
+        cv2.fillPoly(road_mask, [corridor_pts], 255)
+
+        # 2. Pure ONNX Runtime Inference
         engine = get_inference_engine()
         if engine is not None:
             try:
-                dets = engine.predict(img)
-                for d in dets:
+                raw_dets = engine.predict(img)
+                for d in raw_dets:
                     bx = d.bbox_xyxy
                     bw_b = bx[2] - bx[0]
                     bh_b = bx[3] - bx[1]
-                    # Filter out oversized or out-of-road boxes
-                    if bh_b > h * 0.60 or bw_b > w * 0.60:
+
+                    # Verify center of box is inside drivable road corridor
+                    cx = int((bx[0] + bx[2]) / 2)
+                    cy = int((bx[1] + bx[3]) / 2)
+                    if not (0 <= cy < h and 0 <= cx < w and road_mask[cy, cx] > 0):
                         continue
-                    if bx[1] < h * 0.12:  # Sky/horizon
+
+                    # Filter out oversized boxes spanning beyond lanes
+                    if bw_b > w * 0.65 or bh_b > h * 0.55:
                         continue
+                    if cy < h * 0.16:
+                        continue
+
+                    label = d.class_name
+                    conf = float(d.confidence)
+                    aspect = bw_b / max(1.0, bh_b)
+
+                    # Suppress false-positive crack detections on dirt surfaces & trees
+                    # Cracks must be high-confidence or long thin fissures (aspect > 2.2 or < 0.45)
+                    if "CRACK" in label.upper():
+                        if conf < 0.45:
+                            continue
+                        if 0.55 <= aspect <= 1.85 and conf < 0.88:
+                            continue
+
+                    # Suppress flat clipping artifacts or tall vertical splinters for potholes
+                    if "POTHOLE" in label.upper():
+                        if aspect > 3.0 or aspect < 0.35:
+                            continue
+
                     candidates.append({
-                        "label": d.class_name,
-                        "conf": float(d.confidence),
-                        "box_xywh": [bx[0], bx[1], bw_b, bh_b],
+                        "label": label,
+                        "conf": round(conf, 3),
+                        "box_xywh": [float(bx[0]), float(bx[1]), float(bw_b), float(bh_b)],
                         "area": int(bw_b * bh_b),
                     })
-            except Exception:
+            except Exception as e:
                 pass
 
-        # 2. Road Surface Morphological Crater Analysis (detects unpaved/rural road craters)
+        # 3. Bilateral Multi-Scale Depression Cavity Extractor (Real Potholes & Craters)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        road_mask = np.zeros_like(gray)
-        pts = np.array([
-            [int(w * 0.08), int(h * 0.18)],
-            [int(w * 0.92), int(h * 0.18)],
-            [int(w * 0.99), h],
-            [int(w * 0.01), h]
-        ], np.int32)
-        cv2.fillPoly(road_mask, [pts], 255)
+        filtered = cv2.bilateralFilter(gray, d=11, sigmaColor=50, sigmaSpace=50)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 23))
-        blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, kernel)
-        blackhat = cv2.bitwise_and(blackhat, blackhat, mask=road_mask)
-        blurred = cv2.GaussianBlur(blackhat, (7, 7), 0)
-        thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, -4)
-        thresh = cv2.bitwise_and(thresh, thresh, mask=road_mask)
-        close_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 11))
-        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, close_kernel)
-        contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for k_size in [(25, 19), (35, 25), (45, 31)]:
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, k_size)
+            blackhat = cv2.morphologyEx(filtered, cv2.MORPH_BLACKHAT, kernel)
+            blackhat_masked = cv2.bitwise_and(blackhat, blackhat, mask=road_mask)
 
-        for cnt in contours:
-            area = cv2.contourArea(cnt)
-            if area < 160 or area > (w * h * 0.10):
-                continue
-            cx, cy, cbw, cbh = cv2.boundingRect(cnt)
-            if cbw > w * 0.35 or cbh > h * 0.30:
-                continue
-            if cy < h * 0.15:
-                continue
-            aspect = cbw / float(cbh)
-            if 0.38 <= aspect <= 3.3:
-                roi = blackhat[cy:cy+cbh, cx:cx+cbw]
-                mean_d = float(np.mean(roi))
-                if mean_d >= 13.5:
-                    cf = round(min(0.96, max(0.72, 0.70 + (mean_d / 70.0) * 0.25)), 3)
-                    candidates.append({
-                        "label": "POTHOLE",
-                        "conf": cf,
-                        "box_xywh": [cx, cy, cbw, cbh],
-                        "area": int(area),
-                    })
+            thresh = cv2.adaptiveThreshold(
+                blackhat_masked, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv2.THRESH_BINARY, 31, -3
+            )
+            thresh = cv2.bitwise_and(thresh, thresh, mask=road_mask)
+            c_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 7))
+            closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, c_kernel)
 
-        # 3. Non-Maximum Suppression (NMS)
+            cnts, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for c in cnts:
+                area = cv2.contourArea(c)
+                if area < 75 or area > (w * h * 0.08):
+                    continue
+                x, y, cbw, cbh = cv2.boundingRect(c)
+                if y < int(h * 0.16) or (y + cbh) > int(h * 0.98):
+                    continue
+                aspect = cbw / float(cbh)
+                if 0.45 <= aspect <= 2.8:
+                    roi = blackhat_masked[y:y+cbh, x:x+cbw]
+                    mean_intensity = float(np.mean(roi[roi > 0])) if np.any(roi > 0) else 0.0
+                    if mean_intensity > 12.0:
+                        cf = min(0.95, max(0.72, 0.65 + (mean_intensity / 55.0) * 0.28))
+                        candidates.append({
+                            "label": "POTHOLE",
+                            "conf": round(cf, 3),
+                            "box_xywh": [float(x), float(y), float(cbw), float(cbh)],
+                            "area": int(area),
+                        })
+
+        # 4. Non-Maximum Suppression (NMS) prioritizing Potholes
         def iou(b1, b2):
             x1 = max(b1[0], b2[0])
             y1 = max(b1[1], b2[1])
@@ -147,11 +179,15 @@ async def infer_road_defects(
             union = (b1[2] * b1[3]) + (b2[2] * b2[3]) - inter
             return inter / union if union > 0 else 0
 
-        # Sort so high-confidence potholes and defects are prioritized
-        candidates = sorted(candidates, key=lambda c: (1 if c["label"] == "POTHOLE" else 0, c["conf"]), reverse=True)
+        # Sort so potholes and highest-confidence defects take precedence
+        candidates = sorted(
+            candidates,
+            key=lambda c: (1 if c["label"] == "POTHOLE" else 0, c["conf"]),
+            reverse=True
+        )
         kept = []
         for cand in candidates:
-            if any(iou(cand["box_xywh"], k["box_xywh"]) > 0.35 for k in kept):
+            if any(iou(cand["box_xywh"], k["box_xywh"]) > 0.28 for k in kept):
                 continue
             kept.append(cand)
 
@@ -159,7 +195,7 @@ async def infer_road_defects(
         pothole_cnt = 0
         crack_cnt = 0
 
-        for i, k in enumerate(kept[:10]):
+        for i, k in enumerate(kept[:16]):
             bx, by, bw_k, bh_k = k["box_xywh"]
             x_pct = round((bx / w) * 100, 1)
             y_pct = round((by / h) * 100, 1)
@@ -176,7 +212,7 @@ async def infer_road_defects(
                 crack_cnt += 1
                 action = "48-hr bituminous sealing to prevent water penetration"
 
-            severity = "Critical" if (cf > 0.85 or area_px > 2000) else ("Severe" if (cf > 0.72 or area_px > 600) else "Moderate")
+            severity = "Critical" if (cf > 0.85 or area_px > 1800) else ("Severe" if (cf > 0.73 or area_px > 450) else "Moderate")
             score = int(cf * 60 + min(40, (area_px / 2500) * 40))
             score = min(100, max(25, score))
 
@@ -201,7 +237,7 @@ async def infer_road_defects(
         elif len(detections) > 0:
             max_severity = "Moderate"
 
-        overall_health = max(10, 100 - len(detections) * 15)
+        overall_health = max(10, 100 - len(detections) * 8)
 
         return InferenceResponse(
             status="success",

@@ -48,7 +48,7 @@ export async function detectDefects(
     formData.append("file", blob, "upload.jpg");
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
     const apiRes = await fetch("/api/v1/infer", {
       method: "POST",
@@ -171,8 +171,15 @@ async function runBrowserEdgeDetection(
         const rows = Math.floor(h / cellSize);
         const grid = new Float32Array(rows * cols);
 
-        for (let r = Math.floor(rows * 0.3); r < rows; r++) {
-          for (let c = Math.floor(cols * 0.15); c < Math.floor(cols * 0.88); c++) {
+        for (let r = Math.floor(rows * 0.22); r < rows; r++) {
+          // Perspective road trapezoid: tapers towards horizon
+          const progress = (r - rows * 0.22) / (rows * 0.78);
+          const minColPct = 0.32 - progress * 0.24; // 32% at top -> 8% at bottom
+          const maxColPct = 0.68 + progress * 0.26; // 68% at top -> 94% at bottom
+          const startCol = Math.floor(cols * minColPct);
+          const endCol = Math.floor(cols * maxColPct);
+
+          for (let c = startCol; c < endCol; c++) {
             let darkCount = 0;
             let variance = 0;
             for (let dy = 0; dy < cellSize; dy++) {
