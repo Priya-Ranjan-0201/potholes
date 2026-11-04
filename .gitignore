@@ -27,7 +27,11 @@ coverage.xml
 # ML / Training & Checkpoints
 /data/*
 !/data/sample/
-!/data/sample/**
+!/data/sample/splits/
+!/data/sample/splits/**
+data/sample/labels/
+data/sample/raw/
+data/sample/yolo_labels/
 *.cache
 runs/
 ml/runs/
