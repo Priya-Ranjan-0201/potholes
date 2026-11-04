@@ -8,22 +8,22 @@ resolved.
 
 ## Model & Inference
 
-### L-001: No Trained Model Yet
-**Status:** Resolved (Phase 3 & Phase 4)
-**Impact:** Initial production-ready YOLOv8n model trained (`ml/runs/pothole_yolov8n/weights/best.pt`), exported to ONNX opset 17 (`best.onnx`), and quantized with static QDQ INT8 (`best_int8.onnx`). Evaluated with mAP@50 = 0.9950. Ready for edge deployment.
+### L-001: Model Trained on Sample Benchmark Split
+**Status:** In Progress (Sample Baseline Verified, Full Training Queued)
+**Impact:** Initial baseline model trained on the verified 30-sample benchmark dataset (`data/sample/splits/`), exported to ONNX opset 17 (`best.onnx`), and quantized with static QDQ INT8 (`best_int8.onnx`). Full multi-epoch training across complete RDD2022 (~9,665 images) is queued for Cloud GPU execution via `cloud_orchestrator.py`.
 
 ### L-002: Training Limited to YOLO Nano/Small on Local GPU
 **Status:** Active
 **Impact:** The development machine has an RTX 3050 with 6 GB VRAM, which
 can only train YOLO-nano (`yolov8n`) and YOLO-small (`yolov8s`) variants.
 Medium, large, and xlarge variants exceed available VRAM and will OOM.
-**Workaround:** Use Kaggle notebooks (free T4/P100 GPU, 16 GB VRAM) for
-training larger model variants via `ml/training/kaggle_notebook.ipynb`.
-**Resolution:** Cloud GPU offloading configured via Kaggle API runner.
+**Workaround:** Use Kaggle/Colab notebooks (T4 GPU, 16 GB VRAM) for
+training larger model variants via `cloud_orchestrator.py`.
+**Resolution:** Multi-cloud orchestrator with automated lease locking and interruption recovery configured.
 
-### L-003: No Real Metrics or Benchmarks
-**Status:** Resolved (Phase 3 & Phase 4)
-**Impact:** Real metrics measured and verified in `docs/AI_EVALUATION.md` (mAP@50 = 0.9950, Recall = 1.000, F1 = 0.9446). Empirical latency benchmarks measured in `docs/MODEL_CARD.md` and `edge/benchmarks/results/COMPARATIVE_BENCHMARK.md` (p50: 16.6ms on INT8, 58.86 FPS throughput, 72.49% size reduction). All numbers fully traceable.
+### L-003: Metrics Measured on Sample Validation Split
+**Status:** Active (Sample Verified, Full Benchmark Pending)
+**Impact:** Metrics in `docs/AI_EVALUATION.md` reflect the 9-image sample validation split. Latency benchmarks measured via ONNX Runtime on host CPU (p50: 16.6ms on INT8, 58.86 FPS throughput). Full test holdout evaluation across diverse multi-city road scenes is queued following full dataset training.
 
 ---
 

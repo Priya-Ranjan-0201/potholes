@@ -35,19 +35,18 @@ class InferenceResponse(BaseModel):
     detections: List[DetectionBox]
 
 
-def get_yolo_model():
-    """Load primary YOLO model if available."""
-    from ultralytics import YOLO
-    model_paths = [
-        "runs/ablations/ablation_A2_yolo11n_640/weights/best.pt",
-        "runs/baselines/yolov8s/weights/best.pt",
-        "runs/baselines/yolov8n/weights/best.pt",
-        "ml/runs/pothole_yolov8n/weights/best.pt"
+def get_inference_engine():
+    """Load pure ONNX Runtime engine without AGPL Ultralytics dependency."""
+    from edge.agent.infer import EdgeInferenceEngine
+    onnx_paths = [
+        "runs/export/best_int8.onnx",
+        "runs/baselines/yolov8n/weights/best.onnx",
+        "runs/export/best.onnx"
     ]
-    for p in model_paths:
+    for p in onnx_paths:
         if os.path.exists(p):
             try:
-                return YOLO(p)
+                return EdgeInferenceEngine(model_path=p, conf_threshold=0.18, iou_threshold=0.40)
             except Exception:
                 continue
     return None
@@ -59,7 +58,7 @@ async def infer_road_defects(
     conf_thresh: float = Query(0.18, ge=0.05, le=0.95),
     iou_thresh: float = Query(0.35, ge=0.1, le=0.9)
 ):
-    """Run real-time defect detection on an uploaded image."""
+    """Run real-time defect detection on an uploaded image using pure ONNX Runtime + Edge CV."""
     try:
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
@@ -70,22 +69,20 @@ async def infer_road_defects(
         h, w = img.shape[:2]
         candidates = []
 
-        # 1. Neural Model Inference
-        model = get_yolo_model()
-        if model is not None:
+        # 1. Pure ONNX Runtime Inference
+        engine = get_inference_engine()
+        if engine is not None:
             try:
-                results = model.predict(img, conf=conf_thresh, iou=iou_thresh, verbose=False)[0]
-                for b in results.boxes:
-                    lbl = model.names[int(b.cls[0])]
-                    cf = float(b.conf[0])
-                    bx = b.xyxy[0].tolist()
+                dets = engine.predict(img)
+                for d in dets:
+                    bx = d.bbox_xyxy
                     bw_b = bx[2] - bx[0]
                     bh_b = bx[3] - bx[1]
                     if bh_b > h * 0.75 or bw_b > w * 0.75:
                         continue
                     candidates.append({
-                        "label": lbl,
-                        "conf": cf,
+                        "label": d.class_name,
+                        "conf": float(d.confidence),
                         "box_xywh": [bx[0], bx[1], bw_b, bh_b],
                         "area": int(bw_b * bh_b),
                     })
@@ -211,3 +208,4 @@ async def infer_road_defects(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+

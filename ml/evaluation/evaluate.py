@@ -89,13 +89,16 @@ def evaluate_model(
     if box_metrics and hasattr(box_metrics, "maps") and len(box_metrics.maps) > 0:
         for idx, cls_map in enumerate(box_metrics.maps):
             c_name = class_names.get(idx, f"class_{idx}")
+            cls_ap50 = (
+                round(float(box_metrics.ap50[idx]), 4)
+                if hasattr(box_metrics, "ap50") and idx < len(box_metrics.ap50)
+                else 0.0
+            )
+            # Mathematically, mAP@50-95 cannot exceed mAP@50; if mAP@50 is 0.0, mAP@50-95 must be 0.0
+            cls_ap50_95 = min(cls_ap50, round(float(cls_map), 4)) if cls_ap50 > 0 else 0.0
             class_metrics[c_name] = {
-                "mAP50": (
-                    round(float(box_metrics.ap50[idx]), 4)
-                    if hasattr(box_metrics, "ap50") and idx < len(box_metrics.ap50)
-                    else 0.0
-                ),
-                "mAP50_95": round(float(cls_map), 4),
+                "mAP50": cls_ap50,
+                "mAP50_95": cls_ap50_95,
             }
 
     # Speed metrics

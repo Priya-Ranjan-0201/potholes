@@ -1,0 +1,58 @@
+=== TODO/FIXME (1 matches) ===
+  .\ml\stages\stage8_local_data_pipeline.py:51: # 4. Check Guide and Human Todo
+
+=== Mock/Dummy/Fake (68 matches) ===
+  .\backend\app\api\v1\stats.py:4: No mock values, no fabricated metrics (Rule R1).
+  .\backend\tests\test_media.py:14: # Synthetic minimal valid JPEG bytes
+  .\backend\tests\test_migrations.py:5: from unittest.mock import MagicMock
+  .\backend\tests\test_migrations.py:49: # Mock op.get_bind()
+  .\backend\tests\test_security_matrix.py:134: json={"name": "Citizen Fake Contractor"},
+  .\edge\agent\health.py:8: Follows SPEC B4 (honest telemetry without fake/synthetic metrics).
+  .\edge\agent\infer.py:5: Adheres strictly to Rule R2 (No fake AI: raises ModelNotReadyError if model unavailable)
+  .\edge\agent\infer.py:133: "Per Rule R2, fake/mock inference is forbidden."
+  .\edge\agent\main.py:291: "--mock-gps",
+  .\edge\benchmarks\run_benchmark.py:90: # Generate dummy input tensor
+  .\edge\tests\test_benchmark.py:4: from unittest.mock import MagicMock, patch
+  .\edge\tests\test_benchmark.py:25: """Verify benchmark latency aggregation and percentiles using mock InferenceSession."""
+  .\edge\tests\test_blur_privacy.py:15: # Synthetic image with simulated license plate contrast rectangle
+  .\edge\tests\test_capture.py:3: from unittest.mock import MagicMock
+  .\edge\tests\test_capture.py:47: # Mock video capture
+  .\edge\tests\test_infer.py:45: """Verify Rule R2: Missing model must raise ModelNotReadyError (no fake AI)."""
+  .\edge\tests\test_infer.py:59: # Synthetic test image
+  .\edge\tests\test_pipeline.py:20: """Create a 20-frame synthetic road video with moving pothole pattern."""
+  .\edge\tests\test_pipeline.py:53: """Verify complete edge agent pipeline run against synthetic video."""
+  .\ml\configs\data_checksums.yaml:11: sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" # placeholder/verified up
+  .\ml\data\download.py:177: # Note: If expected_sha256 is placeholder, record actual for registry
+  .\ml\data\download.py:242: help="Generate synthetic benchmark sample dataset of specified image count",
+  .\ml\stages\stage11_robustness_safety.py:3: Evaluates trained model under synthetic environmental corruptions:
+  .\ml\stages\stage11_robustness_safety.py:300: - [x] Synthetic corruption suite executed across 6 environmental stress dimensions (Severities 1 thr
+  .\ml\stages\stage12_final_report.py:149: - Synthetic Circular Pothole: Ground Truth Radius = 50px (Area = 7,854 px²), Measured Area = 7,825 p
+  .\ml\stages\stage12_final_report.py:150: - Synthetic Longitudinal Crack: Ground Truth Length = 80.0px, Mean Width = 6.0px. Measured Length = 
+  .\ml\stages\stage7_segmentation_measurement.py:4: - Synthetic mask unit tests with exact analytical ground truths.
+  .\ml\stages\stage7_segmentation_measurement.py:30: """Test geometric measurement algorithms against known synthetic geometries."""
+  .\ml\stages\stage7_segmentation_measurement.py:98: print("\nExecuting Synthetic Mask Unit Tests with Analytical Truths...")
+  .\ml\stages\stage7_segmentation_measurement.py:100: print(f"Synthetic Unit Tests : {test_results['status']}")
+  .\ml\stages\stage7_segmentation_measurement.py:124: - [x] Measurement tests pass on synthetic masks with known analytical answers.
+  .\ml\stages\stage7_segmentation_measurement.py:127: ## 1. Synthetic Analytical Validation
+  .\ml\stages\stage9_export_quantize_benchmark.py:53: dummy = np.random.randn(1, 3, imgsz, imgsz).astype(np.float32)
+  .\ml\stages\stage9_export_quantize_benchmark.py:56: pt_out = pt_model.model(torch.from_numpy(dummy))[0].numpy()
+  .\ml\stages\stage9_export_quantize_benchmark.py:59: onnx_out = ort_session.run(None, {input_name: dummy})[0]
+  .\ml\tests\test_audit.py:13: """Helper to create dummy RGB image."""
+  .\ml\tests\test_export.py:4: from unittest.mock import MagicMock, patch
+  .\ml\tests\test_export.py:31: dummy = tmp_path / "corrupt.onnx"
+  .\ml\tests\test_export.py:32: dummy.write_text("not-an-onnx-file", encoding="utf-8")
+  .\ml\tests\test_export.py:33: val = validate_onnx_graph(dummy)
+  .\ml\tests\test_export.py:39: """Verify export_model orchestration with mock YOLO instance."""
+  .\ml\tests\test_forecast.py:75: """Rule R7: Uninspected segment returns score=None, never synthetic score."""
+  .\ml\tests\test_hard_negatives.py:4: from unittest.mock import MagicMock, patch
+  .\ml\tests\test_hard_negatives.py:50: # Mock ultralytics YOLO model
+  .\ml\tests\test_hard_negatives.py:100: # Create dummy dataset structure
+  .\ml\tests\test_hard_negatives.py:117: # Mock YOLO in mine_hard_negatives to produce 1 detection on candidate
+  .\ml\tests\test_multi_cloud_failover.py:52: # Create dummy initial weights
+  .\ml\tests\test_quantize.py:4: from unittest.mock import patch
+  .\ml\tests\test_quantize.py:42: # Create dummy images
+  .\ml\tests\test_split.py:29: # Create 30 dummy images spanning 3 distinct sequences (10 frames each)
+  ... and 18 more matches
+
+=== Lorem Ipsum (0 matches) ===
+

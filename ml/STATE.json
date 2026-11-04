@@ -193,9 +193,9 @@
     }
   },
   "open_issues": [],
-  "next_action": "Tag v1.0.0-model and push tag and branch to origin",
-  "all_passes_complete": true,
-  "pipeline_status": "FROZEN_V1_0_0",
+  "next_action": "Download full RDD2022 dataset and launch 50-epoch GPU training run",
+  "all_passes_complete": false,
+  "pipeline_status": "SAMPLE_BASELINE_VERIFIED",
   "final_production_model": {
     "artifact": "runs/export/best_int8.onnx",
     "format": "ONNX Dynamic INT8 (Opset 17)",
@@ -204,6 +204,7 @@
     "val_mAP50_95": 0.7913,
     "calibrated_ece": 0.0671,
     "host_fps": 21.0,
-    "reproduction_delta": 0.0
+    "reproduction_delta": 0.0,
+    "note": "Exported from sample baseline (30 images). Pending full RDD2022 50-epoch GPU retrain."
   }
 }

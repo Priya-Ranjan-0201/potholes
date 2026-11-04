@@ -27,7 +27,7 @@ from ml.training.train_detect import train_detector
 
 
 def create_mock_background_candidates(target_dir: Path, count: int = 5) -> list[Path]:
-    """Generate representative road background negative candidates if none exist."""
+    """Generate representative road surface test candidates in target_dir if none exist."""
     target_dir.mkdir(parents=True, exist_ok=True)
     categories = ["shadow", "oil_stain", "water_puddle", "bitumen_patch", "manhole"]
     created_paths = []
@@ -36,18 +36,8 @@ def create_mock_background_candidates(target_dir: Path, count: int = 5) -> list[
         cat = categories[i % len(categories)]
         img_p = target_dir / f"bg_{cat}_{i+1:03d}.jpg"
         if not img_p.exists():
-            base = np.random.randint(60, 90, (320, 320, 3), dtype=np.uint8)
-            if cat == "shadow":
-                base[100:220, 100:220] = (base[100:220, 100:220] * 0.4).astype(np.uint8)
-            elif cat == "oil_stain":
-                base[120:180, 120:180] = np.random.randint(15, 35, (60, 60, 3), dtype=np.uint8)
-            elif cat == "water_puddle":
-                base[80:160, 80:200] = np.random.randint(140, 180, (80, 120, 3), dtype=np.uint8)
-            elif cat == "bitumen_patch":
-                base[50:150, 150:250] = np.random.randint(30, 50, (100, 100, 3), dtype=np.uint8)
-            elif cat == "manhole":
-                base[100:200, 100:200] = 110
-
+            val = min(255, max(40, 70 + (i * 10)))
+            base = np.full((320, 320, 3), val, dtype=np.uint8)
             img = Image.fromarray(base)
             img.save(img_p, "JPEG")
         created_paths.append(img_p)
@@ -200,17 +190,15 @@ def execute_hard_negative_cycle(
         if retrain_res.get("weights", {}).get("best"):
             retrained_weights = Path(retrain_res["weights"]["best"])
 
-    exp_p = round(base_p + 0.042, 4)
-    exp_r = round(max(0.0, base_r - 0.005), 4)
-    exp_f1 = round((2 * exp_p * exp_r) / (exp_p + exp_r), 4) if (exp_p + exp_r) > 0 else 0.0
-    exp_map = round(base_map50 + 0.015, 4)
-    expected_fallback = (exp_p, exp_r, exp_f1, exp_map)
-    ret_p, ret_r, ret_f1, ret_map50 = _eval_or_fallback(
-        weights=retrained_weights,
-        data_yaml=data_yaml,
-        device=device,
-        fallback=expected_fallback,
-    )
+    if not dry_run and mined_count > 0:
+        ret_p, ret_r, ret_f1, ret_map50 = _eval_or_fallback(
+            weights=retrained_weights,
+            data_yaml=data_yaml,
+            device=device,
+            fallback=(base_p, base_r, base_f1, base_map50),
+        )
+    else:
+        ret_p, ret_r, ret_f1, ret_map50 = base_p, base_r, base_f1, base_map50
 
     precision_delta = round(ret_p - base_p, 4)
     recall_delta = round(ret_r - base_r, 4)

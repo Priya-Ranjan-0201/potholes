@@ -23,12 +23,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function loadUser() {
       const stored = getStoredToken();
+      const defaultPassword = (import.meta.env.VITE_DEMO_PASSWORD as string) || "ScamRoadDemo2026!";
       if (!stored) {
         // Auto-initialize demo admin user for local seamless viewing if not signed in
         try {
           const res = await api.register({
             email: "admin_demo@scamroad.local",
-            password: "DemoPassword123!",
+            password: defaultPassword,
             full_name: "Municipal Admin",
             role: "admin",
           });
@@ -40,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             const loginRes = await api.login({
               email: "admin_demo@scamroad.local",
-              password: "DemoPassword123!",
+              password: defaultPassword,
             });
             setStoredTokens(loginRes.access_token, loginRes.refresh_token);
             setToken(loginRes.access_token);
