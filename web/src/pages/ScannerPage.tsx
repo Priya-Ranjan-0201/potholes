@@ -20,20 +20,26 @@ interface SampleImage {
 
 const BENCHMARK_SAMPLES: SampleImage[] = [
   {
+    id: "sample-asphalt-crater",
+    title: "Asphalt Deep Crater",
+    src: "/samples/asphalt_crater.jpg",
+    road: "NH-44 Ludhiana Corridor (KM 314)",
+  },
+  {
     id: "sample-craters",
-    title: "Rural Unpaved Craters",
+    title: "Rural Unpaved Road",
     src: "/samples/unpaved_craters.jpg",
     road: "Rural Connector Sector 32",
   },
   {
     id: "sample-highway",
-    title: "Highway Asphalt Pit",
+    title: "Highway Bitumen Patch",
     src: "/samples/clean_road.jpg",
-    road: "NH-44 Ludhiana Bypass KM 312",
+    road: "GT Road Industrial Bypass",
   },
   {
-    id: "sample-cracks",
-    title: "Structural Cracks",
+    id: "sample-clean",
+    title: "Clean Road (Zero Defect Benchmark)",
     src: "/samples/pothole_nh44.jpg",
     road: "Ferozepur Road (PAU Gate 2)",
   },
