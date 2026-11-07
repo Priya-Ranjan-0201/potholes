@@ -1,8 +1,8 @@
 {
   "project_version": "v7",
   "branch": "v7/polish",
-  "current_phase": 10,
-  "phase_name": "CI, DOCKER & FINAL VERIFICATION",
+  "current_phase": 11,
+  "phase_name": "PASS 2: HOSTILE RE-AUDIT & PASS 3: CLEAN-CLONE FREEZE",
   "status": "IN_PROGRESS",
   "budget": {
     "max_gpu_hours": 2,
@@ -10,7 +10,7 @@
     "max_spend_usd": 0
   },
   "started_at": "2026-11-07T17:38:00+05:30",
-  "completed_phases": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "completed_phases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
@@ -83,13 +83,19 @@
       "production_build": "web build succeeded in 5.09s (239.28 kB gzip JS < 250 kB SLA)"
     },
     "phase_9": {
-      "readme_path": "README.md (honest overview, screenshot matrix, real metrics table)",
-      "project_report": "docs/PROJECT_REPORT.md (complete B.Tech CSE thesis / report)",
-      "slides_outline": "docs/SLIDES_OUTLINE.md (12-slide viva presentation deck)",
-      "demo_script": "docs/DEMO_SCRIPT.md (5-to-10 minute live walkthrough)",
+      "readme_path": "README.md",
+      "project_report": "docs/PROJECT_REPORT.md",
+      "slides_outline": "docs/SLIDES_OUTLINE.md",
+      "demo_script": "docs/DEMO_SCRIPT.md",
       "claims_check": "scripts/check_claims.py PASSED (0 violations)"
+    },
+    "phase_10": {
+      "ci_workflow": ".github/workflows/ci.yml (configured for v7/* branches, 146 tests, full matrix)",
+      "docker_compose": "docker-compose.yml (PostGIS healthcheck & container definitions)",
+      "backup_restore_drill": "scripts/backup_restore_drill.py PASSED (SHA-256 verified)",
+      "backend_tests": "146/146 pytest tests PASSED"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Phase 10 (MUST): CI & Docker hardening, disaster recovery drill, Pass 2 hostile re-audit, and Pass 3 clean clone freeze"
+  "next_action": "Execute Pass 2 (Hostile Re-Audit) and Pass 3 (Clean-Clone Freeze v1.2.0)"
 }

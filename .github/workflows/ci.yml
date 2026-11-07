@@ -2,7 +2,7 @@ name: ScamRoad CI
 
 on:
   push:
-    branches: [main, feat/*, fix/*]
+    branches: [main, feat/*, fix/*, v7/*]
   pull_request:
     branches: [main]
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           ruff check backend ml edge shared --config pyproject.toml
 
-      - name: Run Pytest Full Test Suite (144 Tests)
+      - name: Run Pytest Full Test Suite (146 Tests)
         env:
           POSTGRES_SERVER: localhost
           POSTGRES_PORT: 5432
@@ -71,7 +71,7 @@ jobs:
           REDIS_PORT: 6379
           SECRET_KEY: test-ci-secret-key-at-least-32-chars-long!
         run: |
-          pytest backend/tests ml/tests shared/tests -v
+          pytest -v
 
   frontend-quality:
     runs-on: ubuntu-latest
