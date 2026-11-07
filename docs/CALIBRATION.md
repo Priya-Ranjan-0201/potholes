@@ -102,3 +102,4 @@ If `is_calibrated == true`, physical values are populated with calibration metad
 1. When `is_calibrated == false`, UI elements must display dimensions as **pixels (`px²`)** or relative surface percentage.
 2. Numerical depths in centimeters or repair volumes in cubic meters must **never** be synthesized from single-lens 2D bounding boxes.
 3. Every uncalibrated measurement card must display an indicative notice: `*Relative 2D image coordinates (uncalibrated)`.
+

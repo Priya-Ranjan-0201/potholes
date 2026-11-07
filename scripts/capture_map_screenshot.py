@@ -50,3 +50,4 @@ def capture_map():
 
 if __name__ == "__main__":
     capture_map()
+

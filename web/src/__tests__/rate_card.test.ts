@@ -23,3 +23,4 @@ describe("Illustrative Rate Card Calculation (Rule R9)", () => {
     expect(criticalCost).toBeGreaterThan(severeCost);
   });
 });
+

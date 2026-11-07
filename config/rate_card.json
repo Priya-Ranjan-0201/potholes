@@ -28,3 +28,4 @@
   },
   "formula": "Math.max(base_mobilization_fee, Math.round(severity_score * severity_multiplier + class_base_rate * 0.3))"
 }
+

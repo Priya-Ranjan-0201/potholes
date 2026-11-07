@@ -309,3 +309,4 @@ evaluation once; re-check every doc claim against generated files; tag v1.1.0.
 STOP when: two consecutive rounds give no measurable gain, max 3 passes, or budget exhausted.
 Budget guard: estimate GPU hours before any training job, never exceed my limit (set below).
 ```
+

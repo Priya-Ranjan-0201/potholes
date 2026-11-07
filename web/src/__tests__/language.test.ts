@@ -38,3 +38,4 @@ describe("Multilingual Language System", () => {
     expect(TRANSLATIONS.pa.standardsNotice).toContain("ਪ੍ਰੇਰਿਤ");
   });
 });
+
