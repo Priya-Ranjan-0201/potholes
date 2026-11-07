@@ -1,8 +1,8 @@
 {
   "project_version": "v7",
   "branch": "v7/polish",
-  "current_phase": 3,
-  "phase_name": "HARD-NEGATIVE ROUND & ABLATION",
+  "current_phase": 4,
+  "phase_name": "LOCAL TEST SET PIPELINE",
   "status": "IN_PROGRESS",
   "budget": {
     "max_gpu_hours": 2,
@@ -10,7 +10,7 @@
     "max_spend_usd": 0
   },
   "started_at": "2026-11-07T17:38:00+05:30",
-  "completed_phases": [1, 2],
+  "completed_phases": [1, 2, 3],
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
@@ -30,8 +30,16 @@
       "overall_map50": 0.8575,
       "overall_ece": 0.0191,
       "live_browser_suite": "20/20 PASSED (including /evaluation)"
+    },
+    "phase_3": {
+      "ablation_json": "ml/runs/ablation.json",
+      "experiments_doc": "docs/EXPERIMENTS.md",
+      "hard_negatives": "15 background images with 0-byte labels added",
+      "false_positive_reduction": "-55.6% (from 9 FP down to 4 FP)",
+      "precision_gain": "+2.5% (from 84.1% to 86.6%)",
+      "ablation_table": "3-axis ablation (Capacity, Resolution, Quantization)"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Phase 3: mine hard-negative background images, run before/after ablation, document in docs/EXPERIMENTS.md, and tag v7-phase-3-done"
+  "next_action": "Execute Phase 4: create local test set pipeline, docs/DATA_COLLECTION.md, docs/LABELING_GUIDE.md, sample verification script"
 }
