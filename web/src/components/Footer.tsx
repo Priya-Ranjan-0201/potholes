@@ -1,10 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Shield, Sparkles, CheckCircle2 } from "./Icons";
+import { useLanguage } from "../context/LanguageContext";
 
 export const Footer: React.FC = () => {
+  const { t } = useLanguage();
+
   return (
-    <footer className="mt-auto bg-slate-900 text-slate-300 border-t-2 border-amber-500/80">
+    <footer className="mt-auto bg-slate-900 dark:bg-black text-slate-300 border-t-2 border-amber-500/80 transition-colors">
       {/* Tricolor Micro-Ribbon Accent */}
       <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600" />
 
@@ -18,13 +21,13 @@ export const Footer: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-black text-lg text-white tracking-tight">सड़क सुरक्षा | ScamRoad</span>
+                  <span className="font-black text-lg text-white tracking-tight">{t("appName")}</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                     MoRTH & PWD Compliant
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 font-medium">
-                  राष्ट्रीय सड़क गुणवत्ता एवं गड्ढा निवारण प्रणाली | National Road Defect Surveillance Mission
+                  {t("appSubtitle")}
                 </p>
               </div>
             </div>
@@ -56,22 +59,22 @@ export const Footer: React.FC = () => {
               <li>
                 <Link to="/scanner" className="text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  एआई सड़क स्कैनर (AI Vision Scanner)
+                  {t("navScanner")}
                 </Link>
               </li>
               <li>
                 <Link to="/maintenance" className="text-slate-300 hover:text-amber-400 transition-colors">
-                  कार्य आदेश (PWD Work Orders)
+                  {t("navWorkOrders")}
                 </Link>
               </li>
               <li>
                 <Link to="/complaints" className="text-slate-300 hover:text-amber-400 transition-colors">
-                  नागरिक शिकायत (Citizen Grievance)
+                  {t("navComplaints")}
                 </Link>
               </li>
               <li>
                 <Link to="/defects" className="text-slate-300 hover:text-amber-400 transition-colors">
-                  दोष इन्वेंटरी (Road Defect Catalog)
+                  {t("navDefects")}
                 </Link>
               </li>
             </ul>
@@ -84,19 +87,19 @@ export const Footer: React.FC = () => {
               तकनीकी विनिर्देश / Specs
             </h4>
             <div className="space-y-2 text-xs text-slate-400">
-              <div className="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+              <div className="bg-slate-800/80 dark:bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/60 dark:border-slate-800">
                 <span className="block text-slate-200 font-semibold text-[11px]">एआई मॉडल (Edge Model):</span>
                 <span className="text-[11px] text-emerald-400 font-mono">YOLO11n INT8 Quantized (21 FPS)</span>
               </div>
-              <div className="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+              <div className="bg-slate-800/80 dark:bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/60 dark:border-slate-800">
                 <span className="block text-slate-200 font-semibold text-[11px]">मानक (Standards):</span>
-                <span className="text-[11px] text-amber-300 font-mono">IRC:SP:84-2019 / IRC:82-2023</span>
+                <span className="text-[11px] text-amber-300 font-mono">{t("standardsNotice")}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+        <div className="mt-8 pt-6 border-t border-slate-800 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <div>
             सत्यमेव जयते | Designed for Municipal Corporations, Public Works Department (PWD), and National Highways.
           </div>
@@ -110,3 +113,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

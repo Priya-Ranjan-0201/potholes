@@ -27,6 +27,8 @@ import {
   Legend,
 } from "recharts";
 
+import { useLanguage } from "../context/LanguageContext";
+
 const SEVERITY_COLORS: Record<string, string> = {
   Critical: "#dc2626",
   Severe: "#ea580c",
@@ -35,6 +37,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 export const DashboardPage: React.FC = () => {
+  const { t } = useLanguage();
   const { data: stats, isLoading: loadingStats } = useQuery({
     queryKey: ["statsOverview"],
     queryFn: api.getOverview,
@@ -63,8 +66,8 @@ export const DashboardPage: React.FC = () => {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <Activity className="w-8 h-8 animate-spin text-emerald-600 mx-auto mb-2" />
-          <p className="text-slate-500 font-medium">Loading municipal road health telemetry...</p>
+          <Activity className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-2" />
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Loading municipal road health telemetry...</p>
         </div>
       </div>
     );
@@ -89,99 +92,98 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-8 pb-16">
       {/* Page Title & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md transition-colors">
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>🇮🇳 राष्ट्रीय सड़क सुरक्षा मिशन</span>
+              <span>🇮🇳 {t("appName")}</span>
             </span>
-            <span className="text-xs font-bold text-slate-500 font-mono">
-              IRC:SP:84-2019 / IRC:82-2023 अनुपालित
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
+              {t("standardsNotice")}
             </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <span>सड़क स्थिति एवं रखरखाव अवलोकन</span>
-            <span className="text-sm font-semibold text-slate-400 font-normal">| Municipal Road Health</span>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <span>{t("dashboardTitle")}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Real-time automated edge detection telemetry, PWD contractor SLAs, and citizen grievance redressal.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            {t("dashboardSubtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            <span>लाइव टेलीमेट्री सक्रिय (Live Online)</span>
+            <span>{t("telemetryOnline")}</span>
           </span>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-              कुल सड़क दोष (Total Defects)
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              {t("totalDefects")}
             </span>
-            <span className="text-3xl font-black text-slate-900 mt-1 block">
+            <span className="text-3xl font-black text-slate-900 dark:text-white mt-1 block">
               {stats?.total_defects ?? 0}
             </span>
-            <span className="text-xs text-slate-500 mt-1 block font-medium">
-              <strong className="text-amber-600">{stats?.open_defects ?? 0} सक्रिय</strong> | {stats?.repaired_defects ?? 0} मरम्मत पूर्ण
+            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block font-medium">
+              <strong className="text-amber-600 dark:text-amber-400">{stats?.open_defects ?? 0} {t("activeDefects")}</strong> | {stats?.repaired_defects ?? 0} {t("repairedDefects")}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
             <Layers className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-red-200/90 shadow-xs hover:border-red-300 transition-all flex items-center justify-between bg-gradient-to-br from-white via-white to-red-50/30">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-red-200/90 dark:border-red-900/60 shadow-md hover:border-red-300 dark:hover:border-red-800 transition-all flex items-center justify-between bg-gradient-to-br from-white via-white to-red-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-red-950/20">
           <div>
-            <span className="text-xs font-bold text-red-600 uppercase tracking-wider block">
-              गंभीर गड्ढे (Critical Potholes)
+            <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider block">
+              {t("criticalPotholes")}
             </span>
-            <span className="text-3xl font-black text-red-600 mt-1 block">
+            <span className="text-3xl font-black text-red-600 dark:text-red-400 mt-1 block">
               {stats?.critical_defects ?? 0}
             </span>
-            <span className="text-xs text-red-700 font-bold mt-1 block">
-              24-hr तत्काल डामरीकरण प्राथमिकता
+            <span className="text-xs text-red-700 dark:text-red-300 font-bold mt-1 block">
+              {t("immediateRemediation")}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-red-600 border border-red-200">
+          <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-950/80 flex items-center justify-center text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
             <AlertOctagon className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-              नागरिक शिकायतें (Grievances)
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              {t("citizenGrievances")}
             </span>
-            <span className="text-3xl font-black text-slate-900 mt-1 block">
+            <span className="text-3xl font-black text-slate-900 dark:text-white mt-1 block">
               {stats?.total_complaints ?? 0}
             </span>
-            <span className="text-xs text-slate-500 mt-1 block font-medium">
-              <strong className="text-blue-600">{stats?.complaints_by_status?.["SUBMITTED"] ?? 0} जांच हेतु लंबित</strong>
+            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block font-medium">
+              <strong className="text-blue-600 dark:text-blue-400">{stats?.complaints_by_status?.["SUBMITTED"] ?? 0} {t("pendingReview")}</strong>
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-200">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
             <Clock className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
+        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-              PWD कार्य आदेश (Work Orders)
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+              {t("workOrdersDispatched")}
             </span>
-            <span className="text-3xl font-black text-slate-900 mt-1 block">
+            <span className="text-3xl font-black text-slate-900 dark:text-white mt-1 block">
               {stats?.total_work_orders ?? 0}
             </span>
-            <span className="text-xs text-emerald-700 font-bold mt-1 block">
-              {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} सत्यापित एवं पूर्ण
+            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold mt-1 block">
+              {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} {t("verifiedCompleted")}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-200">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
