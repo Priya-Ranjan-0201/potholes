@@ -3,107 +3,215 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* DHABA DAWN (Light Theme) */
+    --theme-bg: #FFF8EC;
+    --theme-surface: #FFFFFF;
+    --theme-surface-2: #FFF0D6;
+    --theme-border: #EBD9B8;
+    --theme-text: #1B1308;
+    --theme-muted: #5C4A2E;
+    --theme-primary: #2B2F8F;
+    --theme-primary-contrast: #FFFFFF;
+    --theme-accent: #E8452C;
+    --theme-success: #1F8F5F;
+    --theme-warn: #C77700;
+    --theme-danger: #C62828;
+    --theme-focus-ring: #00A3A3;
+  }
+
+  html.dark {
+    /* HIGHWAY NIGHT (Dark Theme) */
+    --theme-bg: #0A0C12;
+    --theme-surface: rgba(20, 24, 36, 0.88);
+    --theme-surface-2: #141926;
+    --theme-border: rgba(255, 200, 80, 0.18);
+    --theme-text: #F3EEE2;
+    --theme-muted: #A9A18F;
+    --theme-primary: #FFB300;
+    --theme-primary-contrast: #1A1200;
+    --theme-accent: #00D1D1;
+    --theme-success: #35D49A;
+    --theme-warn: #FFB84D;
+    --theme-danger: #FF6B6B;
+    --theme-focus-ring: #FFD54A;
+  }
+
   body {
     margin: 0;
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
-  /* Ultra-Clean Modern Light Mode (Porcelain + Pure Ambient Aurora - Zero Grainy Dots) */
+  /* Dhaba Dawn: Cream paper canvas with subtle warm ambient aura */
   body {
-    background-color: #f4f6fb;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.07) 0px, transparent 55%),
-      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 55%),
-      radial-gradient(at 50% 40%, rgba(245, 158, 11, 0.05) 0px, transparent 65%),
-      radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(255, 179, 0, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(232, 69, 44, 0.06) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(0, 163, 163, 0.04) 0px, transparent 65%),
+      radial-gradient(at 0% 100%, rgba(43, 47, 143, 0.05) 0px, transparent 50%);
     background-size: 100% 100%;
     background-attachment: fixed;
-    color: #0f172a;
   }
 
-  /* Premium Cyber-Civic Obsidian Dark Mode */
+  /* Highway Night: Deep asphalt with reflector glows & starry sky */
   html.dark body {
-    background-color: #070a14;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.16) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.16) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.10) 0px, transparent 60%),
-      radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.09) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.14) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, rgba(255, 179, 0, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(0, 209, 209, 0.12) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(232, 69, 44, 0.08) 0px, transparent 60%),
+      radial-gradient(at 0% 100%, rgba(43, 47, 143, 0.12) 0px, transparent 50%);
     background-size: 100% 100%;
     background-attachment: fixed;
-    color: #f8fafc;
   }
 }
 
-/* Glassmorphic Civic Card Utility */
-.civic-card {
-  background: #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
-  transition: all 0.2s ease-in-out;
+/* Truck-Art & Night Highway Card Classes */
+.dhaba-card {
+  background-color: var(--theme-surface);
+  border: 1.5px solid var(--theme-border);
+  box-shadow: 0 4px 14px -2px rgba(92, 74, 46, 0.08);
+  border-radius: 1rem;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-html.dark .civic-card {
-  background: rgba(12, 20, 39, 0.88);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.18);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+html.dark .dhaba-card {
+  background-color: var(--theme-surface);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid var(--theme-border);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 200, 80, 0.08);
 }
 
-html.dark .civic-card:hover {
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12);
+.dhaba-card:hover {
+  border-color: var(--theme-accent);
 }
 
-/* Road Motion & Scanning Animations (Phase 7) */
-@keyframes scanSweep {
-  0% { transform: translateY(0%); opacity: 0.8; }
+html.dark .dhaba-card:hover {
+  border-color: rgba(255, 179, 0, 0.45);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.7), 0 0 18px rgba(255, 179, 0, 0.12);
+}
+
+/* Kilometre Stone (Milestone) Styling */
+.milestone-stone {
+  border-radius: 28px 28px 8px 8px;
+  border: 2px solid var(--theme-border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.milestone-top-yellow {
+  background: linear-gradient(180deg, #F7C61B 0%, #E8B400 100%);
+  color: #1A1200;
+  font-weight: 900;
+  text-align: center;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+.milestone-top-green {
+  background: linear-gradient(180deg, #2FA66A 0%, #1F8F5F 100%);
+  color: #FFFFFF;
+  font-weight: 900;
+  text-align: center;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+/* Painted Dhaba Signboard Plate */
+.dhaba-plate {
+  border: 2px solid #1B1308;
+  background: #FFF0D6;
+  color: #1B1308;
+  box-shadow: 3px 3px 0px 0px #1B1308;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+html.dark .dhaba-plate {
+  border: 2px solid #FFB300;
+  background: #141926;
+  color: #F3EEE2;
+  box-shadow: 3px 3px 0px 0px rgba(255, 179, 0, 0.4);
+}
+
+/* Cat's-Eye Reflector Dot */
+.cats-eye-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFB300;
+  box-shadow: 0 0 6px 1px rgba(255, 179, 0, 0.7);
+  display: inline-block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cats-eye-dot:hover, .cats-eye-dot:focus {
+  transform: scale(1.4);
+  box-shadow: 0 0 12px 3px rgba(255, 179, 0, 0.95);
+}
+
+.cats-eye-peacock {
+  background: #00D1D1;
+  box-shadow: 0 0 6px 1px rgba(0, 209, 209, 0.7);
+}
+
+/* Jaali Mesh Texture */
+.jaali-texture {
+  background-image: radial-gradient(circle, rgba(235, 217, 184, 0.4) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+html.dark .jaali-texture {
+  background-image: radial-gradient(circle, rgba(255, 200, 80, 0.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Road Lane Animation */
+@keyframes laneStream {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -40; }
+}
+
+.road-lane-animated {
+  animation: laneStream 1.2s linear infinite;
+}
+
+/* Road Scan Beam Sweep */
+@keyframes roadScanSweep {
+  0% { transform: translateY(0%); opacity: 0.9; }
   50% { opacity: 1; }
-  100% { transform: translateY(1000%); opacity: 0.8; }
+  100% { transform: translateY(600%); opacity: 0.9; }
 }
 
-@keyframes roadDashMotion {
-  from { background-position: 0 0; }
-  to { background-position: 0 40px; }
+.scan-beam-active {
+  animation: roadScanSweep 2s ease-in-out infinite;
 }
 
-.road-scanner-grid {
-  background-image: linear-gradient(rgba(245, 158, 11, 0.08) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(245, 158, 11, 0.08) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-html.dark .road-scanner-grid {
-  background-image: linear-gradient(rgba(6, 182, 212, 0.12) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(6, 182, 212, 0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Accessibility: Respect Reduced Motion Preferences */
+/* Accessibility: Respect Reduced Motion Preferences (Rule F8) */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
 }
 
-/* Custom Smooth Scrollbar */
+/* Custom Styled Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--theme-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--theme-border);
   border-radius: 4px;
 }
-html.dark ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-muted);
 }
