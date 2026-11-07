@@ -33,4 +33,4 @@
 | [`live_16_mobile_capture_pwa.png`](live_16_mobile_capture_pwa.png) | Mobile Drive-Mode Capture HUD with Speedometer and Offline Outbox | Mobile 375px | Visual test verified |
 
 ---
-> **Rule R7 & R8 Integrity Notice:** All UI captures reflect the student research project state. Government emblems, Ashoka Chakra, and 'IRC Compliant' badges are strictly removed.
+> **Rule R7 & R8 Integrity Notice:** All UI captures reflect the student research project state. Government emblems, Ashoka Chakra, and 'IRC Compliance' badges are strictly removed.

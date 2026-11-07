@@ -29,7 +29,7 @@ def run_cmd(cmd: list[str], cwd: Path) -> tuple[int, str]:
 
 def main():
     print("=" * 65)
-    print("ScamRoad PASS 3: Clean-Clone Reproduction Drill (v1.1.0)")
+    print("ScamRoad PASS 3: Clean-Clone Reproduction Drill (v1.2.0)")
     print("=" * 65)
 
     temp_dir = Path(tempfile.gettempdir()) / "scamroad-repro"
@@ -37,8 +37,9 @@ def main():
         print(f"Cleaning previous temporary directory: {temp_dir}")
         shutil.rmtree(temp_dir, ignore_errors=True)
 
-    print(f"\n[1/5] Cloning fix/redesign-v6 into {temp_dir}...")
-    code, out = run_cmd(["git", "clone", "-b", "fix/redesign-v6", str(REPO_ROOT), str(temp_dir)], cwd=REPO_ROOT)
+    curr_branch = "v7/polish"
+    print(f"\n[1/5] Cloning {curr_branch} into {temp_dir}...")
+    code, out = run_cmd(["git", "clone", "-b", curr_branch, str(REPO_ROOT), str(temp_dir)], cwd=REPO_ROOT)
     if code != 0:
         print(f"❌ Git clone failed:\n{out}")
         sys.exit(1)
@@ -51,17 +52,21 @@ def main():
         "pyproject.toml",
         "requirements.txt",
         "config/rate_card.json",
+        "config/severity_thresholds.json",
         "shared/taxonomy.yaml",
         "backend/requirements.txt",
         "web/package.json",
         "web/package-lock.json",
         "web/eslint.config.js",
+        "web/public/manifest.json",
         "docs/DECISIONS.md",
         "docs/LIMITATIONS.md",
         "docs/CALIBRATION.md",
         "docs/CHANGELOG.md",
         "docs/DEMO_SCRIPT.md",
-        "docs/UI_GUIDE.md",
+        "docs/PROJECT_REPORT.md",
+        "docs/SLIDES_OUTLINE.md",
+        "ml/runs/metrics.json",
         "scripts/check_claims.py",
         "scripts/check_i18n_keys.py",
         "scripts/backup_restore_drill.py",

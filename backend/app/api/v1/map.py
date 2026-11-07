@@ -1,4 +1,4 @@
-"""Map GeoJSON and spatial visualization endpoints for Leaflet web/mobile clients."""
+"""GeoJSON and spatial vector endpoints for GIS exports and spatial analysis."""
 
 from __future__ import annotations
 
@@ -45,8 +45,8 @@ class GeoJSONFeatureCollection(BaseModel):
     response_model=GeoJSONFeatureCollection,
     summary="Get road defects GeoJSON",
     description=(
-        "Retrieve defect points formatted as GeoJSON FeatureCollection for interactive "
-        "Leaflet maps."
+        "Retrieve defect points formatted as GeoJSON FeatureCollection for spatial "
+        "GIS analysis."
     ),
 )
 async def get_defects_geojson(

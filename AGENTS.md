@@ -32,7 +32,7 @@ R16. **Safety.** Driver-facing features must not require interaction while drivi
 | Tracking | ByteTrack (default) / BoT-SORT via Ultralytics or standalone implementation; global-defect consolidation layer (own code) |
 | Backend | FastAPI, Pydantic v2, SQLAlchemy 2.x, Alembic, Celery + Redis, JWT (access + rotating refresh), argon2id, slowapi |
 | Data | PostgreSQL 16 + PostGIS 3, Redis 7, MinIO (S3 compatible) |
-| Web | React 18 + TypeScript strict, Vite, Tailwind, TanStack Query, React Router, Recharts, Leaflet/react-leaflet, i18next |
+| Web | React 18 + TypeScript strict, Vite, Tailwind, TanStack Query, React Router, Recharts, Ward Hotspot Grid, i18next |
 | Mobile | Expo (TypeScript), expo-camera, expo-location, expo-sqlite, expo-notifications, task manager; inference via ONNX Runtime Mobile/TFLite through a config plugin or dev-client (managed Expo Go cannot run custom native inference — document) |
 | Infra | Docker, Compose, GitHub Actions, pre-commit (ruff, black, mypy, eslint, prettier), Prometheus + Grafana (basic) |
 

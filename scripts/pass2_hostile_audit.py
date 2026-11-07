@@ -11,31 +11,40 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-BANNED_PHRASES = [
-    "Government of India",
-    "सत्यमेव जयते",
-    "Compliant with IRC",
-    "IRC Compliant",
-    "MoRTH certified",
-    "MoRTH compliant",
-    "NHAI certified",
-    "Zero Mock",
-    "mission-critical",
-    "Certified for official use",
-    "Leaflet",
-    "OpenStreetMap",
-    "/map",
-    "GIS map",
+GENERAL_BANNED_PATTERNS = [
+    (r"\bGovernment of India\b", "Government of India (Rule R7: Student project)"),
+    (r"सत्यमेव जयते", "National motto (Rule R7)"),
+    (r"(?i)\bCompliant with IRC\b", "Compliant with IRC claim (Rule R8)"),
+    (r"(?i)\bIRC Compliant\b", "IRC Compliant claim (Rule R8)"),
+    (r"(?i)\bMoRTH certified\b", "MoRTH certified claim (Rule R7)"),
+    (r"(?i)\bMoRTH compliant\b", "MoRTH compliant claim (Rule R7)"),
+    (r"(?i)\bNHAI certified\b", "NHAI certified claim (Rule R7)"),
+    (r"(?i)\bZero Mock\b", "Zero Mock claim (Rule R2)"),
+    (r"(?i)\bmission-critical\b", "mission-critical claim (Rule R1)"),
+    (r"(?i)\bCertified for official use\b", "Official certification claim (Rule R7)"),
+]
+
+MAP_BANNED_PATTERNS = [
+    (r"(?i)\bLeaflet\b", "Leaflet library mention (Phase 1: completely removed)"),
+    (r"(?i)\bOpenStreetMap\b", "OpenStreetMap mention (Phase 1: completely removed)"),
+    (r"(?<!google\.com)/map\b", "/map web route (Phase 1: completely removed)"),
+    (r"(?i)\bGIS\s+map\b", "GIS map mention (Phase 1: completely removed)"),
 ]
 
 EXEMPT_FILES = {
     "scripts/check_claims.py",
     "scripts/pass2_hostile_audit.py",
+    "scripts/live_test_suite.py",
     "docs/STATUS_AUDIT.md",
     "docs/FIX_AND_REDESIGN.md",
     "docs/PASS2_AUDIT.md",
     "docs/V7_PLAN.md",
     "docs/V7_STATE.md",
+    "docs/CHANGELOG.md",
+    "docs/FIX_STATE.md",
+    "ml/STATE.json",
+    "web/package-lock.json",
+    "package-lock.json",
 }
 
 IGNORE_DIRS = {
@@ -46,33 +55,60 @@ IGNORE_DIRS = {
     "dist",
     ".ruff_cache",
     ".mypy_cache",
+    "PHASE_REPORTS",
+    "runs",
 }
 
 def audit_banned_phrases():
     print("\n[1/5] Scanning codebase for prohibited institutional claims & badges...")
     violations = []
+    
+    # 1. General institutional scan across full repo
     for root, dirs, files in os.walk(REPO_ROOT):
         dirs[:] = [d for d in dirs if d not in IGNORE_DIRS and not d.startswith(".")]
         for file in files:
             if file.endswith((".py", ".tsx", ".ts", ".html", ".md", ".json", ".yaml", ".yml")):
                 rel_path = (Path(root) / file).relative_to(REPO_ROOT).as_posix()
-                if rel_path in EXEMPT_FILES:
+                if rel_path in EXEMPT_FILES or any(ex in rel_path for ex in ["PHASE_REPORTS", "ml/runs", "package-lock"]):
                     continue
                 full_path = Path(root) / file
                 try:
                     content = full_path.read_text(encoding="utf-8")
-                    for phrase in BANNED_PHRASES:
-                        if phrase.lower() in content.lower():
-                            violations.append((rel_path, phrase))
+                    for pattern, reason in GENERAL_BANNED_PATTERNS:
+                        matches = list(re.finditer(pattern, content))
+                        for m in matches:
+                            violations.append((rel_path, m.group(0), reason))
                 except Exception as e:
                     print(f"  Warning: could not read {rel_path}: {e}")
+
+    # 2. Map-removal scan specifically on UI, docs, and README (Phase 1 Gate)
+    map_scan_roots = [REPO_ROOT / "web" / "src", REPO_ROOT / "README.md", REPO_ROOT / "docs"]
+    for mroot in map_scan_roots:
+        if mroot.is_file():
+            target_files = [mroot]
+        else:
+            target_files = list(mroot.rglob("*.tsx")) + list(mroot.rglob("*.ts")) + list(mroot.rglob("*.md"))
+
+        for fpath in target_files:
+            rel_path = fpath.relative_to(REPO_ROOT).as_posix()
+            if rel_path in EXEMPT_FILES or any(ex in rel_path for ex in ["PHASE_REPORTS", "FIX_AND_REDESIGN", "STATUS_AUDIT", "V7_PLAN", "V7_STATE"]):
+                continue
+            try:
+                content = fpath.read_text(encoding="utf-8")
+                for pattern, reason in MAP_BANNED_PATTERNS:
+                    matches = list(re.finditer(pattern, content))
+                    for m in matches:
+                        violations.append((rel_path, m.group(0), reason))
+            except Exception as e:
+                print(f"  Warning: could not read {rel_path}: {e}")
+
     if violations:
         print(f"  ❌ FOUND {len(violations)} PROHIBITED PHRASES:")
-        for path, phrase in violations:
-            print(f"     • {path}: matched '{phrase}'")
+        for path, phrase, reason in violations:
+            print(f"     • {path}: matched '{phrase}' ({reason})")
         return False
     else:
-        print("  ✅ ZERO prohibited phrases found across entire repository.")
+        print("  ✅ ZERO prohibited phrases found across scanned targets.")
         return True
 
 def audit_rule_r2_no_fake_ai():

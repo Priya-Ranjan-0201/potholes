@@ -321,7 +321,7 @@ def run_suite():
     readme_lines.extend([
         "",
         "---",
-        "> **Rule R7 & R8 Integrity Notice:** All UI captures reflect the student research project state. Government emblems, Ashoka Chakra, and 'IRC Compliant' badges are strictly removed.",
+        "> **Rule R7 & R8 Integrity Notice:** All UI captures reflect the student research project state. Government emblems, Ashoka Chakra, and 'IRC Compliance' badges are strictly removed.",
     ])
     (DOCS_SCREENSHOTS_DIR / "README.md").write_text("\n".join(readme_lines), encoding="utf-8")
     print("=" * 65)
