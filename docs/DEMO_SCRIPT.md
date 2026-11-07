@@ -71,30 +71,43 @@ This script provides an exact, step-by-step walkthrough for demonstrating the co
   - Demonstrate citizen triage: reports transition from `SUBMITTED` → `TRIAGED` → `RESOLVED`.
   - Explain how citizen reports merge with automated edge telemetry to increase priority.
 
-### Minute 7:30 – 8:30: Model Registry & Telemetry
-- **Screen**: `http://localhost:3000/models`
+### Minute 7:30 – 8:30: Model Registry & Scientific Evaluation
+- **Screen**: `http://localhost:3000/evaluation` & `http://localhost:3000/models`
 - **Key Points to Address**:
   - Show active models: YOLO11n ONNX INT8 with 0.999757 cosine parity to PyTorch FP32.
-  - Point out that inference latency and FPS are derived from real benchmark runs (`ml/runs/metrics.json` and `ml/runs/onnx_parity.json`).
+  - Show the scientific evaluation page (`/evaluation`):
+    - Real held-out mAP@50 (`85.75%`) and mAP@50-95 (`62.12%`).
+    - Interactive 5x5 confusion matrix and 10-bin reliability diagram (ECE 1.91%).
+    - 6-case failure gallery (3 false positives, 3 false negatives with engineering mitigations).
 
-### Minute 8:30 – 9:30: Multilingual Inclusivity & Theme Contrast
+### Minute 8:30 – 9:15: Mobile Drive Mode PWA (/capture)
+- **Screen**: `http://localhost:3000/capture`
+- **Key Points to Address**:
+  - Demonstrate installable Progressive Web App with service worker shell caching.
+  - Glanceable Drive Mode HUD: big speedometer (km/h), NavIC/GPS accuracy ($\pm$2.1m), defect counters.
+  - Web Audio acoustic chime on detection with mute toggle.
+  - IndexedDB offline outbox queue with idempotency keys and "Sync Outbox Now" capability.
+  - Sensor Fusion Lite: mechanical bump acceleration cross-validation badge (`⚡ Camera + IMU Bump Agree`).
+
+### Minute 9:15 – 9:45: Multilingual Inclusivity & Theme Contrast
 - **Interaction**:
   - Toggle the language selector in the navbar across 6 Indian languages:
     - **English** → **हिंदी** → **ਪੰਜਾਬੀ** → **தமிழ்** → **తెలుగు** → **বাংলা**
-    - Show that 100% of UI strings change instantly with zero mixed languages (`scripts/check_i18n_keys.py` verified 136/136 keys).
+    - Show that 100% of UI strings change instantly with zero mixed languages (`scripts/check_i18n_keys.py` verified 137/137 keys).
   - Toggle **Dark Mode / Light Mode**:
     - Show the Daybreak Porcelain Light theme (16.51:1 contrast, WCAG AAA).
     - Show the Midnight Obsidian Dark theme (18.89:1 contrast, WCAG AAA).
 
-### Minute 9:30 – 10:00: Summary & Q&A
+### Minute 9:45 – 10:00: Summary & Q&A
 - Show OpenAPI docs at `http://localhost:8000/api/v1/docs`.
-- Mention reproducible test suite: 144 Python tests + 8 Vitest tests passing with 0 warnings.
+- Mention reproducible test suite: 146 Python tests + 8 Vitest tests passing with 0 warnings.
+- Point to `docs/PROJECT_REPORT.md` and `docs/SLIDES_OUTLINE.md`.
 
 ---
 
 ## Offline Fallback Plan
 
 If live internet or local ports are unavailable during a presentation:
-1. **Offline Screenshots**: Open `docs/screenshots/` which contains 17 high-resolution full-page screenshots of all routes in light mode, dark mode, and mobile viewports.
-2. **Offline Fallback Video / Captures**: Open `docs/screenshots/map_restored.png` and `docs/screenshots/02_scanner_light.png` to demonstrate live detection rendering without running servers.
+1. **Offline Screenshots**: Open `docs/screenshots/` which contains 21 high-resolution full-page screenshots of all routes in light mode, dark mode, and mobile viewports.
+2. **Offline Fallback Captures**: Open `docs/screenshots/live_01_dashboard_light.png`, `docs/screenshots/live_04_scanner_detected_nh44.png`, `docs/screenshots/live_13b_evaluation_benchmarks.png`, and `docs/screenshots/live_16_mobile_capture_pwa.png` to demonstrate live detection rendering without running servers.
 
