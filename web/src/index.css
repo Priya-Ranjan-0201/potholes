@@ -9,50 +9,53 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Rich Light Mode Gradient Mesh with Micro Dot Matrix */
+  /* Ultra-Clean Modern Light Mode (Porcelain + Pure Ambient Aurora - Zero Grainy Dots) */
   body {
-    background-color: #f8fafc;
+    background-color: #f4f6fb;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.14) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.07) 0px, transparent 60%),
-      radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
-      radial-gradient(#cbd5e1 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+      radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.07) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 55%),
+      radial-gradient(at 50% 40%, rgba(245, 158, 11, 0.05) 0px, transparent 65%),
+      radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+    background-size: 100% 100%;
     background-attachment: fixed;
     color: #0f172a;
   }
 
-  /* Deep Cosmic Cyber-Civic Dark Mode Background */
+  /* Premium Cyber-Civic Obsidian Dark Mode */
   html.dark body {
-    background-color: #070d18;
+    background-color: #070a14;
     background-image: 
-      radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.18) 0px, transparent 45%),
-      radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.15) 0px, transparent 45%),
-      radial-gradient(at 50% 60%, rgba(99, 102, 241, 0.12) 0px, transparent 60%),
-      radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
-      radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px;
+      radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.16) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.16) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.10) 0px, transparent 60%),
+      radial-gradient(at 0% 100%, rgba(245, 158, 11, 0.09) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.14) 0px, transparent 50%);
+    background-size: 100% 100%;
     background-attachment: fixed;
-    color: #f1f5f9;
+    color: #f8fafc;
   }
 }
 
 /* Glassmorphic Civic Card Utility */
 .civic-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  transition: all 0.2s ease-in-out;
 }
 
 html.dark .civic-card {
-  background: rgba(13, 27, 46, 0.82);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+  background: rgba(12, 20, 39, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html.dark .civic-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12);
 }
 
 /* Custom Smooth Scrollbar */
@@ -68,5 +71,5 @@ html.dark .civic-card {
   border-radius: 4px;
 }
 html.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1e293b;
 }

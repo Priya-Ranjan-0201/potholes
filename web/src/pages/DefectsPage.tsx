@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, DefectItem } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
   AlertTriangle,
   Filter,
@@ -15,6 +16,7 @@ import {
 export const DefectsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { activeRole } = useAuth();
+  const { t } = useLanguage();
 
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -83,17 +85,17 @@ export const DefectsPage: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
-            Canonical Defect Registry (One Pothole = One Record)
+            {t("defectsTitle")}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Deduplicated physical road defects with persistent IDs, multi-pass sighting telemetry, and severity tracking.
+            {t("defectsSubtitle")}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
             <Filter className="w-3.5 h-3.5" />
-            <span>Filter:</span>
+            <span>{t("filterLabel")}</span>
           </div>
 
           <select
@@ -101,11 +103,11 @@ export const DefectsPage: React.FC = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
           >
-            <option value="">All Statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="TRIAGED">TRIAGED</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="REPAIRED">REPAIRED</option>
+            <option value="">{t("allStatuses")}</option>
+            <option value="ACTIVE">{t("activeDefects")}</option>
+            <option value="TRIAGED">{t("statusUnderReview")}</option>
+            <option value="IN_PROGRESS">{t("statusInProgress")}</option>
+            <option value="REPAIRED">{t("repairedDefects")}</option>
           </select>
 
           <select
@@ -113,10 +115,10 @@ export const DefectsPage: React.FC = () => {
             onChange={(e) => setSelectedClass(e.target.value)}
             className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
           >
-            <option value="">All Defect Classes</option>
-            <option value="POTHOLE">POTHOLE</option>
-            <option value="CRACK_LONG">CRACK_LONG</option>
-            <option value="CRACK_TRANS">CRACK_TRANS</option>
+            <option value="">{t("allDefectClasses")}</option>
+            <option value="POTHOLE">{t("potholeLabel")}</option>
+            <option value="CRACK_LONG">{t("crackLongLabel")}</option>
+            <option value="CRACK_TRANS">{t("crackTransLabel")}</option>
           </select>
         </div>
       </div>
@@ -127,14 +129,14 @@ export const DefectsPage: React.FC = () => {
           <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
             <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="py-3 px-4">Defect ID</th>
-                <th className="py-3 px-4">Class</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center">Sightings</th>
-                <th className="py-3 px-4">Hazard Severity</th>
-                <th className="py-3 px-4 text-center">Score</th>
-                <th className="py-3 px-4">First Seen</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">{t("colDefectId")}</th>
+                <th className="py-3 px-4">{t("colClass")}</th>
+                <th className="py-3 px-4">{t("colStatus")}</th>
+                <th className="py-3 px-4 text-center">{t("colSightings")}</th>
+                <th className="py-3 px-4">{t("colSeverity")}</th>
+                <th className="py-3 px-4 text-center">{t("scoreLabel")}</th>
+                <th className="py-3 px-4">{t("colTime")}</th>
+                <th className="py-3 px-4 text-right">#</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import { Cpu, CheckCircle, AlertTriangle, ArrowRight } from "../components/Icons";
 
 interface ModelVersion {
@@ -20,6 +21,7 @@ interface ModelVersion {
 }
 
 export const ModelsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [models, setModels] = useState<ModelVersion[]>([
     {
       id: "mdl-yolo-nano-int8",
@@ -101,10 +103,10 @@ export const ModelsPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Cpu className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            Edge AI Model Registry &amp; Fleet Rollout
+            {t("modelsTitle")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Audited neural network versions, quantization metrics, and hardware benchmarks across OPPO K13 and edge devices.
+            {t("modelsSubtitle")}
           </p>
         </div>
       </div>
@@ -138,24 +140,24 @@ export const ModelsPage: React.FC = () => {
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                     }`}
                   >
-                    {model.status}
+                    {model.status === "ACTIVE" ? t("statusActive") : t("statusAvailable")}
                   </span>
                   <span className="text-xs font-bold bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
                     {model.precision}
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
-                  Runtime: {model.runtime} • SHA-256: {model.sha256.substring(0, 16)}...
+                  {t("runtimeLabel")} {model.runtime} • SHA-256: {model.sha256.substring(0, 16)}...
                 </div>
               </div>
 
               {model.status !== "ACTIVE" && (
                 <button
                   onClick={() => handleActivate(model)}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 self-start md:self-auto"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 self-start md:self-auto cursor-pointer"
                 >
                   <ArrowRight className="w-4 h-4" />
-                  Activate for Fleet
+                  {t("activateFleetBtn")}
                 </button>
               )}
             </div>

@@ -192,7 +192,7 @@ export const ScannerPage: React.FC = () => {
           {isCustomUpload && (
             <span className="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold inline-flex items-center gap-1.5 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              Custom Uploaded Photo
+              {t("customUploadPhoto")}
             </span>
           )}
         </div>
@@ -203,7 +203,7 @@ export const ScannerPage: React.FC = () => {
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer font-bold"
         >
           {showBoxes ? <Eye className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <EyeOff className="w-3.5 h-3.5 text-slate-400" />}
-          <span>{showBoxes ? "Hide Detection Boxes" : "Show Detection Boxes"}</span>
+          <span>{showBoxes ? t("hideBoxes") : t("showBoxes")}</span>
         </button>
       </div>
 
@@ -360,7 +360,12 @@ export const ScannerPage: React.FC = () => {
                             }`}
                           />
                           <span className="font-semibold">
-                            #{idx + 1} {box.label === "POTHOLE" ? t("potholeLabel") : box.label}
+                            #{idx + 1}{" "}
+                            {box.label === "POTHOLE"
+                              ? t("potholeLabel")
+                              : box.label === "CRACK_LONG"
+                              ? t("crackLongLabel")
+                              : t("crackTransLabel")}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -370,7 +375,7 @@ export const ScannerPage: React.FC = () => {
                               isSelected ? "bg-slate-800 dark:bg-amber-700 text-white" : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200 dark:border-slate-600"
                             }`}
                           >
-                            Score: {box.score}
+                            {t("scoreLabel")}: {box.score}
                           </span>
                         </div>
                       </div>
@@ -428,10 +433,9 @@ export const ScannerPage: React.FC = () => {
                     <span className="text-slate-500 font-mono text-[10px]">MoRTH Sec 3004</span>
                   </p>
                   <p className="text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 leading-relaxed">
-                    {activeDefect.action ||
-                      (activeDefect.severity === "Critical"
-                        ? "तत्काल 24 घंटे कोल्ड मिक्स बिटुमिनस इमल्शन भराव (Immediate 24-hr cold mix asphalt compaction)."
-                        : "48 घंटे डामरीकरण सीलिंग (48-hr bituminous sealing required per IRC guidelines).")}
+                    {activeDefect.severity === "Critical"
+                      ? t("actionColdMix")
+                      : t("actionSealing")}
                   </p>
                 </div>
               </div>

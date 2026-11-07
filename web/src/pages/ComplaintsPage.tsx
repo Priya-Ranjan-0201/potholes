@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ComplaintItem } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
   MessageSquareWarning,
   Plus,
@@ -15,6 +16,7 @@ import {
 export const ComplaintsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { activeRole } = useAuth();
+  const { t } = useLanguage();
 
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -118,10 +120,10 @@ export const ComplaintsPage: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <MessageSquareWarning className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            Citizen Grievance Redressal &amp; Damage Reports
+            {t("complaintsTitle")}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Citizen damage submissions governed by strict municipal state machine transitions (Rule B7).
+            {t("complaintsSubtitle")}
           </p>
         </div>
 
@@ -131,14 +133,14 @@ export const ComplaintsPage: React.FC = () => {
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-2 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
           >
-            <option value="">All Complaint Statuses</option>
-            <option value="SUBMITTED">SUBMITTED</option>
-            <option value="UNDER_REVIEW">UNDER_REVIEW</option>
-            <option value="VERIFIED">VERIFIED</option>
-            <option value="ASSIGNED">ASSIGNED</option>
-            <option value="IN_PROGRESS">IN_PROGRESS</option>
-            <option value="RESOLVED">RESOLVED</option>
-            <option value="REJECTED">REJECTED</option>
+            <option value="">{t("allStatuses")}</option>
+            <option value="SUBMITTED">{t("statusSubmitted")}</option>
+            <option value="UNDER_REVIEW">{t("statusUnderReview")}</option>
+            <option value="VERIFIED">{t("statusVerified")}</option>
+            <option value="ASSIGNED">{t("statusAssigned")}</option>
+            <option value="IN_PROGRESS">{t("statusInProgress")}</option>
+            <option value="RESOLVED">{t("statusResolved")}</option>
+            <option value="REJECTED">{t("statusRejected")}</option>
           </select>
 
           <button
@@ -146,7 +148,7 @@ export const ComplaintsPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs"
           >
             <Plus className="w-4 h-4" />
-            Submit Citizen Report
+            {t("submitReportBtn")}
           </button>
         </div>
       </div>
@@ -188,13 +190,13 @@ export const ComplaintsPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                   <div className="md:col-span-2 space-y-1">
-                    <span className="font-bold text-slate-700 dark:text-slate-200 block">Report Description:</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-200 block">{t("reportDesc")}</span>
                     <p className="text-slate-600 dark:text-slate-300 font-medium">
-                      {c.description || "No written description provided by citizen."}
+                      {c.description || t("noDesc")}
                     </p>
                     {c.rejection_reason && (
                       <div className="mt-2 p-2 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900 rounded text-xs font-medium">
-                        Rejection Reason: {c.rejection_reason}
+                        {t("rejectionReason")}: {c.rejection_reason}
                       </div>
                     )}
                   </div>
@@ -202,7 +204,7 @@ export const ComplaintsPage: React.FC = () => {
                   <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-100 dark:border-slate-700 space-y-1">
                     <span className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      GPS Coordinate
+                      {t("gpsCoord")}
                     </span>
                     <span className="font-mono text-slate-800 dark:text-slate-200 text-[11px] block">
                       {c.latitude.toFixed(5)}, {c.longitude.toFixed(5)}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, WorkOrder } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
   ClipboardList,
   Plus,
@@ -17,6 +18,7 @@ import {
 export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
   const { activeRole } = useAuth();
+  const { t } = useLanguage();
 
   // Create modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -112,10 +114,10 @@ export const MaintenancePage: React.FC = () => {
   const workOrders = woData?.items || [];
 
   const columns = [
-    { key: "ASSIGNED", label: "Dispatched / Assigned", color: "border-blue-400 bg-blue-50/30" },
-    { key: "IN_PROGRESS", label: "Repair In Progress", color: "border-amber-400 bg-amber-50/30" },
-    { key: "COMPLETED", label: "Pending Verification", color: "border-purple-400 bg-purple-50/30" },
-    { key: "VERIFIED", label: "Verified & Closed", color: "border-emerald-400 bg-emerald-50/30" },
+    { key: "ASSIGNED", label: t("colAssigned"), color: "border-blue-400 bg-blue-50/30 dark:bg-blue-950/20" },
+    { key: "IN_PROGRESS", label: t("colInProgress"), color: "border-amber-400 bg-amber-50/30 dark:bg-amber-950/20" },
+    { key: "COMPLETED", label: t("colVerified"), color: "border-purple-400 bg-purple-50/30 dark:bg-purple-950/20" },
+    { key: "VERIFIED", label: t("colResolved"), color: "border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20" },
   ];
 
   const getOrdersForColumn = (colKey: string) => {
@@ -132,10 +134,10 @@ export const MaintenancePage: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            Maintenance Kanban &amp; Work Orders
+            {t("maintenanceTitle")}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Lifecycle tracking from contractor assignment to mandatory human repair sign-off (Rule R8: AI never closes work orders).
+            {t("maintenanceSubtitle")}
           </p>
         </div>
 
@@ -145,7 +147,7 @@ export const MaintenancePage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs"
           >
             <Plus className="w-4 h-4" />
-            Dispatch Work Order
+            {t("dispatchWoBtn")}
           </button>
         )}
       </div>

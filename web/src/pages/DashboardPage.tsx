@@ -192,22 +192,22 @@ export const DashboardPage: React.FC = () => {
       {/* Visual Analytics Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 14-Day Activity Trends Line Chart */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+        <div className="civic-card p-6 rounded-xl shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
-                14-Day Observation & Repair Activity
+              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                {t("severityDistributionTitle")}
               </h2>
-              <p className="text-xs text-slate-500">
-                Daily frequency of edge camera detections vs contractor repairs
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {t("dashboardSubtitle")}
               </p>
             </div>
           </div>
           <div className="h-64">
             {loadingTrends ? (
               <div className="h-full flex items-center justify-center text-xs text-slate-400">
-                Loading trends...
+                Loading...
               </div>
             ) : trendsData?.trends && trendsData.trends.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -232,7 +232,7 @@ export const DashboardPage: React.FC = () => {
                   <Line
                     type="monotone"
                     dataKey="observations_count"
-                    name="Detections"
+                    name={t("navDefects")}
                     stroke="#22c55e"
                     strokeWidth={2}
                     dot={{ r: 3 }}
@@ -240,7 +240,7 @@ export const DashboardPage: React.FC = () => {
                   <Line
                     type="monotone"
                     dataKey="complaints_count"
-                    name="Complaints"
+                    name={t("citizenGrievances")}
                     stroke="#3b82f6"
                     strokeWidth={2}
                     dot={{ r: 3 }}
@@ -264,14 +264,14 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Severity Breakdown & Defect Class Distributions */}
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div className="civic-card p-6 rounded-xl shadow-xs flex flex-col justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 mb-1">
-              <Activity className="w-5 h-5 text-emerald-600" />
-              Damage Severity & Defect Classes
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+              <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              {t("severityDistributionTitle")}
             </h2>
-            <p className="text-xs text-slate-500 mb-4">
-              Breakdown by multi-factor hazard level (Rule R5) and defect taxonomy
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              {t("dashboardSubtitle")}
             </p>
           </div>
 
@@ -320,25 +320,25 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Ward Health & Budget Allocations Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div className="civic-card rounded-xl shadow-xs overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-base font-bold text-slate-900">Municipal Ward Breakdown & Budgets</h2>
+            <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("colWard")}</h2>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Aggregated across all roads</span>
+          <span className="text-xs text-slate-400 font-medium">MoRTH & PWD</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-400 border-b border-slate-100">
+          <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="py-3 px-4">Ward Code</th>
-                <th className="py-3 px-4">Ward Name</th>
-                <th className="py-3 px-4 text-center">Total Defects</th>
-                <th className="py-3 px-4 text-center">Critical Defects</th>
-                <th className="py-3 px-4 text-center">Repaired</th>
-                <th className="py-3 px-4 text-right">Allocated Budget</th>
-                <th className="py-3 px-4 text-right">Spent Budget</th>
+                <th className="py-3 px-4">#</th>
+                <th className="py-3 px-4">{t("colWard")}</th>
+                <th className="py-3 px-4 text-center">{t("totalDefects")}</th>
+                <th className="py-3 px-4 text-center">{t("criticalPotholes")}</th>
+                <th className="py-3 px-4 text-center">{t("repairedDefects")}</th>
+                <th className="py-3 px-4 text-right">{t("budgetEst")}</th>
+                <th className="py-3 px-4 text-right">{t("colStatus")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -389,23 +389,23 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Contractor Workload & SLA Compliance Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div className="civic-card rounded-xl shadow-xs overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <HardHat className="w-5 h-5 text-amber-600" />
-            <h2 className="text-base font-bold text-slate-900">Contractor Performance & SLA Delivery</h2>
+            <HardHat className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("contractorLeaderboardTitle")}</h2>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Compliance rate based on verified repairs</span>
+          <span className="text-xs text-slate-400 font-medium">MoRTH & PWD</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-400 border-b border-slate-100">
+          <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
               <tr>
-                <th className="py-3 px-4">Contractor</th>
-                <th className="py-3 px-4 text-center">Assigned Work Orders</th>
-                <th className="py-3 px-4 text-center">Completed</th>
-                <th className="py-3 px-4 text-center">Human Verified (Rule R8)</th>
-                <th className="py-3 px-4 text-right">SLA Compliance Rate</th>
+                <th className="py-3 px-4">{t("colContractor")}</th>
+                <th className="py-3 px-4 text-center">{t("workOrdersDispatched")}</th>
+                <th className="py-3 px-4 text-center">{t("repairedDefects")}</th>
+                <th className="py-3 px-4 text-center">{t("verifiedCompleted")}</th>
+                <th className="py-3 px-4 text-right">{t("colSLA")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
