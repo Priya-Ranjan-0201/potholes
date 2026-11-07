@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, ModelEvaluationResponse } from "../api/client";
 import {
-  BarChart3,
   Activity,
   ShieldCheck,
   AlertTriangle,
@@ -19,6 +18,7 @@ import {
   Line,
   ComposedChart,
 } from "recharts";
+import { MilestoneHeader, CatsEye } from "../ui";
 
 // Static fallback metrics if backend is offline or static mode is active
 const FALLBACK_METRICS: ModelEvaluationResponse = {
@@ -229,38 +229,38 @@ export const EvaluationPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-16">
-      {/* Header Banner */}
-      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+    <div className="space-y-6 pb-16 w-full">
+      {/* Header Banner with Milestone Stone */}
+      <div className="dhaba-card p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <MilestoneHeader km="06" title="AI Model Evaluation" highway="NH-44" variant="yellow" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                <CatsEye color="peacock" size="sm" pulse />
                 <span>Test Split Evidence</span>
               </span>
-              <span className="font-mono text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <span className="font-mono text-[10px] px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
                 SHA: {m.sha256.slice(0, 12)}&hellip;
               </span>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+              <span className="text-[10px] font-black uppercase px-2 py-1 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 font-mono">
                 INT8 Quantized ({m.file_size_mb} MB)
               </span>
             </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-              <span>AI Model Evaluation &amp; Scientific Benchmark Registry</span>
+            <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
+              Scientific Model Evaluation &amp; Empirical Benchmark Registry
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Pure empirical testing on the held-out test split of <strong>{m.dataset_name}</strong>. Zero fabricated or estimated data.
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1">
+              Pure empirical testing on the held-out test split of <strong>{m.dataset_name}</strong>. Zero fabricated data.
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-xs text-amber-900 dark:text-amber-200 max-w-sm">
-            <span className="font-bold flex items-center gap-1.5 mb-0.5">
-              <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 max-w-sm">
+            <span className="font-black flex items-center gap-1.5 mb-0.5 font-mono">
+              <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
               Student Research Disclaimer
             </span>
-            <span>
+            <span className="text-[11px] leading-relaxed">
               Evaluated on held-out test split (N = {m.test_images_count} images). Not safety-certified. Physical repairs require municipal engineering sign-off.
             </span>
           </div>
@@ -269,7 +269,7 @@ export const EvaluationPage: React.FC = () => {
 
       {/* Primary Metric KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="civic-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+        <div className="dhaba-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               mAP@50 (IoU 0.50)
@@ -286,7 +286,7 @@ export const EvaluationPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="civic-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+        <div className="dhaba-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Macro F1 Score
@@ -303,7 +303,7 @@ export const EvaluationPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="civic-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+        <div className="dhaba-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               CPU Latency (p50)
@@ -320,7 +320,7 @@ export const EvaluationPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="civic-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
+        <div className="dhaba-card p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Calibration Error (ECE)
@@ -339,7 +339,7 @@ export const EvaluationPage: React.FC = () => {
       </div>
 
       {/* Per-Class Table */}
-      <div className="civic-card rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+      <div className="dhaba-card rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 overflow-hidden">
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
             <h2 className="text-base font-black text-slate-900 dark:text-white">
@@ -414,7 +414,7 @@ export const EvaluationPage: React.FC = () => {
       {/* Confusion Matrix & Calibration Diagram Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Interactive Confusion Matrix */}
-        <div className="civic-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
+        <div className="dhaba-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -503,7 +503,7 @@ export const EvaluationPage: React.FC = () => {
         </div>
 
         {/* Confidence Calibration Reliability Chart */}
-        <div className="civic-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
+        <div className="dhaba-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -548,7 +548,7 @@ export const EvaluationPage: React.FC = () => {
       </div>
 
       {/* Failure Cases Gallery (Viva Evidence) */}
-      <div className="civic-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 space-y-4">
+      <div className="dhaba-card p-6 rounded-2xl shadow-md border border-slate-200/90 dark:border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
-import { Cpu, CheckCircle, AlertTriangle, ArrowRight } from "../components/Icons";
+import { AlertTriangle, ArrowRight } from "../components/Icons";
+import { MilestoneHeader, CatsEye } from "../ui";
 
 interface ModelVersion {
   id: string;
@@ -106,22 +107,24 @@ export const ModelsPage: React.FC = () => {
 
   return (
     <div className="w-full pb-16 space-y-6">
-      {/* Header */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header with Milestone Stone */}
+      <div className="dhaba-card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <Cpu className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            {t("modelsTitle")}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <div className="flex items-center gap-2 mb-1.5">
+            <MilestoneHeader km="05" title={t("modelsTitle")} highway="NH-44" variant="yellow" />
+            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
+              On-Device Checkpoints
+            </span>
+          </div>
+          <p className="text-xs text-stone-600 dark:text-stone-400">
             {t("modelsSubtitle")}
           </p>
         </div>
       </div>
 
       {actionNotice && (
-        <div className="mb-6 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl p-4 flex items-center gap-3 text-emerald-900 dark:text-emerald-200 text-sm font-semibold shadow-sm">
-          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+        <div className="bg-emerald-500/15 border border-emerald-500/40 rounded-xl p-4 flex items-center gap-3 text-emerald-800 dark:text-emerald-200 text-xs font-semibold shadow-sm font-mono">
+          <CatsEye color="peacock" size="sm" pulse />
           {actionNotice}
         </div>
       )}
@@ -131,10 +134,10 @@ export const ModelsPage: React.FC = () => {
         {models.map((model) => (
           <div
             key={model.id}
-            className={`civic-card rounded-2xl p-6 shadow-sm transition-all ${
+            className={`dhaba-card p-6 transition-all ${
               model.status === "ACTIVE"
-                ? "border-emerald-500 ring-2 ring-emerald-500/20"
-                : "hover:border-slate-400/40"
+                ? "border-amber-500 ring-2 ring-amber-500/30 shadow-md"
+                : "hover:border-stone-400/40"
             }`}
           >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
