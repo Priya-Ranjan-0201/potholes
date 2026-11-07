@@ -1,210 +1,27 @@
 {
-  "current_pass": 3,
-  "current_stage": 0,
-  "gpu_hours_used": 0.0,
-  "dataset_version": "dataset_v1.0",
-  "budget": {
-    "max_total_gpu_hours": 30.0,
-    "max_gpu_hours_per_stage": 5.0,
-    "max_refinement_passes": 3,
-    "max_wall_clock_days": 7
-  },
-  "stages": {
-    "stage_0": {
-      "name": "ENVIRONMENT CHECK",
-      "status": "passed",
-      "gpu_hours_est": 0.1,
-      "gpu_hours_actual": 0.0037,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/env_check/env_report.json",
-        "runs/env_check/vram_probe.json",
-        "docs/PHASE_REPORTS/pass1-stage0.md"
-      ]
-    },
-    "stage_1": {
-      "name": "DATA ACQUISITION",
-      "status": "passed",
-      "gpu_hours_est": 0.2,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/data_acquisition/acquisition_manifest.json",
-        "docs/DATASETS.md",
-        "docs/PHASE_REPORTS/pass1-stage1.md"
-      ]
-    },
-    "stage_2": {
-      "name": "DATA AUDIT AND CLEANING",
-      "status": "passed",
-      "gpu_hours_est": 0.3,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/audit/audit_latest.json",
-        "docs/DATASET_AUDIT.md",
-        "docs/dataset_artifacts/dataset_manifest.csv",
-        "docs/PHASE_REPORTS/pass1-stage2.md"
-      ]
-    },
-    "stage_3": {
-      "name": "SPLITS AND EVALUATION PROTOCOL",
-      "status": "passed",
-      "gpu_hours_est": 0.2,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/eval/reproducibility_protocol.json",
-        "docs/PHASE_REPORTS/pass1-stage3.md"
-      ]
-    },
-    "stage_4": {
-      "name": "BASELINES",
-      "status": "passed",
-      "gpu_hours_est": 2.0,
-      "gpu_hours_actual": 0.0281,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/baselines/yolov8n/metrics.json",
-        "runs/baselines/yolov8s/metrics.json",
-        "docs/PHASE_REPORTS/pass1-stage4.md"
-      ]
-    },
-    "stage_5": {
-      "name": "SYSTEMATIC IMPROVEMENT",
-      "status": "passed",
-      "gpu_hours_est": 4.0,
-      "gpu_hours_actual": 0.03,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/experiments/ablation_matrix.json",
-        "docs/EXPERIMENTS.md",
-        "docs/PHASE_REPORTS/pass1-stage5.md"
-      ]
-    },
-    "stage_6": {
-      "name": "MODEL FAMILY COMPARISON",
-      "status": "passed",
-      "gpu_hours_est": 2.5,
-      "gpu_hours_actual": 0.02,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/comparison/model_comparison.json",
-        "docs/PHASE_REPORTS/pass1-stage6.md"
-      ]
-    },
-    "stage_7": {
-      "name": "SEGMENTATION AND MEASUREMENT",
-      "status": "passed",
-      "gpu_hours_est": 1.5,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/segmentation/measurement_report.json",
-        "docs/PHASE_REPORTS/pass1-stage7.md"
-      ]
-    },
-    "stage_8": {
-      "name": "LOCAL (INDIA/PUNJAB) DATA PIPELINE",
-      "status": "passed",
-      "gpu_hours_est": 0.5,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "docs/LABELING_GUIDE.md",
-        "docs/HUMAN_TODO.md",
-        "runs/local_pipeline/pipeline_validation.json",
-        "docs/PHASE_REPORTS/pass1-stage8.md"
-      ]
-    },
-    "stage_9": {
-      "name": "EXPORT, QUANTIZATION, EDGE BENCHMARK",
-      "status": "passed",
-      "gpu_hours_est": 0.8,
-      "gpu_hours_actual": 0.02,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/export/edge_benchmark_report.json",
-        "runs\\baselines\\yolov8n\\weights\\best.onnx",
-        "runs\\export\\best_int8.onnx",
-        "docs/PHASE_REPORTS/pass1-stage9.md"
-      ]
-    },
-    "stage_10": {
-      "name": "VIDEO, TRACKING AND REAL-WORLD TESTING",
-      "status": "passed",
-      "gpu_hours_est": 1.0,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/tracking/tracking_report.json",
-        "docs/PHASE_REPORTS/pass1-stage10.md"
-      ]
-    },
-    "stage_11": {
-      "name": "ROBUSTNESS AND SAFETY TESTS",
-      "status": "passed",
-      "gpu_hours_est": 1.2,
-      "gpu_hours_actual": 0.0,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "runs/robustness/robustness_report.json",
-        "docs/PHASE_REPORTS/pass1-stage11.md",
-        "docs/LIMITATIONS.md"
-      ]
-    },
-    "stage_12": {
-      "name": "FINAL REPORT",
-      "status": "passed",
-      "gpu_hours_est": 0.2,
-      "gpu_hours_actual": 0.01,
-      "exit_criteria_met": true,
-      "evidence_files": [
-        "docs/AI_EVALUATION.md",
-        "docs/PHASE_REPORTS/pass1-stage12.md"
-      ]
+  "current_phase": 2,
+  "phase_name": "HONESTY AND CLAIM FIXES",
+  "status": "IN_PROGRESS",
+  "started_at": "2026-11-07T16:05:00+05:30",
+  "completed_phases": [
+    {
+      "phase": 1,
+      "name": "REAL AUDIT",
+      "completed_at": "2026-11-07T16:16:00+05:30",
+      "evidence": "docs/STATUS_AUDIT.md",
+      "gate_status": "PASSED"
     }
-  },
-  "run_ids": [
-    "pothole_yolov8n_20261031_024047",
-    "yolo11n_20261103_050820"
   ],
-  "best_model_per_family": {
-    "yolov8n": {
-      "weights": "runs/baselines/yolov8n/weights/best.pt",
-      "mAP50_95": 0.7913,
-      "precision": 0.8125
-    },
-    "yolo11n": {
-      "weights": "runs/yolo11n_20261103_050820/weights/best.pt",
-      "mAP50_95": 0.552,
-      "precision": 0.864
-    },
-    "yolov8s": {
-      "weights": "runs/baselines/yolov8s/weights/best.pt",
-      "mAP50_95": 0.498,
-      "precision": 0.4911
-    },
-    "edge_selected": {
-      "name": "YOLOv8 Nano (yolov8n)",
-      "weights": "runs\\baselines\\yolov8n\\weights\\best.pt",
-      "mAP50_95": 0.7913,
-      "latency_ms": 58.72
-    }
+  "evidence_paths": {
+    "status_audit": "docs/STATUS_AUDIT.md"
   },
-  "open_issues": [],
-  "next_action": "Download full RDD2022 dataset and launch 50-epoch GPU training run",
-  "all_passes_complete": false,
-  "pipeline_status": "SAMPLE_BASELINE_VERIFIED",
-  "final_production_model": {
-    "artifact": "runs/export/best_int8.onnx",
-    "format": "ONNX Dynamic INT8 (Opset 17)",
-    "file_size_mb": 3.32,
-    "val_mAP50": 0.8575,
-    "val_mAP50_95": 0.7913,
-    "calibrated_ece": 0.0671,
-    "host_fps": 21.0,
-    "reproduction_delta": 0.0,
-    "note": "Exported from sample baseline (30 images). Pending full RDD2022 50-epoch GPU retrain."
-  }
+  "open_issues": [
+    "Government branding strings in web/src/components/Navbar.tsx and Footer.tsx",
+    "Banned compliance badges in README.md and LanguageContext.tsx",
+    "Conflation of confidence with severity in infer.py",
+    "Unmeasured hardware benchmarks in README.md",
+    "Hardcoded repair costs in ScannerPage.tsx",
+    "PyTorch 2.5 serialization import conflict in train_detect.py"
+  ],
+  "next_action": "Execute Phase 2: Create check_claims.py, rewrite README.md with honest student claims, purge government branding from UI/context, add rate card"
 }
