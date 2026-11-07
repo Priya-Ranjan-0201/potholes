@@ -1,9 +1,9 @@
 # ScamRoad — Autonomous Fix, Hardening & Redesign State Tracker
 
 **Branch:** `fix/redesign-v6`  
-**Current Phase:** Phase 6 — FRONTEND CODE QUALITY  
+**Current Phase:** Phase 7 — UI/UX REDESIGN (VISUAL OVERHAUL & MOTION)  
 **Status:** IN_PROGRESS  
-**Last Updated:** November 07, 2026 | 16:35 IST  
+**Last Updated:** November 07, 2026 | 16:39 IST  
 
 ---
 
@@ -29,7 +29,10 @@
   - Deliverables: Restored `/map` route with Leaflet + OpenStreetMap in `web/src/pages/MapPage.tsx`, added severity color markers, multi-pass sighting scale, click-to-open defect drawer, filter bar, dark/light theme support.
   - Gate: `/map` loads cleanly, interactive drawer opens, screenshot saved to `docs/screenshots/map_restored.png`.
   - Completed: November 07, 2026 | Tag: `fix-phase-5-done`
-- [ ] **Phase 6: Frontend Code Quality**
+- [x] **Phase 6: Frontend Code Quality**
+  - Deliverables: Fixed ESLint 9 configuration with `typescript-eslint` in `web/eslint.config.js`, added `scripts/check_i18n_keys.py` (100% coverage across 136 keys x 6 languages), expanded Vitest suite to 8 tests across 3 test files (`api.test.ts`, `language.test.ts`, `rate_card.test.ts`), verified `tsc --noEmit` clean.
+  - Gate: `tsc --noEmit` passes (0 errors), `eslint .` passes (0 errors), `npm test` passes (8/8), `check_i18n_keys.py` passes (100% parity).
+  - Completed: November 07, 2026 | Tag: `fix-phase-6-done`
 - [ ] **Phase 7: UI/UX Redesign (Visual Overhaul & Motion)**
 - [ ] **Phase 8: Tests, CI, Docs, Deploy**
 - [ ] **Pass 2: Hostile Re-Audit & Backlog Fix**
@@ -48,9 +51,10 @@
 - `docs/CALIBRATION.md` — Phase 3 camera calibration protocol (Rule R4)
 - `backend/tests/test_security_matrix.py` — Phase 4 security & RBAC matrix (100% passing)
 - `docs/screenshots/map_restored.png` — Phase 5 live browser screenshot of restored GIS map
+- `scripts/check_i18n_keys.py` — Phase 6 100% 6-language dictionary parity verification
 
 ---
 
 ## Open Issues & Non-Blocking Findings
 
-None blocking. Proceeding to Phase 6 Frontend Code Quality.
+None blocking. Proceeding to Phase 7 UI/UX Redesign.
