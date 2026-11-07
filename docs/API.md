@@ -1,176 +1,109 @@
-# ScamRoad API Reference
+# ScamRoad API Reference (v1.1.0)
 
 ## Overview
 
-The ScamRoad API is a RESTful JSON API served by FastAPI. All endpoints are
-versioned under the `/api/v1` prefix.
+The ScamRoad API is a high-throughput, async RESTful JSON service built on FastAPI. All API routes are strictly versioned under `/api/v1` (with top-level `/health` exposed for orchestration and Docker healthchecks).
 
-**Base URL:** `http://localhost:8000/api/v1`
+- **Base URL:** `http://localhost:8000/api/v1`
+- **Interactive OpenAPI Documentation (Swagger UI):** `http://localhost:8000/api/v1/docs`
+- **ReDoc Documentation:** `http://localhost:8000/api/v1/redoc`
+- **OpenAPI JSON Spec:** `http://localhost:8000/api/v1/openapi.json`
 
 ---
 
-## Error Envelope
+## Standard Error Envelope (Schema Contract A6)
 
-All error responses follow a consistent envelope format:
+All error responses strictly return the standard error envelope:
 
 ```json
 {
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "Human-readable error description.",
+    "message": "Human-readable description of error.",
     "details": [
       {
         "field": "image",
-        "issue": "File size exceeds 10 MB limit."
+        "issue": "Payload exceeds maximum allowed size (10 MB)."
       }
     ],
-    "request_id": "req_abc123def456"
+    "request_id": "req-9b8e612c-47ea-43f1-b992"
   }
 }
 ```
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `error.code` | string | Machine-readable error code (e.g., `VALIDATION_ERROR`, `NOT_FOUND`, `MODEL_NOT_READY`, `UNAUTHORIZED`, `RATE_LIMITED`). |
-| `error.message` | string | Human-readable description of the error. |
-| `error.details` | array \| null | Optional array of field-level error details. |
-| `error.request_id` | string | Unique request identifier for debugging and log correlation. |
 
 ### Standard Error Codes
 
 | HTTP Status | Error Code | Description |
-|------------|------------|-------------|
-| 400 | `VALIDATION_ERROR` | Request body or parameters failed validation. |
-| 401 | `UNAUTHORIZED` | Missing or invalid authentication token. |
-| 403 | `FORBIDDEN` | Authenticated but insufficient permissions. |
-| 404 | `NOT_FOUND` | Requested resource does not exist. |
-| 409 | `CONFLICT` | Resource state conflict (e.g., duplicate submission). |
-| 429 | `RATE_LIMITED` | Too many requests. Check `Retry-After` header. |
-| 503 | `MODEL_NOT_READY` | ML model is not loaded. Check `Retry-After` header. |
+|---|---|---|
+| `400` | `VALIDATION_ERROR` | Request payload or query parameters failed schema validation. |
+| `401` | `UNAUTHORIZED` | Bearer token is missing, malformed, or expired. |
+| `403` | `FORBIDDEN` | Authenticated principal has insufficient RBAC privileges. |
+| `404` | `NOT_FOUND` | Target entity does not exist. |
+| `409` | `CONFLICT` | Resource state conflict (e.g. invalid state machine transition). |
+| `429` | `RATE_LIMITED` | Request threshold exceeded; client must respect `Retry-After`. |
+| `500` | `INTERNAL_SERVER_ERROR` | Unhandled backend exception; trace ID logged for correlation. |
+| `503` | `MODEL_NOT_READY` | Requested ML model is initializing or unavailable. |
 
 ---
 
-## Currently Available Endpoints
+## Authoritative Endpoint Catalog (38 Verified Endpoints)
 
-### `GET /api/v1/health`
+### 1. Authentication & RBAC (`/auth`)
+- `POST /api/v1/auth/login` — Authenticate user and issue JWT Bearer access + refresh tokens.
+- `GET /api/v1/auth/me` — Retrieve active user identity and role assignment.
+- `POST /api/v1/auth/refresh` — Issue fresh access token from valid refresh token.
+- `POST /api/v1/auth/register` — Register new user account.
 
-Health check endpoint. Always available, no authentication required.
+### 2. Inference & Media (`/infer`, `/media`)
+- `POST /api/v1/infer` — Real-time road damage inference via YOLO11n ONNX runtime with ByteTrack tracking. Returns detections with `is_calibrated: false` and `unit: px_relative_pct` (Rule R4).
+- `POST /api/v1/media/upload` — Upload privacy-redacted defect imagery (faces & plates pre-blurred per Rule R6).
 
-**Response (200 OK):**
+### 3. Defect Registry (`/defects`)
+- `GET /api/v1/defects` — List defect registry records with spatial bounding box, severity, and status filters.
+- `GET /api/v1/defects/{defect_id}` — Retrieve full defect profile, observation history, and GIS coordinates.
+- `POST /api/v1/defects/{defect_id}/override-severity` — Authorized engineer manual override of computed severity score.
 
-```json
-{
-  "status": "healthy",
-  "version": "0.1.0",
-  "service": "scamroad-api"
-}
-```
+### 4. Work Orders & Maintenance (`/work-orders`)
+- `GET /api/v1/work-orders` — List maintenance work orders with priority and assignment filters.
+- `POST /api/v1/work-orders` — Create new maintenance work order.
+- `GET /api/v1/work-orders/{work_order_id}` — Get single work order details, audit trail, and assigned contractor.
+- `PATCH /api/v1/work-orders/{work_order_id}/status` — Transition work order state (`ASSIGNED` → `IN_PROGRESS` → `REPAIRED`).
+- `POST /api/v1/work-orders/{work_order_id}/repair` — Contractor submits post-repair photographic evidence.
+- `POST /api/v1/work-orders/{work_order_id}/verify` — **Authoritative Engineer Sign-Off**. Mandatory human verification with before/after evidence to transition to `CLOSED` (Rule R5: AI is strictly prohibited from closing work orders).
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `status` | string | Service health status. One of: `healthy`, `degraded`, `unhealthy`. |
-| `version` | string | Application version (semver). |
-| `service` | string | Service identifier. |
+### 5. GIS & Interactive Map (`/map`, `/health-index`, `/forecasts`)
+- `GET /api/v1/map/geojson` — Returns GeoJSON `FeatureCollection` of road defect clusters with multi-pass sighting counts.
+- `GET /api/v1/map/roads` — Returns road network geometry and road hierarchy classifications.
+- `GET /api/v1/health-index/{segment_id}` — Computes live Road Health Index ($0 \le \text{RHI} \le 100$).
+- `GET /api/v1/forecasts/{segment_id}` — Structural deterioration forecast for pavement maintenance scheduling.
 
-**Example:**
+### 6. Citizen Reports & Grievances (`/reports`)
+- `POST /api/v1/reports` — Citizen grievance submission with GPS geotag and optional photo upload.
+- `GET /api/v1/reports` — List citizen complaints with ward, status, and date filters.
+- `PATCH /api/v1/reports/{complaint_id}/status` — Update citizen report lifecycle status (`SUBMITTED` → `TRIAGED` → `RESOLVED`).
+- `GET /api/v1/reports/defects.csv` — Export filtered defect registry as municipal CSV.
+- `GET /api/v1/reports/executive-summary` — Aggregated ward and road network summary brief.
 
-```bash
-curl http://localhost:8000/api/v1/health
-```
+### 7. Municipal Contractors & SLA Management (`/contractors`, `/sla-policies`)
+- `GET /api/v1/contractors` — List registered road maintenance contractors.
+- `POST /api/v1/contractors` — Register municipal contractor with license tier.
+- `GET /api/v1/sla-policies` — List municipal SLA response time policies.
+- `POST /api/v1/sla-policies` — Create SLA resolution policy.
 
----
+### 8. Municipal Analytics & Statistics (`/stats`)
+- `GET /api/v1/stats/overview` — High-level defect counts, active work orders, and network health score.
+- `GET /api/v1/stats/trends` — Multi-day temporal trends of detections versus completed repairs.
+- `GET /api/v1/stats/wards` — Spatial distribution of defects and repair cost estimates across municipal wards.
+- `GET /api/v1/stats/contractors` — Performance metrics, completion velocity, and SLA adherence per contractor.
 
-## Planned Endpoints
+### 9. Edge Batch Sync (`/sync`)
+- `POST /api/v1/sync` — Ingest offline SQLite outbox batches from edge agents. Implements idempotent replay protection via `idempotency_key`.
 
-> **Note:** The following endpoints will be implemented in Phase 4–8. They are
-> listed here for planning purposes and are subject to change.
+### 10. Notifications (`/notifications`)
+- `GET /api/v1/notifications` — Active alerts and high-severity road defect alerts.
+- `POST /api/v1/notifications` — Dispatch alert to municipal response teams.
+- `PATCH /api/v1/notifications/{notification_id}/read` — Acknowledge notification.
 
-### Phase 4 — Backend Core
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/v1/images` | Upload an image with GPS metadata for detection. |
-| `GET` | `/api/v1/images` | List uploaded images (paginated, filterable). |
-| `GET` | `/api/v1/images/{id}` | Get image details and associated detections. |
-| `GET` | `/api/v1/detections` | List detections (paginated, filterable by class/severity/area). |
-| `GET` | `/api/v1/detections/{id}` | Get single detection detail. |
-
-### Phase 6 — API Hardening
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/v1/auth/register` | Register a new user account. |
-| `POST` | `/api/v1/auth/login` | Authenticate and receive JWT tokens. |
-| `POST` | `/api/v1/auth/refresh` | Refresh an expired access token. |
-| `GET` | `/api/v1/reports` | List damage reports (paginated). |
-| `POST` | `/api/v1/reports` | Create a new damage report from detections. |
-| `PATCH` | `/api/v1/reports/{id}` | Update report status or assignment. |
-| `GET` | `/api/v1/stats/overview` | Aggregate statistics (counts, severity distribution). |
-| `GET` | `/api/v1/stats/ward/{ward_id}` | Ward-level damage statistics. |
-| `GET` | `/api/v1/stats/trends` | Time-series trend data. |
-
----
-
-## Authentication
-
-> **Status:** Planned but not yet implemented (Phase 6).
-
-Authentication will use **JWT Bearer tokens** in the `Authorization` header:
-
-```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-```
-
-**Token lifecycle:**
-- **Access token:** 15-minute expiry. Required for all authenticated endpoints.
-- **Refresh token:** 7-day expiry. Used to obtain new access tokens without
-  re-entering credentials.
-
-**Roles:**
-| Role | Permissions |
-|------|------------|
-| `citizen` | Upload images, view own submissions, view public stats. |
-| `engineer` | All citizen permissions + view all detections, manage reports. |
-| `admin` | All engineer permissions + user management, system configuration. |
-
-Until Phase 6, all endpoints are unauthenticated. The health endpoint will
-remain public permanently.
-
----
-
-## Pagination
-
-Paginated endpoints accept these query parameters:
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number (1-indexed). |
-| `per_page` | integer | 20 | Items per page (max 100). |
-
-Responses include pagination metadata:
-
-```json
-{
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "per_page": 20,
-    "total": 142,
-    "pages": 8
-  }
-}
-```
-
-Standard `Link` headers are also returned for API clients that prefer them.
-
----
-
-## Rate Limiting
-
-| Context | Limit |
-|---------|-------|
-| Authenticated user | 60 requests / minute |
-| Anonymous / unauthenticated | 10 requests / minute |
-
-When rate-limited, the API returns `429 RATE_LIMITED` with a `Retry-After`
-header indicating seconds to wait.
+### 11. System Health (`/health`)
+- `GET /api/v1/health` — Subsystem health check (PostGIS connectivity, Redis ping, ML model readiness).
+- `GET /health` — High-availability load-balancer probe.

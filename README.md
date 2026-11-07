@@ -3,8 +3,8 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](notebooks/ScamRoad_Colab_Training.ipynb)
 [![Kaggle GPU](https://kaggle.com/static/images/open-in-kaggle.svg)](notebooks/ScamRoad_Kaggle_GPU_Pipeline.ipynb)
-[![Tests Status](https://img.shields.io/badge/Python%20Tests-142%2F144%20Passing-brightgreen.svg)](docs/STATUS_AUDIT.md)
-[![Web Tests](https://img.shields.io/badge/Web%20Tests-2%2F2%20Passing-brightgreen.svg)](web/)
+[![Tests Status](https://img.shields.io/badge/Python%20Tests-144%2F144%20Passing-brightgreen.svg)](docs/STATUS_AUDIT.md)
+[![Web Tests](https://img.shields.io/badge/Web%20Tests-8%2F8%20Passing-brightgreen.svg)](web/)
 [![Frontend](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite%20%2B%20Tailwind-blue.svg)](web/)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%20Async%20REST-009688.svg)](backend/)
 [![Inference Engine](https://img.shields.io/badge/Inference-ONNX%20Runtime%20INT8-purple.svg)](ml/quantize.py)

@@ -74,6 +74,7 @@ mobile/dist/
 
 # Docker
 *.log
+backups/
 
 # IDE
 .vscode/

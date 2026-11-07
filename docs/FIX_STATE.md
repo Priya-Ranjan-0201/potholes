@@ -37,7 +37,10 @@
   - Deliverables: Enhanced `web/src/index.css` with road-perspective motion animations, WCAG AAA (16.5:1 / 18.9:1) & AA (5.48:1 / 4.83:1) tokens, mobile responsive navbar and layouts, `scripts/capture_ui_matrix.py` test suite.
   - Gate: 17 live screenshots captured across light mode, dark mode, and mobile (375px) in `docs/screenshots/`, WCAG 2.1 AA/AAA contrast checks passing.
   - Completed: November 07, 2026 | Tag: `fix-phase-7-done`
-- [ ] **Phase 8: Tests, CI, Docs, Deploy**
+- [x] **Phase 8: Tests, CI, Docs, Deploy**
+  - Deliverables: Enhanced `.github/workflows/ci.yml` (automated claim check, i18n parity check, Python 144 tests, Node.js ESLint 9 + TypeScript + Vitest + build, Docker build), updated `docker-compose.yml` (web, api, worker, postgres, redis, minio), `scripts/backup_restore_drill.py` (checksum-verified disaster recovery), authoritative `docs/API.md` (38 endpoints), `docs/UI_GUIDE.md`, `docs/CHANGELOG.md`, `docs/DEMO_SCRIPT.md`.
+  - Gate: 144/144 Python pytest tests passing (100%), 8/8 Web tests passing, production Vite build clean, backup/restore drill verified.
+  - Completed: November 07, 2026 | Tag: `fix-phase-8-done`
 - [ ] **Pass 2: Hostile Re-Audit & Backlog Fix**
 - [ ] **Pass 3: Clean-Clone Reproduction & Freeze (v1.1.0)**
 
