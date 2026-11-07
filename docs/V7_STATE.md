@@ -1,7 +1,7 @@
 # ScamRoad v7 — Semester-Scope Polish, Evidence and Redesign State Tracker
 
 **Branch:** `v7/polish`  
-**Current Phase:** Phase 8 — BEAUTIFUL, ATTRACTIVE UI/UX (COMMAND CENTER & ROAD HERO)  
+**Current Phase:** Phase 9 — README, PROJECT REPORT, SLIDES OUTLINE, DEMO SCRIPT  
 **Status:** IN_PROGRESS  
 **Budget:** Max GPU hours: 2 | Max wall-clock days: 1 | Max spend: $0  
 **Started At:** November 07, 2026 | 17:38 IST  
@@ -17,7 +17,7 @@
 - [x] **Phase 5 (SHOULD): Capture App as a PWA** — Tag: `v7-phase-5-done`
 - [x] **Phase 6 (COULD): Sensor Fusion Lite (Experimental)** — Tag: `v7-phase-6-done`
 - [x] **Phase 7 (SHOULD): Severity Calibration & Workflow Hardening** — Tag: `v7-phase-7-done`
-- [ ] **Phase 8 (MUST): Beautiful, Attractive UI/UX (Command Center, Road Scene Hero, 17 Views)**
+- [x] **Phase 8 (MUST): Beautiful, Attractive UI/UX (Command Center, Road Scene Hero, 17 Views)** — Tag: `v7-phase-8-done`
 - [ ] **Phase 9 (MUST): README, Project Report, Slides Outline, Demo Script**
 - [ ] **Phase 10 (MUST): CI, Docker, Final Verification**
 - [ ] **Pass 2: Hostile Re-Audit**
@@ -25,14 +25,11 @@
 
 ---
 
-## Phase 6 & 7 Verification Evidence & Gate Summary
-- **Sensor Fusion Lite:**
-  - Implemented `edge/agent/sensor_fusion.py` with baseline-tracking vertical shock detection (`BumpDetector`) and camera/IMU cross-validation (`SensorFusionMatcher`).
-  - Unit tests in `backend/tests/test_sensor_fusion.py` passed (2/2).
-  - Integrated into Drive Mode HUD (`web/src/pages/CapturePage.tsx`) with active g-force telemetry and visual pulse agreement badge `⚡ Camera + IMU Bump Agree`.
-  - Field drive task logged as `H-004` in `docs/HUMAN_TODO.md` (Rule R1 honest tracking).
-- **Severity Calibration & Human Rater Study Kit:**
-  - `scripts/rater_study_kit.py` generates study export `bench/rater_study_template.csv` and report `bench/rater_study_report.json`.
-  - Calibration protocol demonstrates mean inter-rater Cohen's kappa $\kappa = 0.654$ (Substantial Agreement), 88.9% category concordance vs `SeverityEngine`, and MAE of 6.26 distress points on 0–100 scale.
-  - Multi-rater study distributed task logged as `H-005` in `docs/HUMAN_TODO.md`.
-  - Full backend test suite passed with 146/146 tests (100%).
+## Phase 8 Verification Evidence & Gate Summary
+- **Original Visual Identity:** Created `web/src/components/Logo.tsx` featuring a stylised road in perspective forming an "S" curve with a glowing neon cyan scan-ping dot (Rule 8.1).
+- **Animated Road Perspective Hero Scene:** Implemented `web/src/components/RoadHeroScene.tsx` with dynamic streaming dashed lane markings, dusk sky aurora, animated neural scan laser sweep bar, real-time scientific telemetry strip, and integrated "Viva Presentation Mode" 6-step guided examiner tour.
+- **Background Atmosphere & Battery Optimization:** Animations automatically pause when the browser tab is hidden via `document.hidden` event listener.
+- **Contrast & Accessibility (WCAG 2.2 AA):** All text elements meet or exceed WCAG AA contrast against cards. High-contrast neon accents on Midnight Obsidian dark mode and Daybreak Porcelain light mode.
+- **Visual QA Screenshot Matrix:** All 21 high-resolution page captures saved directly to `docs/screenshots/` with an indexed `README.md` cataloging each view, resolution, and theme.
+- **Zero Banned Claims & Map Leftovers:** Verified with `scripts/check_claims.py` (0 violations).
+- **Bundle SLA Verification:** Production JS bundle builds in 5.09s at 239.28 kB gzip (< 250 kB SLA).

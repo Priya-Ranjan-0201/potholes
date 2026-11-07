@@ -63,6 +63,12 @@ export const Radio: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) 
   </svg>
 );
 
+export const Play: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
 export const UserCheck: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />

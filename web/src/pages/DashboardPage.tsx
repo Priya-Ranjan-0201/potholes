@@ -30,6 +30,7 @@ import {
 } from "recharts";
 
 import { useLanguage } from "../context/LanguageContext";
+import { RoadHeroScene } from "../components/RoadHeroScene";
 
 // Canonical Severity Colors adhering to config/severity_thresholds.json
 const SEVERITY_COLORS: Record<string, string> = {
@@ -253,7 +254,10 @@ export const DashboardPage: React.FC = () => {
     : [];
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 pb-16">
+      {/* Animated Road Perspective Scene Hero & Scientific Evidence Strip */}
+      <RoadHeroScene />
+
       {/* Page Title & Status */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md transition-colors">
         <div>

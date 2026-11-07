@@ -19,6 +19,7 @@ import {
 } from "./Icons";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES, LanguageCode } from "../context/LanguageContext";
+import { Logo } from "./Logo";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -77,9 +78,7 @@ export const Navbar: React.FC = () => {
           {/* Official Emblem & Logo */}
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-emerald-600 dark:from-amber-600 dark:to-slate-800 flex items-center justify-center text-white font-black text-lg shadow-md border border-amber-400/50 group-hover:scale-105 transition-transform">
-                <span>स</span><span className="text-white text-xs font-mono ml-0.5">R</span>
-              </div>
+              <Logo showWordmark={false} size="md" />
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-black text-lg text-slate-900 dark:text-white tracking-tight">

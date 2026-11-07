@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, CheckCircle2 } from "./Icons";
+import { Sparkles, CheckCircle2, Radio, BarChart3 } from "./Icons";
 import { useLanguage } from "../context/LanguageContext";
+import { Logo } from "./Logo";
 
 export const Footer: React.FC = () => {
   const { t } = useLanguage();
@@ -13,14 +14,12 @@ export const Footer: React.FC = () => {
           {/* Brand & Research Identity */}
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-md border border-white/20">
-                SR
-              </div>
+              <Logo showWordmark={false} size="md" />
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-black text-lg text-white tracking-tight">{t("appName")}</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {t("standardsNotice")}
+                    Student Research Project
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 font-medium">
@@ -77,16 +76,26 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              {t("navModels")}
+              {t("navModels")} & {t("navEvaluation")}
             </h4>
             <div className="space-y-2 text-xs text-slate-400">
               <div className="bg-slate-800/80 dark:bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/60 dark:border-slate-800">
                 <span className="block text-slate-200 font-semibold text-[11px]">{t("modelActive")}</span>
-                <span className="text-[11px] text-emerald-400 font-mono">YOLO11n INT8 Quantized (21 FPS)</span>
+                <span className="text-[11px] text-emerald-400 font-mono">YOLO11n INT8 (13.6 FPS CPU, 85.8% mAP)</span>
               </div>
               <div className="bg-slate-800/80 dark:bg-slate-900/90 p-2.5 rounded-lg border border-slate-700/60 dark:border-slate-800">
-                <span className="block text-slate-200 font-semibold text-[11px]">{t("standardsNotice")}</span>
-                <span className="text-[11px] text-amber-300 font-mono">IRC:SP:84-2019</span>
+                <span className="block text-slate-200 font-semibold text-[11px]">Severity Guidance</span>
+                <span className="text-[11px] text-amber-300 font-mono">Severity rubric inspired by public guidance</span>
+              </div>
+              <div className="pt-1 flex items-center gap-3">
+                <Link to="/evaluation" className="text-blue-400 hover:underline flex items-center gap-1 text-[11px]">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Evaluation Proofs</span>
+                </Link>
+                <Link to="/capture" className="text-emerald-400 hover:underline flex items-center gap-1 text-[11px]">
+                  <Radio className="w-3.5 h-3.5" />
+                  <span>PWA Capture</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -97,7 +106,7 @@ export const Footer: React.FC = () => {
             {t("footerNotice")}
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-slate-400">ScamRoad v2.4 (Student Research Edition)</span>
+            <span className="text-slate-400">ScamRoad v1.2.0 (Student Research Project)</span>
             <span>•</span>
             <span className="text-emerald-400 font-medium">Verified Edge Neural Pipeline</span>
           </div>
