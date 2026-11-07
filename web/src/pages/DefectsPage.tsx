@@ -52,14 +52,6 @@ export const DefectsPage: React.FC = () => {
     enabled: !!activeDefectId,
   });
 
-  const detail = defectDetail as any;
-  const inspectedDefect = detail ? (detail.defect || detail) : null;
-  const inspectedObservations: any[] = detail?.observations || [];
-  const latestSeverity = detail?.severity_history?.[0];
-  const inspectedScore = inspectedDefect?.normalized_score ?? latestSeverity?.normalized_score ?? null;
-  const inspectedLevel = inspectedDefect?.severity_level ?? latestSeverity?.level ?? "Minor";
-  const inspectedNeedsReview = inspectedDefect?.needs_human_review ?? latestSeverity?.needs_human_review ?? false;
-
   const overrideMutation = useMutation({
     mutationFn: (vars: { id: string; level: string; reason: string }) =>
       api.overrideSeverity(vars.id, {
@@ -106,9 +98,10 @@ export const DefectsPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <MilestoneHeader
-              tag="ROAD DEFECTS"
+              km="04"
               title={t("defectsTitle")}
               subtitle={t("defectsSubtitle")}
+              highway="NH-44"
               variant="yellow"
             />
           </div>
@@ -436,7 +429,7 @@ export const DefectsPage: React.FC = () => {
               </button>
             </div>
 
-            {loadingDetail || !inspectedDefect ? (
+            {loadingDetail || !defectDetail ? (
               <div className="py-12 text-center text-xs text-slate-400">Loading defect data...</div>
             ) : (
               <div className="space-y-6">
@@ -445,40 +438,40 @@ export const DefectsPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-slate-500">Class</span>
                     <span className="text-sm font-bold text-slate-900 dark:text-white">
-                      {inspectedDefect.class_code ? inspectedDefect.class_code.toUpperCase() : "POTHOLE"}
+                      {defectDetail.defect.class_code.toUpperCase()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-slate-500">Status</span>
                     <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                      {inspectedDefect.status || "ACTIVE"}
+                      {defectDetail.defect.status}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-slate-500">GPS Coordinates</span>
                     <div className="flex items-center gap-1.5">
                       <span className="font-mono text-xs text-slate-800 dark:text-slate-200 font-bold">
-                        {inspectedDefect.latitude?.toFixed(5) ?? "30.90500"}, {inspectedDefect.longitude?.toFixed(5) ?? "75.86000"}
+                        {defectDetail.defect.latitude.toFixed(5)}, {defectDetail.defect.longitude.toFixed(5)}
                       </span>
                       <button
                         onClick={() =>
                           handleCopyCoords(
-                            inspectedDefect.latitude ?? 30.905,
-                            inspectedDefect.longitude ?? 75.86,
-                            inspectedDefect.id
+                            defectDetail.defect.latitude,
+                            defectDetail.defect.longitude,
+                            defectDetail.defect.id
                           )
                         }
                         className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500"
                         title="Copy coordinates"
                       >
-                        {copiedId === inspectedDefect.id ? (
+                        {copiedId === defectDetail.defect.id ? (
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                         ) : (
                           <Copy className="w-3.5 h-3.5" />
                         )}
                       </button>
                       <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${inspectedDefect.latitude},${inspectedDefect.longitude}`}
+                        href={`https://www.google.com/maps/search/?api=1&query=${defectDetail.defect.latitude},${defectDetail.defect.longitude}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-blue-600"
@@ -491,13 +484,13 @@ export const DefectsPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-slate-500">Road Corridor</span>
                     <span className="font-mono text-xs text-slate-800 dark:text-slate-200">
-                      {inspectedDefect.road_segment_id || inspectedDefect.road_name || "Corridor Urban-12"}
+                      {defectDetail.defect.road_segment_id || "Corridor Urban-12 (Unsnapped)"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase text-slate-500">Sightings (Multi-Pass)</span>
                     <span className="text-xs font-black text-emerald-700 dark:text-emerald-400">
-                      {inspectedDefect.times_seen || 1} pass(es)
+                      {defectDetail.defect.times_seen} pass(es)
                     </span>
                   </div>
                 </div>
@@ -510,8 +503,8 @@ export const DefectsPage: React.FC = () => {
                       Severity Scoring (Rubric Inspired by IRC:SP:84-2019)
                     </h3>
                     <SeverityBadge
-                      level={inspectedLevel}
-                      score={inspectedScore ?? undefined}
+                      level={defectDetail.defect.severity_level || "Minor"}
+                      score={defectDetail.defect.normalized_score ?? undefined}
                       size="md"
                     />
                   </div>
@@ -522,8 +515,9 @@ export const DefectsPage: React.FC = () => {
                         Normalized Score
                       </span>
                       <span className="text-xl font-black text-slate-900 dark:text-white">
-                        {inspectedScore !== null && inspectedScore !== undefined
-                          ? Math.round(inspectedScore)
+                        {defectDetail.defect.normalized_score !== null &&
+                        defectDetail.defect.normalized_score !== undefined
+                          ? Math.round(defectDetail.defect.normalized_score)
                           : "N/A"}
                         <span className="text-xs text-slate-400 font-normal"> / 100</span>
                       </span>
@@ -534,7 +528,7 @@ export const DefectsPage: React.FC = () => {
                         Review Trigger
                       </span>
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                        {inspectedNeedsReview
+                        {defectDetail.defect.needs_human_review
                           ? "⚠️ Needs Engineer Review"
                           : "Standard Auto-Scored"}
                       </span>
@@ -559,21 +553,21 @@ export const DefectsPage: React.FC = () => {
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <History className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                    Camera Pass Observations ({inspectedObservations.length})
+                    Camera Pass Observations ({defectDetail.observations.length})
                   </h3>
 
                   <div className="space-y-2">
-                    {inspectedObservations.map((obs: any, idx: number) => (
+                    {defectDetail.observations.map((obs, idx) => (
                       <div
-                        key={obs.id || idx}
+                        key={obs.id}
                         className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs"
                       >
                         <div>
                           <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                            Pass #{idx + 1} &mdash; Confidence: {Math.round((obs.confidence ?? 0.85) * 100)}%
+                            Pass #{idx + 1} &mdash; Confidence: {Math.round(obs.confidence * 100)}%
                           </span>
                           <span className="text-slate-400 text-[11px] block">
-                            {obs.observed_at ? new Date(obs.observed_at).toLocaleString() : "Recent pass"}
+                            {new Date(obs.observed_at).toLocaleString()}
                           </span>
                         </div>
                         <div className="text-right">

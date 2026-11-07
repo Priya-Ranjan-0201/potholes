@@ -65,3 +65,4 @@ export const KpiPlate: React.FC<KpiPlateProps> = ({
     </div>
   );
 };
+

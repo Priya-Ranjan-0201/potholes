@@ -29,3 +29,4 @@ export const BentoCard: React.FC<BentoCardProps> = ({ children, span = "1", clas
 
   return <div className={`${spanClasses} ${className}`}>{children}</div>;
 };
+

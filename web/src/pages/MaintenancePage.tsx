@@ -151,9 +151,10 @@ export const MaintenancePage: React.FC = () => {
       <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <MilestoneHeader
-            tag="WORK ORDERS"
+            km="02"
             title={t("maintenanceTitle")}
             subtitle={t("maintenanceSubtitle")}
+            highway="NH-44"
             variant="yellow"
           />
         </div>

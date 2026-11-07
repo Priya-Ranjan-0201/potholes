@@ -14,24 +14,14 @@ export const Footer: React.FC = () => {
           {/* Brand & Research Identity */}
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-3">
-              <Logo showWordmark={false} size="md" />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-black text-lg text-white tracking-tight font-signboard">
-                    Scam<span className="text-amber-500">Road</span>
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase font-mono">
-                    v1.2
-                  </span>
-                </div>
-                <p className="text-xs text-stone-400 font-medium">
-                  {t("appSubtitle")}
-                </p>
-              </div>
+              <Logo showWordmark={true} size="md" variant="dark" />
+              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/30 uppercase font-mono">
+                v1.2
+              </span>
             </div>
 
             <p className="text-xs text-stone-400 leading-relaxed max-w-md">
-              Empirical edge AI detection for potholes and structural road distress, paired with municipal workflow tracking.
+              {t("appSubtitle")}
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-stone-400">

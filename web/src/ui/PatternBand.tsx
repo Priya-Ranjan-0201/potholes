@@ -150,3 +150,4 @@ export const PatternBand: React.FC<PatternBandProps> = ({
     </div>
   );
 };
+

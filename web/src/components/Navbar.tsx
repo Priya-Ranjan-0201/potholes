@@ -104,24 +104,15 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Main Navbar */}
-        <div className="w-full bg-[#FFFDF7] dark:bg-[#0D1017] border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
-          <div className="flex items-center justify-between h-15 gap-4">
-            {/* Left: Clean Brand Logo */}
-            <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-              <Logo showWordmark={false} size="sm" />
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-black text-lg tracking-tight text-stone-900 dark:text-stone-100 font-signboard">
-                    Scam<span className="text-amber-500">Road</span>
-                  </span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
-                    v1.2
-                  </span>
-                </div>
-                <span className="text-[10px] text-stone-500 dark:text-stone-400 font-medium hidden sm:inline -mt-0.5">
-                  Road Defect &amp; Pothole AI
-                </span>
-              </div>
+        <div className="w-full bg-[#FFFDF7] dark:bg-[#0D1017] border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 shadow-xs">
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Left: Official ScamRoad Brand Logo */}
+            <Link to="/" className="flex items-center gap-2 shrink-0 group py-1">
+              <Logo showWordmark={true} size="lg" className="hidden sm:block" />
+              <Logo showWordmark={false} size="sm" className="sm:hidden" />
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono hidden xl:inline">
+                v1.2
+              </span>
             </Link>
 
             {/* Center: Clean 5 Core Navigation Links */}

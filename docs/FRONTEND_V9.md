@@ -229,3 +229,4 @@ FINAL OUTPUT: summary per phase; theme comparison screenshots; Lighthouse/axe/te
 credits; open issues and HUMAN_TODO (choose the final default theme, native-speaker review of translations,
 real-phone daylight check, licence confirmations). START NOW with P1 and continue automatically.
 ```
+

@@ -84,7 +84,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-12 w-full">
       {/* Sleek Hero Banner */}
-      <RoadHeroScene stats={stats} />
+      <RoadHeroScene />
 
       {/* 4 Bento-Grid KPI Plates */}
       <BentoGrid>
@@ -140,7 +140,7 @@ export const DashboardPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <div className="h-64 sm:h-72">
+          <div className="h-60">
             {loadingTrends ? (
               <div className="h-full flex items-center justify-center text-xs text-stone-400 font-mono">
                 Loading activity trends...
@@ -206,7 +206,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center h-64 sm:h-72">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center h-60">
             {/* Pie Chart */}
             <div className="h-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -290,7 +290,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {sortedWards.map((w) => {
             const isCrit = w.critical_defects > 0;
             const isMod = w.total_defects > w.repaired_defects;

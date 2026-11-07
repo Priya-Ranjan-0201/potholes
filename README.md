@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="web/public/logo-horizontal.png" alt="ScamRoad Logo" width="480" />
+</p>
+
 # ScamRoad (सड़क सुरक्षा)
 ### Edge AI Pothole & Road Defect Surveillance Portal (Student Research Project)
 
