@@ -20,3 +20,4 @@ The interface brings together the warmth and celebratory flair of Indian truck a
 - Fluid full-width container (`w-full px-4 sm:px-6 lg:px-8 xl:px-12`) ensuring no black bars or cramped columns.
 - Dedicated glass and painted plates for text over road perspective backgrounds to prevent dashed lines from overlapping copy.
 - Mobile bottom milestone navigation bar with touch-friendly 44px+ hit targets.
+

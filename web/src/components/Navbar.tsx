@@ -6,20 +6,15 @@ import {
   ClipboardList,
   MessageSquareWarning,
   Layers,
-  Cpu,
   Menu,
   X,
-  BarChart3,
-  Radio,
   Sun,
   Moon,
   Globe,
-  Plus,
 } from "./Icons";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import { Logo } from "./Logo";
-import { CatsEye } from "../ui/CatsEye";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -28,7 +23,6 @@ export const Navbar: React.FC = () => {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [hornHonked, setHornHonked] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close language dropdown on outside click
@@ -47,90 +41,66 @@ export const Navbar: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // "Horn OK Please" Playful Easter Egg (Rule 2.8) - Visual Ripple Only, No Auto-play Audio
-  const triggerHorn = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setHornHonked(true);
-    setTimeout(() => setHornHonked(false), 900);
-  };
-
+  // Core essential navigation links (clean, uncluttered semester scope)
   const navLinks = [
-    { to: "/", label: t("navOverview"), icon: Compass, km: "00" },
-    { to: "/scanner", label: t("navScanner"), icon: Camera, km: "01" },
-    { to: "/maintenance", label: t("navWorkOrders"), icon: ClipboardList, km: "02" },
-    { to: "/complaints", label: t("navComplaints"), icon: MessageSquareWarning, km: "03" },
-    { to: "/defects", label: t("navDefects"), icon: Layers, km: "04" },
-    { to: "/models", label: t("navModels"), icon: Cpu, km: "05" },
-    { to: "/evaluation", label: t("navEvaluation"), icon: BarChart3, km: "06" },
-    { to: "/capture", label: t("navCapture"), icon: Radio, km: "07" },
+    { to: "/", label: t("navOverview"), icon: Compass },
+    { to: "/scanner", label: t("navScanner"), icon: Camera },
+    { to: "/defects", label: t("navDefects"), icon: Layers },
+    { to: "/maintenance", label: t("navWorkOrders"), icon: ClipboardList },
+    { to: "/complaints", label: t("navComplaints"), icon: MessageSquareWarning },
   ];
 
-  const currentRoute = navLinks.find((l) => l.to === location.pathname) || {
-    label: "Roadway",
-    km: "00",
-  };
+  const secondaryLinks = [
+    { to: "/evaluation", label: "Model Evaluation" },
+    { to: "/models", label: "Edge Telemetry" },
+    { to: "/capture", label: "Drive PWA" },
+  ];
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full transition-colors duration-200">
-        {/* Ticker Banner: Pure Single-Line Student Research Disclaimer & Standards (Rule F3) */}
-        <div className="w-full bg-[#0A0C12] text-[#F3EEE2] py-1.5 px-4 sm:px-6 lg:px-8 border-b border-amber-500/20 text-[11px] font-medium">
-          <div className="w-full flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 overflow-hidden truncate">
-              <CatsEye color="amber" size="sm" pulse />
-              <span className="text-amber-400 font-extrabold tracking-wider shrink-0 uppercase">
-                {t("appName")}
-              </span>
-              <span className="text-stone-600 hidden sm:inline">|</span>
-              <span className="text-stone-300 truncate hidden sm:inline">
-                {t("govtBanner")}
-              </span>
-            </div>
+        {/* Subtle Single-Line Disclaimer Banner */}
+        <div className="w-full bg-stone-950 text-stone-300 py-1.5 px-4 sm:px-6 lg:px-8 border-b border-stone-800 text-[11px] font-medium flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <span className="text-amber-400 font-bold shrink-0">ScamRoad</span>
+            <span className="text-stone-600 hidden sm:inline">•</span>
+            <span className="text-stone-400 truncate">
+              Student Research Project (B.Tech CSE) · Edge AI Road Defect Detection
+            </span>
+          </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="hidden md:inline-flex items-center gap-1.5 text-emerald-400 font-semibold font-mono text-[10px]">
-                ● {t("standardsNotice")}
-              </span>
-              <span className="text-amber-300/80 font-mono text-[10px] bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/30">
-                {t("helplineText")}
-              </span>
-            </div>
+          <div className="flex items-center gap-4 shrink-0 text-[10px] text-stone-400 font-mono ml-3">
+            <span className="hidden md:inline">IRC:82-2023 Guidelines</span>
+            <Link to="/evaluation" className="text-amber-400 hover:underline">
+              Model Proofs (85.8% mAP) &rarr;
+            </Link>
           </div>
         </div>
 
-        {/* Main Highway Navigation Bar */}
-        <div className="w-full bg-[#FFF8EC]/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-b-2 border-[#EBD9B8] dark:border-amber-400/20 px-4 sm:px-6 lg:px-8 shadow-xs">
-          <div className="flex items-center justify-between h-16 gap-3">
-            {/* Left: Brand Identity + Horn OK Please Easter Egg */}
-            <div className="flex items-center gap-3 shrink-0">
-              <Link to="/" className="flex items-center gap-2.5 group">
-                <Logo showWordmark={false} size="md" />
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-xl tracking-tight text-stone-900 dark:text-stone-100 font-signboard">
-                      Scam<span className="text-amber-500">Road</span>
-                    </span>
-                    <button
-                      onClick={triggerHorn}
-                      title="Horn OK Please! Click for safe road greeting"
-                      className={`text-[9px] font-black px-1.5 py-0.5 rounded border transition-all duration-300 select-none ${
-                        hornHonked
-                          ? "bg-amber-400 text-stone-950 border-amber-300 scale-110 shadow-[0_0_12px_rgba(255,179,0,0.8)]"
-                          : "bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30 hover:bg-amber-500/20"
-                      }`}
-                    >
-                      {hornHonked ? "🎺 PEEP PEEP!" : "HORN OK"}
-                    </button>
-                  </div>
-                  <span className="text-[10px] text-stone-500 dark:text-stone-400 font-mono font-semibold">
-                    NH-44 · KM {currentRoute.km}
+        {/* Main Navbar */}
+        <div className="w-full bg-[#FFF8EC]/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 lg:px-8 shadow-xs">
+          <div className="flex items-center justify-between h-15 gap-4">
+            {/* Left: Clean Brand Logo */}
+            <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+              <Logo showWordmark={false} size="sm" />
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-black text-lg tracking-tight text-stone-900 dark:text-stone-100 font-signboard">
+                    Scam<span className="text-amber-500">Road</span>
+                  </span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
+                    v1.2
                   </span>
                 </div>
-              </Link>
-            </div>
+                <span className="text-[10px] text-stone-500 dark:text-stone-400 font-medium hidden sm:inline -mt-0.5">
+                  Road Defect &amp; Pothole AI
+                </span>
+              </div>
+            </Link>
 
-            {/* Center Desktop Highway Exits Navigation */}
-            <nav className="hidden xl:flex items-center gap-1 bg-[#FFF0D6]/70 dark:bg-stone-900/80 p-1 rounded-xl border border-[#EBD9B8] dark:border-stone-800 shrink-0">
+            {/* Center: Clean 5 Core Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1 bg-[#FFF0D6]/60 dark:bg-stone-900/60 p-1 rounded-xl border border-[#EBD9B8] dark:border-stone-800">
               {navLinks.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
@@ -140,21 +110,20 @@ export const Navbar: React.FC = () => {
                     to={item.to}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       isActive
-                        ? "bg-white dark:bg-stone-950 text-amber-600 dark:text-amber-400 shadow-xs border border-amber-500/40 font-black"
-                        : "text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-stone-800/60"
+                        ? "bg-white dark:bg-stone-950 text-amber-600 dark:text-amber-400 shadow-xs border border-amber-500/30 font-black"
+                        : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-stone-800/50"
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${isActive ? "text-amber-500" : "text-stone-400"}`} />
                     <span>{item.label}</span>
-                    {isActive && <CatsEye color="amber" size="sm" />}
                   </Link>
                 );
               })}
             </nav>
 
-            {/* Right Action Controls: Lang Switcher, Theme Switcher, Quick CTAs */}
+            {/* Right: Quick Action Controls */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Language Switcher Dropdown */}
+              {/* Language Switcher */}
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
@@ -162,15 +131,11 @@ export const Navbar: React.FC = () => {
                   aria-label="Select Language"
                 >
                   <Globe className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="hidden sm:inline font-mono">{currentOption.nativeName}</span>
-                  <span className="sm:hidden font-mono text-[11px] uppercase">{currentOption.code}</span>
+                  <span className="font-mono text-xs">{currentOption.nativeName}</span>
                 </button>
 
                 {langDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-stone-900 border-2 border-[#EBD9B8] dark:border-stone-700 rounded-xl shadow-xl py-1 z-50 animate-fadeIn">
-                    <div className="px-3 py-1 text-[10px] font-black uppercase text-stone-400 font-mono border-b border-stone-100 dark:border-stone-800">
-                      Languages (भाषाएं)
-                    </div>
+                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-700 rounded-xl shadow-xl py-1 z-50">
                     {LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
@@ -178,14 +143,14 @@ export const Navbar: React.FC = () => {
                           setLanguage(lang.code);
                           setLangDropdownOpen(false);
                         }}
-                        className={`w-full px-3 py-2 text-left text-xs flex items-center justify-between transition ${
+                        className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition ${
                           language === lang.code
-                            ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-black"
+                            ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-bold"
                             : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          <span className="text-base">{lang.flag}</span>
+                          <span>{lang.flag}</span>
                           <span>{lang.nativeName}</span>
                         </span>
                         <span className="text-[10px] font-mono opacity-60 uppercase">{lang.code}</span>
@@ -195,33 +160,24 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Theme Toggle (Dhaba Dawn <-> Highway Night) */}
+              {/* Theme Switcher */}
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition"
-                title={theme === "dark" ? "Switch to Dhaba Dawn (Light)" : "Switch to Highway Night (Dark)"}
                 aria-label="Toggle Theme"
+                title={theme === "dark" ? "Light theme" : "Dark theme"}
               >
                 {theme === "dark" ? (
-                  <Sun className="w-4 h-4 text-amber-400" />
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
                 ) : (
-                  <Moon className="w-4 h-4 text-indigo-600" />
+                  <Moon className="w-3.5 h-3.5 text-indigo-600" />
                 )}
               </button>
-
-              {/* Quick Report CTA */}
-              <Link
-                to="/complaints"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8452C] hover:bg-red-600 text-white text-xs font-black transition shadow-xs"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t("reportPotholeBtn")}</span>
-              </Link>
 
               {/* Mobile Hamburger Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="xl:hidden p-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200"
+                className="md:hidden p-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200"
                 aria-label="Toggle Navigation Menu"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -232,7 +188,7 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="xl:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b-2 border-[#EBD9B8] dark:border-amber-400/20 px-4 py-3 shadow-lg">
+          <div className="md:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-[#EBD9B8] dark:border-stone-800 px-4 py-3 shadow-lg">
             <div className="grid grid-cols-2 gap-2">
               {navLinks.map((item) => {
                 const Icon = item.icon;
@@ -253,13 +209,31 @@ export const Navbar: React.FC = () => {
                 );
               })}
             </div>
+            <div className="pt-2 mt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-around text-xs">
+              {secondaryLinks.map((s) => (
+                <Link key={s.to} to={s.to} className="text-stone-500 hover:text-amber-500 font-medium py-1">
+                  {s.label}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </header>
 
-      {/* Mobile Bottom Milestone Navigation Bar (Rule 6.1) */}
-      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-t-2 border-[#EBD9B8] dark:border-amber-400/20 px-2 py-1.5 shadow-lg safe-area-pb">
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-t border-[#EBD9B8] dark:border-stone-800 px-2 py-1.5 shadow-lg safe-area-pb">
         <div className="flex items-center justify-around">
+          <Link
+            to="/"
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
+              location.pathname === "/"
+                ? "text-amber-600 dark:text-amber-400 font-black"
+                : "text-stone-500 dark:text-stone-400"
+            }`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>Overview</span>
+          </Link>
           <Link
             to="/scanner"
             className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
@@ -268,7 +242,7 @@ export const Navbar: React.FC = () => {
                 : "text-stone-500 dark:text-stone-400"
             }`}
           >
-            <Camera className="w-5 h-5" />
+            <Camera className="w-4 h-4" />
             <span>Scan</span>
           </Link>
           <Link
@@ -279,19 +253,8 @@ export const Navbar: React.FC = () => {
                 : "text-stone-500 dark:text-stone-400"
             }`}
           >
-            <Layers className="w-5 h-5" />
+            <Layers className="w-4 h-4" />
             <span>Defects</span>
-          </Link>
-          <Link
-            to="/"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <Compass className="w-5 h-5" />
-            <span>Overview</span>
           </Link>
           <Link
             to="/maintenance"
@@ -301,19 +264,8 @@ export const Navbar: React.FC = () => {
                 : "text-stone-500 dark:text-stone-400"
             }`}
           >
-            <ClipboardList className="w-5 h-5" />
+            <ClipboardList className="w-4 h-4" />
             <span>Orders</span>
-          </Link>
-          <Link
-            to="/evaluation"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/evaluation"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span>Report</span>
           </Link>
         </div>
       </div>

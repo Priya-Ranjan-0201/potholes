@@ -18,7 +18,6 @@ import {
   Line,
   ComposedChart,
 } from "recharts";
-import { MilestoneHeader, CatsEye } from "../ui";
 
 // Static fallback metrics if backend is offline or static mode is active
 const FALLBACK_METRICS: ModelEvaluationResponse = {
@@ -230,38 +229,36 @@ export const EvaluationPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 w-full">
-      {/* Header Banner with Milestone Stone */}
+      {/* Header Banner */}
       <div className="dhaba-card p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <MilestoneHeader km="06" title="AI Model Evaluation" highway="NH-44" variant="yellow" />
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
-                <CatsEye color="peacock" size="sm" pulse />
-                <span>Test Split Evidence</span>
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider font-mono bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                NH-44 · KM 06
               </span>
-              <span className="font-mono text-[10px] px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                SHA: {m.sha256.slice(0, 12)}&hellip;
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                <span>INT8 Quantized ({m.file_size_mb} MB)</span>
               </span>
-              <span className="text-[10px] font-black uppercase px-2 py-1 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 font-mono">
-                INT8 Quantized ({m.file_size_mb} MB)
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-700">
+                SHA: {m.sha256.slice(0, 10)}&hellip;
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
-              Scientific Model Evaluation &amp; Empirical Benchmark Registry
+              Model Evaluation &amp; Benchmarks
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1">
-              Pure empirical testing on the held-out test split of <strong>{m.dataset_name}</strong>. Zero fabricated data.
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+              Held-out empirical test split evaluation on <strong>{m.dataset_name}</strong> (N = {m.test_images_count} images).
             </p>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 max-w-sm">
+          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 max-w-sm shrink-0">
             <span className="font-black flex items-center gap-1.5 mb-0.5 font-mono">
               <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
-              Student Research Disclaimer
+              Student Research Project
             </span>
-            <span className="text-[11px] leading-relaxed">
-              Evaluated on held-out test split (N = {m.test_images_count} images). Not safety-certified. Physical repairs require municipal engineering sign-off.
+            <span className="text-[11px] leading-relaxed block">
+              Tested on real held-out road photos. Field repairs require human engineer physical audit.
             </span>
           </div>
         </div>

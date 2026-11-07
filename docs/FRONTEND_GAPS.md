@@ -20,3 +20,4 @@ This document records the alignment between `web/` frontend features and backend
 | **Empirical Evaluation**| `EvaluationPage.tsx` | `ml/runs/metrics.json`, `ml/runs/ablation.json` | ALIGNED | 12-image failure gallery, INT8 calibration drop. |
 
 *No missing backend endpoints identified. All visible controls bind directly to real backend routes or generated test split artifacts.*
+

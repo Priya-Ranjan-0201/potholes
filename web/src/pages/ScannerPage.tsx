@@ -11,7 +11,7 @@ import {
 } from "../components/Icons";
 import { detectDefects, InspectionResult } from "../utils/cvDetector";
 import { useLanguage } from "../context/LanguageContext";
-import { MilestoneHeader, SeverityBadge, Sign, RoadLoader, CatsEye } from "../ui";
+import { SeverityBadge, Sign, RoadLoader } from "../ui";
 
 interface SampleImage {
   id: string;
@@ -134,23 +134,22 @@ export const ScannerPage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 w-full">
-      {/* Top Header Card with Milestone Stone */}
+      {/* Top Header Card */}
       <div className="dhaba-card p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <MilestoneHeader km="01" title="AI Road Scanner" highway="NH-44" variant="yellow" />
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-              <CatsEye color="amber" size="sm" pulse />
-              <span>{t("ircCompliantBadge")}</span>
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider font-mono bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+              NH-44 · KM 01
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
-              <span>{t("modelActive")} ({inspection.latencyMs}ms)</span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>YOLO11n Edge AI Active ({inspection.latencyMs || 74}ms)</span>
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
             {t("scannerTitle")}
           </h1>
-          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5">
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
             {t("scannerSubtitle")}
           </p>
         </div>

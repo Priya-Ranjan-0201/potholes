@@ -51,3 +51,4 @@
 
 15. **Performance & Memory Footprint:**  
     *Verification:* Total production bundle gzip size is under 250 KB (`243 KB`), ensuring sub-2.5s load times on 4G cellular links.
+

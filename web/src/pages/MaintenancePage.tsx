@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, WorkOrder } from "../api/client";
-import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import {
   Plus,
@@ -16,7 +15,6 @@ import { MilestoneHeader, CatsEye } from "../ui";
 
 export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
-  const { activeRole } = useAuth();
   const { t } = useLanguage();
 
   // Create modal state
@@ -111,10 +109,10 @@ export const MaintenancePage: React.FC = () => {
   const workOrders = woData?.items || [];
 
   const columns = [
-    { key: "ASSIGNED", label: "Lane 1: Assigned", color: "border-blue-500/40 bg-blue-500/[0.04]", catseye: "peacock" as const },
-    { key: "IN_PROGRESS", label: "Lane 2: In Repair", color: "border-amber-500/40 bg-amber-500/[0.04]", catseye: "amber" as const },
-    { key: "COMPLETED", label: "Lane 3: Pending Audit", color: "border-purple-500/40 bg-purple-500/[0.04]", catseye: "amber" as const },
-    { key: "VERIFIED", label: "Lane 4: Verified Closure", color: "border-emerald-500/40 bg-emerald-500/[0.04]", catseye: "peacock" as const },
+    { key: "ASSIGNED", label: "Assigned", color: "border-blue-500/40 bg-blue-500/[0.04]", catseye: "peacock" as const },
+    { key: "IN_PROGRESS", label: "In Repair", color: "border-amber-500/40 bg-amber-500/[0.04]", catseye: "amber" as const },
+    { key: "COMPLETED", label: "Pending Audit", color: "border-purple-500/40 bg-purple-500/[0.04]", catseye: "amber" as const },
+    { key: "VERIFIED", label: "Verified Closure", color: "border-emerald-500/40 bg-emerald-500/[0.04]", catseye: "peacock" as const },
   ];
 
   const getOrdersForColumn = (colKey: string) => {
@@ -146,26 +144,22 @@ export const MaintenancePage: React.FC = () => {
       {/* Header with Milestone Stone and Create Dispatch Button */}
       <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <MilestoneHeader km="02" title={t("maintenanceTitle")} highway="NH-44" variant="yellow" />
-            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
-              Highway Lane Kanban
-            </span>
-          </div>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
-            {t("maintenanceSubtitle")}
-          </p>
+          <MilestoneHeader
+            km="02"
+            title={t("maintenanceTitle")}
+            subtitle={t("maintenanceSubtitle")}
+            highway="NH-44"
+            variant="yellow"
+          />
         </div>
 
-        {(activeRole === "engineer" || activeRole === "admin") && (
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 rounded-xl text-xs font-black transition shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t("dispatchWoBtn")}</span>
-          </button>
-        )}
+        <button
+          onClick={() => setCreateModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 rounded-xl text-xs font-black transition shadow-md shrink-0 self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          <span>{t("dispatchWoBtn")}</span>
+        </button>
       </div>
 
       {/* Kanban Board Columns styled as Highway Lanes */}
@@ -175,7 +169,7 @@ export const MaintenancePage: React.FC = () => {
           return (
             <div
               key={col.key}
-              className={`rounded-2xl border-2 p-4 flex flex-col h-[680px] ${col.color} dhaba-card shadow-xs`}
+              className={`rounded-2xl border-2 p-4 flex flex-col min-h-[380px] max-h-[720px] ${col.color} dhaba-card shadow-xs`}
             >
               <div className="flex items-center justify-between pb-3 border-b border-[#EBD9B8] dark:border-stone-800 mb-3">
                 <div className="flex items-center gap-1.5">
@@ -288,8 +282,10 @@ export const MaintenancePage: React.FC = () => {
                     );
                   })
                 ) : (
-                  <div className="text-center text-xs text-stone-400 py-12 font-mono">
-                    Lane Clear
+                  <div className="h-full flex flex-col items-center justify-center py-12 text-center text-stone-400 dark:text-stone-500">
+                    <CheckCircle className="w-6 h-6 opacity-30 mb-2" />
+                    <span className="text-xs font-semibold">No active orders</span>
+                    <span className="text-[11px] opacity-70">Lane clear</span>
                   </div>
                 )}
               </div>

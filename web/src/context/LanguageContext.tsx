@@ -110,8 +110,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     colRating: "Quality Score",
 
     // Complaints Page
-    complaintsTitle: "Citizen Grievance Redressal & Damage Reports",
-    complaintsSubtitle: "Citizen damage submissions governed by strict municipal state machine transitions.",
+    complaintsTitle: "Citizen Grievances & Reports",
+    complaintsSubtitle: "Submit and track public road distress complaints and municipal repair updates.",
     allStatuses: "All Complaint Statuses",
     submitReportBtn: "+ Submit Citizen Report",
     statusSubmitted: "SUBMITTED",
@@ -134,8 +134,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     cancelBtn: "Cancel",
 
     // Work Orders / Maintenance
-    maintenanceTitle: "Maintenance Kanban & PWD Work Orders",
-    maintenanceSubtitle: "Lifecycle tracking from contractor assignment to mandatory human repair sign-off.",
+    maintenanceTitle: "Work Orders & Maintenance",
+    maintenanceSubtitle: "Track repair progress from contractor assignment to human engineer verification.",
     dispatchWoBtn: "+ Dispatch Work Order",
     colAssigned: "Assigned & Created",
     colInProgress: "Repair In Progress",
@@ -149,8 +149,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     slaTarget: "Target SLA:",
 
     // Defects Registry
-    defectsTitle: "Canonical Defect Registry (One Pothole = One Record)",
-    defectsSubtitle: "Deduplicated physical road defects with persistent IDs, multi-pass sighting telemetry, and severity tracking.",
+    defectsTitle: "Road Defect Registry",
+    defectsSubtitle: "Live database of road surface defects identified by Edge AI and field audits.",
     filterLabel: "Filter:",
     allDefectClasses: "All Defect Classes",
     colDefectId: "Defect ID",

@@ -91,3 +91,4 @@ export const OrnamentFrame: React.FC<OrnamentFrameProps> = ({
     </div>
   );
 };
+

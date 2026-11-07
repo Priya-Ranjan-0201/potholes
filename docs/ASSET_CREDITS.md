@@ -17,3 +17,4 @@ In strict accordance with Rule F4 of the frontend specification:
 - **Truck-Art Ornaments (`web/src/ui/OrnamentFrame.tsx`):** Original geometric scalloped garland patterns, chevron reflector bands, and corner flourishes.
 - **"Gaddha" Crater Mascot (`web/src/ui/EmptyState.tsx`):** Original hand-drawn geometric SVG mascot representing a friendly road crater.
 - **System Icons (`web/src/components/Icons.tsx`):** MIT Licensed feather/lucide iconography.
+

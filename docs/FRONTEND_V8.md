@@ -220,3 +220,4 @@ FINAL OUTPUT: summary per phase; Lighthouse, axe and test results with file path
 asset credits; list of open issues and HUMAN_TODO items (native-speaker review of translations, real-phone
 check, asset licence confirmations). START NOW with P1 and continue automatically.
 ```
+

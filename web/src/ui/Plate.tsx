@@ -48,3 +48,4 @@ export const Plate: React.FC<PlateProps> = ({
     </div>
   );
 };
+

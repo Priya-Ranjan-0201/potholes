@@ -114,15 +114,13 @@ export const ComplaintsPage: React.FC = () => {
       {/* Header and Submit Button with Milestone Stone */}
       <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <MilestoneHeader km="03" title={t("complaintsTitle")} highway="NH-44" variant="yellow" />
-            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
-              Public Reporting Kiosk
-            </span>
-          </div>
-          <p className="text-xs text-stone-600 dark:text-stone-400">
-            {t("complaintsSubtitle")}
-          </p>
+          <MilestoneHeader
+            km="03"
+            title={t("complaintsTitle")}
+            subtitle={t("complaintsSubtitle")}
+            highway="NH-44"
+            variant="yellow"
+          />
         </div>
 
         <div className="flex items-center gap-3 shrink-0">

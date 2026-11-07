@@ -53,3 +53,4 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
     </span>
   );
 };
+

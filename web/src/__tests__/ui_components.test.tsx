@@ -37,3 +37,4 @@ describe("Design System Tokens & Road Signs (Truck Art Meets Night Highway)", ()
     expect(signByString.shape).toBe("circle");
   });
 });
+
