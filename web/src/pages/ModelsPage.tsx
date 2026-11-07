@@ -13,10 +13,12 @@ interface ModelVersion {
   status: "ACTIVE" | "AVAILABLE" | "ARCHIVED";
   sha256: string;
   benchmarks: {
-    oppo_k13_ms: number;
-    oppo_k13_fps: number;
-    rpi5_ms: number;
-    jetson_ms: number;
+    host_platform: string;
+    host_p50_ms: number;
+    host_fps: number;
+    oppo_k13_status: string;
+    rpi5_status: string;
+    jetson_status: string;
   };
 }
 
@@ -28,16 +30,18 @@ export const ModelsPage: React.FC = () => {
       name: "ScamRoad YOLO Nano INT8 (Production Edge)",
       precision: "INT8",
       runtime: "ONNX Runtime Mobile / TFLite",
-      size_mb: 3.42,
-      mAP50: 0.9912,
-      mAP50_95: 0.8124,
+      size_mb: 3.35,
+      mAP50: 0.8575,
+      mAP50_95: 0.6214,
       status: "ACTIVE",
       sha256: "b9c0268a734e91244f7725dc1001a403bbff7e7195f269a9e3e3b7498c0b2984",
       benchmarks: {
-        oppo_k13_ms: 14.2,
-        oppo_k13_fps: 22.4,
-        rpi5_ms: 38.5,
-        jetson_ms: 8.4,
+        host_platform: "Windows 11 (AMD64 12-core)",
+        host_p50_ms: 20.75,
+        host_fps: 47.98,
+        oppo_k13_status: "UNTESTED",
+        rpi5_status: "UNTESTED",
+        jetson_status: "UNTESTED",
       },
     },
     {
@@ -45,16 +49,18 @@ export const ModelsPage: React.FC = () => {
       name: "ScamRoad YOLO Nano FP32 (Full Precision Baseline)",
       precision: "FP32",
       runtime: "PyTorch / ONNX FP32",
-      size_mb: 12.85,
-      mAP50: 0.9950,
-      mAP50_95: 0.8240,
+      size_mb: 12.18,
+      mAP50: 0.8613,
+      mAP50_95: 0.6240,
       status: "AVAILABLE",
       sha256: "034e91244f7725dc1001a403bbff7e7195f269a9e3e3b7498c0b2984b9c0268a",
       benchmarks: {
-        oppo_k13_ms: 28.6,
-        oppo_k13_fps: 15.1,
-        rpi5_ms: 84.0,
-        jetson_ms: 12.1,
+        host_platform: "Windows 11 (AMD64 12-core)",
+        host_p50_ms: 41.16,
+        host_fps: 23.60,
+        oppo_k13_status: "UNTESTED",
+        rpi5_status: "UNTESTED",
+        jetson_status: "UNTESTED",
       },
     },
     {
@@ -63,15 +69,17 @@ export const ModelsPage: React.FC = () => {
       precision: "FP32",
       runtime: "PyTorch / TensorRT",
       size_mb: 44.1,
-      mAP50: 0.9965,
-      mAP50_95: 0.8410,
+      mAP50: 0.8920,
+      mAP50_95: 0.6510,
       status: "AVAILABLE",
       sha256: "7725dc1001a403bbff7e7195f269a9e3e3b7498c0b2984b9c0268a034e91244f",
       benchmarks: {
-        oppo_k13_ms: 64.0,
-        oppo_k13_fps: 8.2,
-        rpi5_ms: 195.0,
-        jetson_ms: 19.5,
+        host_platform: "Windows 11 (AMD64 12-core)",
+        host_p50_ms: 88.40,
+        host_fps: 11.31,
+        oppo_k13_status: "UNTESTED",
+        rpi5_status: "UNTESTED",
+        jetson_status: "UNTESTED",
       },
     },
   ]);
@@ -186,31 +194,35 @@ export const ModelsPage: React.FC = () => {
               </div>
 
               <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
-                <span className="text-xs text-blue-700 font-semibold block">OPPO K13 NPU Speed</span>
+                <span className="text-xs text-blue-700 font-semibold block">Host Throughput (Verified)</span>
                 <span className="text-xl font-black text-blue-900 mt-1 block font-mono">
-                  {model.benchmarks.oppo_k13_fps} FPS
+                  {model.benchmarks.host_fps} FPS
                 </span>
-                <span className="text-[10px] text-blue-600 font-mono">({model.benchmarks.oppo_k13_ms} ms/frame)</span>
+                <span className="text-[10px] text-blue-600 font-mono">({model.benchmarks.host_p50_ms} ms p50)</span>
               </div>
             </div>
 
-            {/* Hardware Benchmark Comparison Bar */}
-            <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-2 text-xs text-slate-600">
+            {/* Hardware Benchmark Status Bar per Rule R10 */}
+            <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
               <div>
-                <span className="text-slate-400">Raspberry Pi 5:</span>{" "}
-                <strong className="font-mono">{model.benchmarks.rpi5_ms} ms</strong>
+                <span className="text-slate-400">Tested Device:</span>{" "}
+                <strong className="font-mono">{model.benchmarks.host_platform}</strong>
               </div>
-              <div>
-                <span className="text-slate-400">Jetson Orin Nano:</span>{" "}
-                <strong className="font-mono">{model.benchmarks.jetson_ms} ms</strong>
-              </div>
-              <div>
-                <span className="text-slate-400">Quantization Loss:</span>{" "}
-                <strong className="font-mono text-emerald-700">
-                  {model.precision === "INT8" ? "-0.38% mAP drop" : "0.0% Baseline"}
-                </strong>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                  OPPO K13: {model.benchmarks.oppo_k13_status}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                  RPi 5: {model.benchmarks.rpi5_status}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                  Jetson Orin: {model.benchmarks.jetson_status}
+                </span>
               </div>
             </div>
+            <p className="text-[10px] text-slate-400 mt-2 italic">
+              *Verified on Windows 11 host (generic_best_bench.json). Mobile NPU and embedded SBCs marked UNTESTED per Rule R10.
+            </p>
           </div>
         ))}
       </div>

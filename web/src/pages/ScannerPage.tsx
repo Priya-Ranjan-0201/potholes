@@ -139,7 +139,7 @@ export const ScannerPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>🇮🇳 {t("ircCompliantBadge")}</span>
+              <span>{t("ircCompliantBadge")}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
               <span>{t("modelActive")} ({inspection.latencyMs}ms)</span>
@@ -414,7 +414,10 @@ export const ScannerPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 dark:text-slate-400 text-xs">{t("estRepairCost")}</span>
+                  <div>
+                    <span className="text-slate-500 dark:text-slate-400 text-xs block">{t("estRepairCost")}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 italic block">*Illustrative rate card</span>
+                  </div>
                   <span className="font-mono text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
                     ₹{(Math.max(activeDefect.score * 55, 1850)).toLocaleString("en-IN")}
                   </span>
@@ -430,7 +433,7 @@ export const ScannerPage: React.FC = () => {
                 <div className="pt-2">
                   <p className="text-[11px] text-slate-400 mb-1 font-bold uppercase tracking-wider flex items-center justify-between">
                     <span>{t("recommendedAction")}</span>
-                    <span className="text-slate-500 font-mono text-[10px]">MoRTH Sec 3004</span>
+                    <span className="text-slate-500 font-mono text-[10px]">IRC:82 Inspired</span>
                   </p>
                   <p className="text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 leading-relaxed">
                     {activeDefect.severity === "Critical"

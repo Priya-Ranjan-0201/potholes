@@ -97,7 +97,10 @@ export const DashboardPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>🇮🇳 {t("appName")}</span>
+              <span>{t("appName")}</span>
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+              DEMO DATA SEEDED
             </span>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
               {t("standardsNotice")}
@@ -326,7 +329,7 @@ export const DashboardPage: React.FC = () => {
             <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("colWard")}</h2>
           </div>
-          <span className="text-xs text-slate-400 font-medium">MoRTH & PWD</span>
+          <span className="text-xs text-slate-400 font-medium">Municipal Engineering Division</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
@@ -395,7 +398,7 @@ export const DashboardPage: React.FC = () => {
             <HardHat className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("contractorLeaderboardTitle")}</h2>
           </div>
-          <span className="text-xs text-slate-400 font-medium">MoRTH & PWD</span>
+          <span className="text-xs text-slate-400 font-medium">Municipal Engineering Division</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">

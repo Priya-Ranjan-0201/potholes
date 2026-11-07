@@ -21,12 +21,12 @@ export const LANGUAGES: LanguageOption[] = [
 export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   en: {
     // Brand & Banner
-    govtBanner: "Government of India | Ministry of Road Transport & Highways (MoRTH) & PWD",
-    standardsNotice: "IRC:SP:84-2019 & IRC:82-2023 Compliant",
+    govtBanner: "Student Research Project | AI Road Defect & Municipal Workflow Portal (Not an official government portal)",
+    standardsNotice: "Severity rubric inspired by IRC:82-2023 (Clause 4.2)",
     helplineText: "24x7 Citizen Helpline: 1800-ROAD-FIX",
     appName: "ScamRoad",
     appHindiName: "Road Safety",
-    appSubtitle: "National AI Road Defect & Pothole Redressal Portal",
+    appSubtitle: "Autonomous Edge AI Pothole & Road Defect Portal (Student Research)",
     
     // Navbar
     navOverview: "Dashboard",
@@ -42,7 +42,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "AI Pothole & Road Defect Scanner",
     scannerSubtitle: "Real-time neural edge detection for potholes and road structural damage per MoRTH specifications.",
     modelActive: "YOLO11n Edge AI Active",
-    ircCompliantBadge: "IRC:SP:84-2019 Compliant",
+    ircCompliantBadge: "IRC:82-2023 Inspired Rubric",
     uploadRoadPhoto: "+ Upload Road Photo",
     uploadHint: "Drop high-resolution road photo or click to browse",
     presetsLabel: "Benchmark Highway Presets:",
@@ -170,20 +170,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "Language",
 
     // Footer
-    footerNotice: "Government of India | Ministry of Road Transport & Highways (MoRTH) & PWD",
-    footerCompliance: "IRC:SP:84-2019 & IRC:82-2023 Compliant",
+    footerNotice: "Student research project. Not an official government system. Not safety-certified.",
+    footerCompliance: "Severity rubric inspired by IRC:82-2023 Clause 4.2 & IRC:SP:84-2019",
     footerPrivacy: "Rule R15 Privacy Shield active for public camera feeds",
-    allRightsReserved: "Government of India. All rights reserved.",
+    allRightsReserved: "Student Research Project. Open for academic and civic research.",
   },
 
   hi: {
     // Brand & Banner
-    govtBanner: "भारत सरकार | सड़क परिवहन एवं राजमार्ग मंत्रालय (MoRTH) एवं लोक निर्माण विभाग",
-    standardsNotice: "भारतीय सड़क कांग्रेस IRC:SP:84-2019 एवं IRC:82-2023 मानकीकृत",
+    govtBanner: "छात्र अनुसंधान परियोजना | सड़क एआई पोर्टल (गैर-सरकारी / अनुसंधान हेतु)",
+    standardsNotice: "IRC:82-2023 (खण्ड 4.2) से प्रेरित गंभीरता मानक",
     helplineText: "24x7 नागरिक हेल्पलाइन: 1800-ROAD-FIX",
     appName: "सड़क सुरक्षा",
     appHindiName: "सड़क सुरक्षा",
-    appSubtitle: "राष्ट्रीय एआई सड़क दोष एवं गड्ढा निवारण पोर्टल",
+    appSubtitle: "स्वायत्त एज एआई सड़क दोष एवं गड्ढा निवारण प्रणाली (छात्र अनुसंधान)",
 
     // Navbar
     navOverview: "डैशबोर्ड",
@@ -199,7 +199,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "एआई सड़क स्कैनर एवं गड्ढा पहचान",
     scannerSubtitle: "सड़क परिवहन मंत्रालय (MoRTH) विनिर्देशों के अनुसार गड्ढों और दरारों की वास्तविक समय में स्वचालित पहचान।",
     modelActive: "YOLO11n एज एआई सक्रिय",
-    ircCompliantBadge: "भारतीय मानक IRC:SP:84-2019 अनुपालित",
+    ircCompliantBadge: "IRC:82-2023 प्रेरित मानक",
     uploadRoadPhoto: "+ सड़क फोटो अपलोड करें",
     uploadHint: "उच्च-गुणवत्ता सड़क फोटो खींचें या फाइल चुनें",
     presetsLabel: "परीक्षण राजमार्ग नमूने:",
@@ -327,20 +327,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "भाषा चुनें",
 
     // Footer
-    footerNotice: "भारत सरकार | सड़क परिवहन एवं राजमार्ग मंत्रालय (MoRTH) एवं लोक निर्माण विभाग",
-    footerCompliance: "IRC:SP:84-2019 एवं IRC:82-2023 मानक अनुरूप",
+    footerNotice: "छात्र अनुसंधान परियोजना। यह कोई आधिकारिक सरकारी प्रणाली नहीं है। सुरक्षा-प्रमाणित नहीं।",
+    footerCompliance: "IRC:82-2023 (खण्ड 4.2) एवं IRC:SP:84-2019 से प्रेरित मानक",
     footerPrivacy: "सार्वजनिक कैमरा फुटेज हेतु नियम R15 गोपनीयता शील्ड सक्रिय",
-    allRightsReserved: "भारत सरकार। सर्वाधिकार सुरक्षित।",
+    allRightsReserved: "छात्र अनुसंधान परियोजना। शैक्षणिक एवं नागरिक अनुसंधान हेतु।",
   },
 
   pa: {
     // Brand & Banner
-    govtBanner: "ਭਾਰਤ ਸਰਕਾਰ | ਸੜਕ ਆਵਾਜਾਈ ਅਤੇ ਰਾਜਮਾਰਗ ਮੰਤਰਾਲਾ (MoRTH) ਤੇ ਲੋਕ ਨਿਰਮਾਣ ਵਿਭਾਗ",
-    standardsNotice: "ਭਾਰਤੀ ਸੜਕ ਕਾਂਗਰਸ IRC:SP:84-2019 ਤੇ IRC:82-2023 ਮਾਨਕੀਕ੍ਰਿਤ",
+    govtBanner: "ਵਿਦਿਆਰਥੀ ਖੋਜ ਪ੍ਰੋਜੈਕਟ | ਸੜਕ ਏਆਈ ਪੋਰਟਲ (ਗ਼ੈਰ-ਸਰਕਾਰੀ ਖੋਜ ਪ੍ਰਣਾਲੀ)",
+    standardsNotice: "IRC:82-2023 (ਧਾਰਾ 4.2) ਤੋਂ ਪ੍ਰੇਰਿਤ ਗੰਭੀਰਤਾ ਰੂਬਰਿਕ",
     helplineText: "24x7 ਨਾਗਰਿਕ ਹੈਲਪਲਾਈਨ: 1800-ROAD-FIX",
     appName: "ਸੜਕ ਸੁਰੱਖਿਆ",
     appHindiName: "ਸੜਕ ਸੁਰੱਖਿਆ",
-    appSubtitle: "ਰਾਸ਼ਟਰੀ ਏਆਈ ਸੜਕ ਗੁਣਵੱਤਾ ਤੇ ਟੋਏ ਨਿਵਾਰਣ ਪੋਰਟਲ",
+    appSubtitle: "ਏਆਈ ਸੜਕ ਗੁਣਵੱਤਾ ਤੇ ਟੋਏ ਨਿਵਾਰਣ ਪੋਰਟਲ (ਵਿਦਿਆਰਥੀ ਖੋਜ)",
 
     // Navbar
     navOverview: "ਡੈਸ਼ਬੋਰਡ",
@@ -356,7 +356,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "ਏਆਈ ਸੜਕ ਸਕੈਨਰ ਅਤੇ ਟੋਇਆਂ ਦੀ ਪਛਾਣ",
     scannerSubtitle: "ਸੜਕ ਆਵਾਜਾਈ ਮੰਤਰਾਲੇ ਦੇ ਨਿਯਮਾਂ ਅਨੁਸਾਰ ਟੋਇਆਂ ਅਤੇ ਤਰੇੜਾਂ ਦੀ ਰੀਅਲ-ਟਾਈਮ ਆਟੋਮੈਟਿਕ ਜਾਂਚ।",
     modelActive: "YOLO11n ਏਆਈ ਮਾਡਲ ਚਾਲੂ",
-    ircCompliantBadge: "IRC:SP:84-2019 ਅਨੁਕੂਲ",
+    ircCompliantBadge: "IRC:82-2023 ਪ੍ਰੇਰਿਤ ਰੂਬਰਿਕ",
     uploadRoadPhoto: "+ ਸੜਕ ਦੀ ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ",
     uploadHint: "ਸਾਫ਼ ਫੋਟੋ ਖਿੱਚੋ ਜਾਂ ਫਾਈਲ ਚੁਣੋ",
     presetsLabel: "ਨਮੂਨਾ ਹਾਈਵੇਅ ਸੜਕਾਂ:",
@@ -484,20 +484,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "ਭਾਸ਼ਾ ਚੁਣੋ",
 
     // Footer
-    footerNotice: "ਭਾਰਤ ਸਰਕਾਰ | ਸੜਕ ਆਵਾਜਾਈ ਅਤੇ ਰਾਜਮਾਰਗ ਮੰਤਰਾਲਾ ਤੇ ਲੋਕ ਨਿਰਮਾਣ ਵਿਭਾਗ",
-    footerCompliance: "IRC:SP:84-2019 ਮਾਨਕਾਂ ਅਨੁਕੂਲ",
+    footerNotice: "ਵਿਦਿਆਰਥੀ ਖੋਜ ਪ੍ਰੋਜੈਕਟ। ਕੋਈ ਅਧਿਕਾਰਤ ਸਰਕਾਰੀ ਪ੍ਰਣਾਲੀ ਨਹੀਂ। ਸੁਰੱਖਿਆ-ਪ੍ਰਮਾਣਿਤ ਨਹੀਂ।",
+    footerCompliance: "IRC:82-2023 (ਧਾਰਾ 4.2) ਤੇ IRC:SP:84-2019 ਤੋਂ ਪ੍ਰੇਰਿਤ ਰੂਬਰਿਕ",
     footerPrivacy: "ਕੈਮਰਾ ਫੀਡ ਲਈ ਨਿਯਮ R15 ਨਿੱਜਤਾ ਸੁਰੱਖਿਆ ਲਾਗੂ ਹੈ",
-    allRightsReserved: "ਭਾਰਤ ਸਰਕਾਰ। ਸਾਰੇ ਹੱਕ ਰਾਖਵੇਂ ਹਨ।",
+    allRightsReserved: "ਵਿਦਿਆਰਥੀ ਖੋਜ ਪ੍ਰੋਜੈਕਟ। ਅਕਾਦਮਿਕ ਖੋਜ ਹਿੱਤ ਉਪਲਬਧ।",
   },
 
   ta: {
     // Brand & Banner
-    govtBanner: "இந்திய அரசு | சாலை போக்குவரத்து மற்றும் நெடுஞ்சாலைகள் அமைச்சகம் (MoRTH)",
-    standardsNotice: "இந்திய சாலை காங்கிரஸ் IRC:SP:84-2019 தரநிலை அங்கீகரிக்கப்பட்டது",
+    govtBanner: "மாணவர் ஆராய்ச்சி திட்டம் | சாலை AI தளம் (அரசு தளம் அல்ல)",
+    standardsNotice: "IRC:82-2023 (பிரிவு 4.2) வழிகாட்டல்",
     helplineText: "24x7 குடிமக்கள் உதவி எண்: 1800-ROAD-FIX",
     appName: "சாலை பாதுகாப்பு",
     appHindiName: "சாலை பாதுகாப்பு",
-    appSubtitle: "தேசிய சாலை குறைபாடு மற்றும் குழி தீர்வு தளம்",
+    appSubtitle: "சாலை குறைபாடு மற்றும் குழி கண்காணிப்பு தளம் (மாணவர் ஆய்வு)",
 
     // Navbar
     navOverview: "டாஷ்போர்டு",
@@ -513,7 +513,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "AI சாலை ஸ்கேனர் & குழி கண்டறிதல்",
     scannerSubtitle: "MoRTH விவரக்குறிப்புகளின்படி சாலை குழிகள் மற்றும் விரிசல்களை நிகழ்நேரத்தில் கண்டறிதல்.",
     modelActive: "YOLO11n AI மாடல் செயலில் உள்ளது",
-    ircCompliantBadge: "IRC:SP:84-2019 அங்கீகரிக்கப்பட்டது",
+    ircCompliantBadge: "IRC:82-2023 வழிகாட்டல்",
     uploadRoadPhoto: "+ சாலை புகைப்படத்தைப் பதிவேற்று",
     uploadHint: "தெளிவான புகைப்படத்தை எடுக்கவும் அல்லது கோப்பைத் தேர்ந்தெடுக்கவும்",
     presetsLabel: "மாதிரி நெடுஞ்சாலை சாலைகள்:",
@@ -641,20 +641,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "மொழியைத் தேர்வுசெய்",
 
     // Footer
-    footerNotice: "இந்திய அரசு | சாலை போக்குவரத்து மற்றும் நெடுஞ்சாலைகள் அமைச்சகம் & PWD",
-    footerCompliance: "IRC:SP:84-2019 தரநிலைகளுக்கு இணங்குகிறது",
+    footerNotice: "மாணவர் ஆராய்ச்சி திட்டம். அதிகாரப்பூர்வ அரசு அமைப்பு அல்ல. பாதுகாப்பு சான்றிதழ் பெறப்படவில்லை.",
+    footerCompliance: "IRC:82-2023 (பிரிவு 4.2) மற்றும் IRC:SP:84-2019 வழிகாட்டல்",
     footerPrivacy: "கேமரா காட்சிகளுக்கு விதி R15 தனியுரிமை கவசம் செயலில் உள்ளது",
-    allRightsReserved: "இந்திய அரசு. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.",
+    allRightsReserved: "மாணவர் ஆராய்ச்சி திட்டம். கல்வி மற்றும் ஆய்வு பயன்பாட்டிற்கு.",
   },
 
   te: {
     // Brand & Banner
-    govtBanner: "భారత ప్రభుత్వం | రోడ్డు రవాణా మరియు రహదారుల మంత్రిత్వ శాఖ (MoRTH)",
-    standardsNotice: "భారతీయ రోడ్డు కాంగ్రెస్ IRC:SP:84-2019 ప్రమాణాల ప్రకారం ఆమోదించబడింది",
+    govtBanner: "విద్యార్థి పరిశోధన ప్రాజెక్ట్ | రోడ్డు AI పోర్టల్ (ప్రభుత్వ అధికారికం కాదు)",
+    standardsNotice: "IRC:82-2023 (క్లాజ్ 4.2) ప్రేరిత తీవ్రత వర్గీకరణ",
     helplineText: "24x7 పౌర హెల్ప్‌లైన్: 1800-ROAD-FIX",
     appName: "రోడ్డు భద్రత",
     appHindiName: "రోడ్డు భద్రత",
-    appSubtitle: "జాతీయ రోడ్డు నాణ్యత మరియు గుంతల నివారణ పోర్టల్",
+    appSubtitle: "రోడ్డు నాణ్యత మరియు గుంతల పర్యవేక్షణ పోర్టల్ (పరిశోధన)",
 
     // Navbar
     navOverview: "డాష్‌బోర్డ్",
@@ -670,7 +670,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "AI రోడ్డు స్కానర్ & గుంతల గుర్తింపు",
     scannerSubtitle: "MoRTH మార్గదర్శకాల ప్రకారం గుంతలు మరియు పగుళ్లను నిజ సమయంలో స్వయంచాలకంగా గుర్తించడం.",
     modelActive: "YOLO11n AI మోడల్ చురుకుగా ఉంది",
-    ircCompliantBadge: "IRC:SP:84-2019 నిబంధనల ప్రకారం",
+    ircCompliantBadge: "IRC:82-2023 ఆధారితం",
     uploadRoadPhoto: "+ రోడ్డు ఫోటోను అప్‌లోడ్ చేయండి",
     uploadHint: "స్పష్టమైన ఫోటో తీయండి లేదా ఫైల్ ఎంచుకోండి",
     presetsLabel: "నమూనా జాతీయ రహదారులు:",
@@ -798,20 +798,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "భాషను ఎంచుకోండి",
 
     // Footer
-    footerNotice: "భారత ప్రభుత్వం | రోడ్డు రవాణా మరియు రహదారుల మంత్రిత్వ శాఖ & PWD",
-    footerCompliance: "IRC:SP:84-2019 ప్రమాణాలకు అనుగుణంగా ఉంది",
+    footerNotice: "విద్యార్థి పరిశోధన ప్రాజెక్ట్. అధికారిక ప్రభుత్వ వ్యవస్థ కాదు. భద్రతా-ధృవీకరించబడలేదు.",
+    footerCompliance: "IRC:82-2023 (క్లాజ్ 4.2) మరియు IRC:SP:84-2019 ప్రమాణాల ప్రేరణ",
     footerPrivacy: "కెమెరా ఫీడ్ కోసం నియమం R15 గోప్యతా కవచం సక్రియంగా ఉంది",
-    allRightsReserved: "భారత ప్రభుత్వం. సర్వ హక్కులు ప్రత్యేకించబడ్డాయి.",
+    allRightsReserved: "విద్యార్థి పరిశోధన ప్రాజెక్ట్. విద్యా మరియు పరిశోధన ప్రయోజనాల కోసం.",
   },
 
   bn: {
     // Brand & Banner
-    govtBanner: "ভারত সরকার | সড়ক পরিবহন ও মহাসড়ক মন্ত্রক (MoRTH) এবং পূর্ত বিভাগ",
-    standardsNotice: "ভারতীয় সড়ক কংগ্রেস IRC:SP:84-2019 ও IRC:82-2023 অনুমোদিত",
+    govtBanner: "শিক্ষার্থী গবেষণা প্রকল্প | সড়ক AI পোর্টাল (সরকারী পোর্টাল নয়)",
+    standardsNotice: "IRC:82-2023 (ধারা ৪.২) অনুপ্রাণিত তীব্রতা রুব্রিক",
     helplineText: "24x7 নাগরিক হেল্পলাইন: 1800-ROAD-FIX",
     appName: "সড়ক সুরক্ষা",
     appHindiName: "সড়ক সুরক্ষা",
-    appSubtitle: "জাতীয় এআই সড়ক ত্রুটি ও গর্ত প্রতিকার পোর্টাল",
+    appSubtitle: "স্বায়ত্তশাসিত এজ এআই সড়ক ত্রুটি ও গর্ত নজরদারি পোর্টাল (গবেষণা)",
 
     // Navbar
     navOverview: "ড্যাশবোর্ড",
@@ -827,7 +827,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     scannerTitle: "এআই সড়ক স্ক্যানার এবং গর্ত সনাক্তকরণ",
     scannerSubtitle: "সড়ক পরিবহন মন্ত্রকের নিয়মাবলী অনুসারে গর্ত ও ফাটলের রিয়েল-টাইম স্বয়ংক্রিয় সনাক্তকরণ।",
     modelActive: "YOLO11n এজ এআই সক্রিয়",
-    ircCompliantBadge: "IRC:SP:84-2019 অনুগত",
+    ircCompliantBadge: "IRC:82-2023 অনুপ্রাণিত",
     uploadRoadPhoto: "+ সড়কের ছবি আপলোড করুন",
     uploadHint: "স্পষ্ট ছবি তুলুন বা ফাইল নির্বাচন করুন",
     presetsLabel: "নমুনা জাতীয় মহাসড়ক:",
@@ -955,10 +955,10 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "ভাষা নির্বাচন করুন",
 
     // Footer
-    footerNotice: "ভারত সরকার | সড়ক পরিবহন ও মহাসড়ক মন্ত্রক এবং পূর্ত বিভাগ",
-    footerCompliance: "IRC:SP:84-2019 মানদণ্ড অনুগত",
+    footerNotice: "শিক্ষার্থী গবেষণা প্রকল্প। কোনও সরকারী ব্যবস্থা নয়। সুরক্ষা-প্রত্যয়িত নয়।",
+    footerCompliance: "IRC:82-2023 (ধারা ৪.২) ও IRC:SP:84-2019 অনুপ্রাণিত রুব্রিক",
     footerPrivacy: "ক্যামেরা ফিডের জন্য নিয়ম R15 গোপনীয়তা শিল্ড সক্রিয়",
-    allRightsReserved: "ভারত সরকার। সর্বস্বত্ব সংরক্ষিত।",
+    allRightsReserved: "শিক্ষার্থী গবেষণা প্রকল্প। প্রাতিষ্ঠানিক ও নাগরিক গবেষণার জন্য উন্মুক্ত।",
   },
 };
 

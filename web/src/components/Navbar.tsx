@@ -50,12 +50,11 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-300">
-      {/* 🇮🇳 Tricolor National Micro-Ribbon Banner */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600" />
+      {/* Student Research Disclaimer & Standards Notice */}
       <div className="bg-slate-900 dark:bg-black text-slate-300 py-1 px-4 sm:px-6 lg:px-8 text-[11px] font-medium border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-bold">🇮🇳 {t("appName")}</span>
+            <span className="text-amber-400 font-bold">{t("appName")}</span>
             <span className="hidden sm:inline text-slate-600">|</span>
             <span className="hidden sm:inline text-slate-300">
               {t("govtBanner")}

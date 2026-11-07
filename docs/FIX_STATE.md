@@ -1,9 +1,9 @@
 # ScamRoad — Autonomous Fix, Hardening & Redesign State Tracker
 
 **Branch:** `fix/redesign-v6`  
-**Current Phase:** Phase 2 — HONESTY AND CLAIM FIXES  
+**Current Phase:** Phase 3 — ML CORRECTNESS AND EVIDENCE  
 **Status:** IN_PROGRESS  
-**Last Updated:** November 07, 2026 | 16:16 IST  
+**Last Updated:** November 07, 2026 | 16:21 IST  
 
 ---
 
@@ -13,11 +13,13 @@
   - Deliverable: `docs/STATUS_AUDIT.md`
   - Gate: Audit written, 38 OpenAPI endpoints, 39 tables, 4 model weights, and every README claim classified.
   - Completed: November 07, 2026 | Tag: `fix-phase-1-done`
-- [ ] **Phase 2: Honesty and Claim Fixes**
-  - Plan: Create `scripts/check_claims.py`, purge false GoI/MoRTH/NHAI branding, replace compliance badges with honest inspired rubrics, add rate card config, fix notebook URLs, update README.md.
-  - Deliverables: `scripts/check_claims.py`, updated `README.md`, `config/rate_card.json`, updated `Navbar.tsx`, `Footer.tsx`, `LanguageContext.tsx`.
-  - Gate: `python scripts/check_claims.py` passes with 0 violations.
+- [x] **Phase 2: Honesty and Claim Fixes**
+  - Deliverables: `scripts/check_claims.py`, updated `README.md`, `config/rate_card.json`, updated `Navbar.tsx`, `Footer.tsx`, `LanguageContext.tsx`, `DashboardPage.tsx`, `ModelsPage.tsx`, `ScannerPage.tsx`, `docs/DECISIONS.md`, `docs/LIMITATIONS.md`.
+  - Gate: `python scripts/check_claims.py` passed with 0 banned phrases and 100% claim traceability.
+  - Completed: November 07, 2026 | Tag: `fix-phase-2-done`
 - [ ] **Phase 3: ML Correctness and Evidence**
+  - Plan: Patch `ml/training/train_detect.py` serialization import, decouple confidence from severity in `backend/app/api/v1/infer.py`, generate `bench/privacy_blur_report.json` and `ml/runs/metrics.json`, achieve 144/144 passing pytest tests.
+  - Gate: 144/144 tests passing, ONNX parity and blur recall verified.
 - [ ] **Phase 4: Backend, Database, Security**
 - [ ] **Phase 5: Restore the Map and Core GIS Features**
 - [ ] **Phase 6: Frontend Code Quality**
@@ -31,13 +33,13 @@
 ## Evidence Paths
 
 - `docs/STATUS_AUDIT.md` — Phase 1 comprehensive codebase and claims audit report
+- `scripts/check_claims.py` — Phase 2 automated claim honesty checker (0 violations)
+- `config/rate_card.json` — Phase 2 configurable repair cost rate card
 
 ---
 
 ## Open Issues & Non-Blocking Findings
 
-1. `web/src/components/Navbar.tsx` and `Footer.tsx`: Government branding and emblems to be replaced by neutral student project text.
-2. `web/src/context/LanguageContext.tsx`: Translation keys contain "Government of India", "MoRTH & PWD", "Compliant".
-3. `ml/training/train_detect.py`: PyTorch 2.5 import error on `torch.utils.serialization`.
-4. `infer.py` & `ScannerPage.tsx`: Confidence conflated with severity; hardcoded repair costs.
-5. `README.md`: Hardware benchmarks need "UNTESTED" status for unmeasured mobile/SBC targets.
+1. `ml/training/train_detect.py`: PyTorch 2.5 import error on `torch.utils.serialization`.
+2. `backend/app/api/v1/infer.py`: Conflation of confidence with severity (Rule R4).
+3. `edge/agent/blur_privacy.py`: Needs quantitative blur recall benchmark (Rule R6).

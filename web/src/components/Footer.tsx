@@ -7,17 +7,14 @@ export const Footer: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="mt-auto bg-slate-900 dark:bg-black text-slate-300 border-t-2 border-amber-500/80 transition-colors">
-      {/* Tricolor Micro-Ribbon Accent */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600" />
-
+    <footer className="mt-auto bg-slate-900 dark:bg-black text-slate-300 border-t border-slate-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand & Authority */}
+          {/* Brand & Research Identity */}
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-md border border-white/20">
-                🇮🇳
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-md border border-white/20">
+                SR
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -97,12 +94,12 @@ export const Footer: React.FC = () => {
 
         <div className="mt-8 pt-6 border-t border-slate-800 dark:border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <div>
-            सत्यमेव जयते | {t("footerNotice")}
+            {t("footerNotice")}
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-slate-400">Version 2.4.0 (Production GovTech Build)</span>
+            <span className="text-slate-400">ScamRoad v2.4 (Student Research Edition)</span>
             <span>•</span>
-            <span className="text-emerald-400 font-medium">100% Verified Neural Edge Pipeline</span>
+            <span className="text-emerald-400 font-medium">Verified Edge Neural Pipeline</span>
           </div>
         </div>
       </div>

@@ -1,0 +1,30 @@
+{
+  "_notice": "Illustrative estimate, not an official Schedule of Rates. For municipal budget planning only.",
+  "currency": "INR",
+  "currency_symbol": "₹",
+  "base_mobilization_fee": 1850,
+  "severity_multiplier": 55,
+  "class_rates": {
+    "POTHOLE": {
+      "base_rate": 2200,
+      "unit": "per_defect",
+      "action": "Cold-mix asphalt compaction (indicative IRC:82 procedure)"
+    },
+    "CRACK_LONG": {
+      "base_rate": 1500,
+      "unit": "per_linear_meter_est",
+      "action": "Bituminous crack sealing"
+    },
+    "CRACK_TRANS": {
+      "base_rate": 1600,
+      "unit": "per_linear_meter_est",
+      "action": "Transverse crack route and seal"
+    },
+    "CRACK_ALLIGATOR": {
+      "base_rate": 3000,
+      "unit": "per_sq_meter_est",
+      "action": "Full-depth patch repair"
+    }
+  },
+  "formula": "Math.max(base_mobilization_fee, Math.round(severity_score * severity_multiplier + class_base_rate * 0.3))"
+}
