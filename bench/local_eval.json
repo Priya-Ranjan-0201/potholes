@@ -1,0 +1,104 @@
+{
+  "timestamp_utc": "2026-11-07T12:43:59.095851+00:00",
+  "model_version": "YOLO11n-INT8",
+  "checkpoint": "runs/export/best_int8.onnx",
+  "dataset_name": "ScamRoad Campus & City Local Test Slice",
+  "total_test_images": 10,
+  "total_ground_truth_instances": 9,
+  "metrics": {
+    "true_positives": 1,
+    "false_positives": 7,
+    "false_negatives": 8,
+    "precision": 0.125,
+    "recall": 0.1111,
+    "f1_score": 0.1176,
+    "mAP50": 0.1225
+  },
+  "latency": {
+    "p50_ms": 304.05,
+    "throughput_fps": 3.3,
+    "total_benchmark_time_seconds": 4.17
+  },
+  "per_image_audit": [
+    {
+      "image": "local_campus_01.jpg",
+      "ground_truth_count": 1,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_02.jpg",
+      "ground_truth_count": 1,
+      "detections_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_03.jpg",
+      "ground_truth_count": 1,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_04.jpg",
+      "ground_truth_count": 1,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_05.jpg",
+      "ground_truth_count": 2,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 2
+    },
+    {
+      "image": "local_campus_06.jpg",
+      "ground_truth_count": 2,
+      "detections_count": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_07.jpg",
+      "ground_truth_count": 1,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1
+    },
+    {
+      "image": "local_campus_08.jpg",
+      "ground_truth_count": 0,
+      "detections_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0
+    },
+    {
+      "image": "local_campus_09.jpg",
+      "ground_truth_count": 0,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0
+    },
+    {
+      "image": "local_campus_10.jpg",
+      "ground_truth_count": 0,
+      "detections_count": 1,
+      "tp": 0,
+      "fp": 1,
+      "fn": 0
+    }
+  ]
+}
