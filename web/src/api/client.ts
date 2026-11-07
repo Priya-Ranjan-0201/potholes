@@ -90,26 +90,48 @@ export interface DefectItem {
   needs_human_review?: boolean;
 }
 
+export interface DefectObservationItem {
+  id: string;
+  observed_at: string;
+  confidence: number;
+  latitude: number;
+  longitude: number;
+  accuracy_m?: number | null;
+  speed_mps?: number | null;
+  heading_deg?: number | null;
+  track_length_frames?: number | null;
+  best_frame_path?: string | null;
+  measurement_summary?: Record<string, any> | null;
+}
+
+export interface DefectSeverityHistoryItem {
+  id: string;
+  normalized_score: number;
+  level: string;
+  source: string;
+  needs_human_review: boolean;
+  factor_breakdown?: Record<string, number> | null;
+  missing_factors?: string[] | null;
+  uncertainty_note?: string | null;
+  created_at: string;
+}
+
 export interface DefectDetailResponse {
-  defect: DefectItem;
-  observations: Array<{
-    id: string;
-    observed_at: string;
-    confidence: number;
-    latitude: number;
-    longitude: number;
-    track_length_frames?: number | null;
-    best_frame_path?: string | null;
-  }>;
-  assessments: Array<{
-    id: string;
-    normalized_score: number;
-    level: string;
-    source: string;
-    needs_human_review: boolean;
-    uncertainty_note?: string | null;
-    created_at: string;
-  }>;
+  id: string;
+  class_code: string;
+  status: string;
+  latitude: number;
+  longitude: number;
+  times_seen: number;
+  first_seen: string;
+  last_seen: string;
+  road_segment_id?: string | null;
+  road_name?: string | null;
+  observations: DefectObservationItem[];
+  severity_history?: DefectSeverityHistoryItem[];
+  merge_history?: any[];
+  defect?: DefectItem;
+  assessments?: DefectSeverityHistoryItem[];
 }
 
 export interface ModelEvaluationResponse {
