@@ -35,16 +35,59 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import torch
 
+# 1. Alias serialization modules to prevent torch.load / unpickling errors
+if "torch.utils.serialization" not in sys.modules:
+    try:
+        sys.modules["torch.utils.serialization"] = torch.serialization
+    except Exception:
+        pass
+if "torch.utils.serialization.config" not in sys.modules:
+    try:
+        sys.modules["torch.utils.serialization.config"] = types.ModuleType("torch.utils.serialization.config")
+    except Exception:
+        pass
+
+# 2. Patch torch.use_deterministic_algorithms to prevent inductor config crash
+_orig_use_deterministic_algorithms = getattr(torch, "use_deterministic_algorithms", None)
+if _orig_use_deterministic_algorithms is not None:
+    def _safe_use_deterministic_algorithms(mode: bool, *, warn_only: bool = False) -> None:
+        try:
+            _orig_use_deterministic_algorithms(mode, warn_only=warn_only)
+        except (AttributeError, Exception):
+            try:
+                if hasattr(torch, "_C") and hasattr(torch._C, "_set_deterministic_algorithms"):
+                    torch._C._set_deterministic_algorithms(mode, warn_only=warn_only)
+            except Exception:
+                pass
+    torch.use_deterministic_algorithms = _safe_use_deterministic_algorithms
+
+# 3. Patch torch._inductor.config if it is a ConfigModule to allow setting deterministic
 try:
-    import torch.utils.serialization
-    import torch.utils.serialization.config
-except (ImportError, AttributeError):
+    import torch._inductor.config as ic
+    orig_setattr = type(ic).__setattr__
+    def _safe_config_setattr(self, name, value):
+        try:
+            orig_setattr(self, name, value)
+        except AttributeError:
+            object.__setattr__(self, name, value)
+    type(ic).__setattr__ = _safe_config_setattr
+    ic.deterministic = False
+except Exception:
     pass
 
+# 4. Patch Ultralytics unset_deterministic
 try:
-    import torch._inductor.config
-    if not hasattr(torch._inductor.config, "deterministic"):
-        torch._inductor.config.deterministic = False
+    import ultralytics.utils.torch_utils as tu
+    _orig_unset_deterministic = tu.unset_deterministic
+    def _safe_unset_deterministic():
+        try:
+            _orig_unset_deterministic()
+        except Exception:
+            try:
+                torch.backends.cudnn.deterministic = False
+            except Exception:
+                pass
+    tu.unset_deterministic = _safe_unset_deterministic
 except Exception:
     pass
 
