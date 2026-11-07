@@ -11,25 +11,34 @@ import {
   Sun,
   Moon,
   Globe,
+  Search,
+  Sparkles,
 } from "./Icons";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import { Logo } from "./Logo";
+import { PatternBand } from "../ui/PatternBand";
+import { THEME_DEFINITIONS, ThemePreset } from "../ui/tokens";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, themePreset, setThemePreset } = useTheme();
   const { language, setLanguage, t, currentOption } = useLanguage();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  const themeDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close language dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
         setLangDropdownOpen(false);
+      }
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target as Node)) {
+        setThemeDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -41,7 +50,7 @@ export const Navbar: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Core essential navigation links (clean, uncluttered semester scope)
+  // Core essential navigation links
   const navLinks = [
     { to: "/", label: t("navOverview"), icon: Compass },
     { to: "/scanner", label: t("navScanner"), icon: Camera },
@@ -54,13 +63,21 @@ export const Navbar: React.FC = () => {
     { to: "/evaluation", label: "Model Evaluation" },
     { to: "/models", label: "Edge Telemetry" },
     { to: "/capture", label: "Drive PWA" },
+    { to: "/design-lab", label: "Theme Design Lab" },
+  ];
+
+  const themeKeys: ThemePreset[] = [
+    "holi-highway",
+    "truck-art-neon",
+    "monsoon-dusk",
+    "punjab-fields",
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full transition-colors duration-200">
+      <header className="sticky top-0 z-40 w-full bg-[#FFFDF7] dark:bg-[#0D1017] shadow-sm">
         {/* Subtle Single-Line Disclaimer Banner */}
-        <div className="w-full bg-stone-950 text-stone-300 py-1.5 px-4 sm:px-6 lg:px-8 border-b border-stone-800 text-[11px] font-medium flex items-center justify-between">
+        <div className="w-full bg-stone-950 text-stone-300 py-1.5 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 border-b border-stone-800 text-[11px] font-medium flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
             <span className="text-amber-400 font-bold shrink-0">ScamRoad</span>
@@ -71,6 +88,9 @@ export const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 text-[10px] text-stone-400 font-mono ml-3">
+            <Link to="/design-lab" className="text-purple-400 hover:underline hidden md:inline">
+              Design Lab &rarr;
+            </Link>
             <span className="hidden md:inline">IRC:82-2023 Guidelines</span>
             <Link to="/evaluation" className="text-amber-400 hover:underline">
               Model Proofs (85.8% mAP) &rarr;
@@ -78,8 +98,13 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
+        {/* Regional Folk Art Pattern Band with solid background to prevent scroll bleed */}
+        <div className="bg-[#FFFDF7] dark:bg-[#0D1017] w-full">
+          <PatternBand regional height={6} opacity={0.5} />
+        </div>
+
         {/* Main Navbar */}
-        <div className="w-full bg-[#FFF8EC]/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 lg:px-8 shadow-xs">
+        <div className="w-full bg-[#FFFDF7] dark:bg-[#0D1017] border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12">
           <div className="flex items-center justify-between h-15 gap-4">
             {/* Left: Clean Brand Logo */}
             <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
@@ -123,8 +148,73 @@ export const Navbar: React.FC = () => {
 
             {/* Right: Quick Action Controls */}
             <div className="flex items-center gap-2 shrink-0">
+              {/* Command Palette Trigger */}
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+                }}
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 text-xs font-mono transition"
+                title="Open Command Palette (Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-[11px] font-bold">⌘K</span>
+              </button>
+
+              {/* Theme Palette Chooser */}
+              <div className="relative" ref={themeDropdownRef}>
+                <button
+                  onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition"
+                  aria-label="Select Theme"
+                  title="Switch vibrant theme"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="hidden xl:inline text-xs">{THEME_DEFINITIONS[themePreset].name}</span>
+                </button>
+
+                {themeDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-700 rounded-xl shadow-xl p-2 z-50 space-y-1">
+                    <span className="text-[10px] uppercase font-mono font-black text-stone-400 px-2 block mb-1">
+                      Vibrant Themes
+                    </span>
+                    {themeKeys.map((key) => {
+                      const def = THEME_DEFINITIONS[key];
+                      const isSelected = themePreset === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setThemePreset(key);
+                            setThemeDropdownOpen(false);
+                          }}
+                          className={`w-full px-2.5 py-2 text-left rounded-lg text-xs flex items-center justify-between transition ${
+                            isSelected
+                              ? "bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold"
+                              : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                          }`}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-bold">{def.name}</span>
+                            <div className="flex items-center gap-1 mt-1">
+                              {def.swatches.map((swatch, idx) => (
+                                <div
+                                  key={idx}
+                                  className="w-2.5 h-2.5 rounded-full"
+                                  style={{ backgroundColor: swatch }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Language Switcher */}
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={langDropdownRef}>
                 <button
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition"
@@ -160,7 +250,7 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Theme Switcher */}
+              {/* Light / Dark Mode Toggle */}
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700 transition"
@@ -189,7 +279,7 @@ export const Navbar: React.FC = () => {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-[#EBD9B8] dark:border-stone-800 px-4 py-3 shadow-lg">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
               {navLinks.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
@@ -197,9 +287,9 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={item.to}
                     to={item.to}
-                    className={`flex items-center gap-2 p-2.5 rounded-lg text-xs font-bold ${
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-bold transition ${
                       isActive
-                        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/40"
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                         : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
                     }`}
                   >
@@ -209,66 +299,26 @@ export const Navbar: React.FC = () => {
                 );
               })}
             </div>
-            <div className="pt-2 mt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-around text-xs">
-              {secondaryLinks.map((s) => (
-                <Link key={s.to} to={s.to} className="text-stone-500 hover:text-amber-500 font-medium py-1">
-                  {s.label}
-                </Link>
-              ))}
+
+            <div className="mt-3 pt-3 border-t border-stone-200 dark:border-stone-800">
+              <span className="text-[10px] font-black uppercase text-stone-400 font-mono block mb-1">
+                More Portals
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {secondaryLinks.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className="p-2 rounded-lg bg-stone-100 dark:bg-stone-800/60 text-stone-600 dark:text-stone-400 hover:text-amber-500 transition font-medium"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         )}
       </header>
-
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0A0C12]/95 backdrop-blur-md border-t border-[#EBD9B8] dark:border-stone-800 px-2 py-1.5 shadow-lg safe-area-pb">
-        <div className="flex items-center justify-around">
-          <Link
-            to="/"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            <span>Overview</span>
-          </Link>
-          <Link
-            to="/scanner"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/scanner"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <Camera className="w-4 h-4" />
-            <span>Scan</span>
-          </Link>
-          <Link
-            to="/defects"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/defects"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Defects</span>
-          </Link>
-          <Link
-            to="/maintenance"
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] font-bold ${
-              location.pathname === "/maintenance"
-                ? "text-amber-600 dark:text-amber-400 font-black"
-                : "text-stone-500 dark:text-stone-400"
-            }`}
-          >
-            <ClipboardList className="w-4 h-4" />
-            <span>Orders</span>
-          </Link>
-        </div>
-      </div>
     </>
   );
 };

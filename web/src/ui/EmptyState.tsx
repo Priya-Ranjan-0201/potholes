@@ -20,7 +20,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <div
-      className={`dhaba-card p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto my-6 border-dashed border-2 border-stone-300 dark:border-amber-400/30 ${className}`}
+      className={`dhaba-card p-8 sm:p-12 flex flex-col items-center justify-center text-center w-full max-w-xl mx-auto my-8 border-dashed border-2 border-stone-300 dark:border-amber-400/30 ${className}`}
     >
       {/* Friendly Folk Mascot "Gaddha" (Original Hand-drawn Geometric SVG) */}
       <div className="w-24 h-24 mb-4 relative flex items-center justify-center">

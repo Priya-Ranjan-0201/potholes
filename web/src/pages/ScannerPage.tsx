@@ -139,7 +139,7 @@ export const ScannerPage: React.FC = () => {
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider font-mono bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-              NH-44 · KM 01
+              AI SCANNER
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

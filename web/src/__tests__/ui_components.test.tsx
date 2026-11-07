@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { getSeverityFromScore, getSeveritySign, SEVERITY_SIGNS } from "../ui/tokens";
+import {
+  getSeverityFromScore,
+  getSeveritySign,
+  SEVERITY_SIGNS,
+  THEME_DEFINITIONS,
+  ThemePreset,
+} from "../ui/tokens";
 
-describe("Design System Tokens & Road Signs (Truck Art Meets Night Highway)", () => {
+describe("Design System Tokens & Road Signs (v9 Vibrant Upgrade)", () => {
   it("maps severity scores to canonical road sign levels accurately", () => {
     expect(getSeverityFromScore(10)).toBe("Minor");
     expect(getSeverityFromScore(25)).toBe("Minor");
@@ -36,5 +42,24 @@ describe("Design System Tokens & Road Signs (Truck Art Meets Night Highway)", ()
     expect(signByString.level).toBe("Minor");
     expect(signByString.shape).toBe("circle");
   });
-});
 
+  it("supports all 4 vibrant Indian road themes with complete tokens", () => {
+    const presets: ThemePreset[] = [
+      "holi-highway",
+      "truck-art-neon",
+      "monsoon-dusk",
+      "punjab-fields",
+    ];
+
+    presets.forEach((preset) => {
+      const def = THEME_DEFINITIONS[preset];
+      expect(def).toBeDefined();
+      expect(def.name).toBeTruthy();
+      expect(def.swatches.length).toBeGreaterThanOrEqual(4);
+      expect(def.light.bg).toBeTruthy();
+      expect(def.light.primaryGradient).toBeTruthy();
+      expect(def.dark.bg).toBeTruthy();
+      expect(def.dark.primaryGradient).toBeTruthy();
+    });
+  });
+});

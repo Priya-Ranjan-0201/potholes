@@ -17,7 +17,7 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
   showScore = true,
   className = "",
 }) => {
-  const cfg = getSeveritySign(score !== undefined ? score : (level || "Moderate"));
+  const cfg = getSeveritySign(score !== undefined ? score : ((level as SeverityLevel) || "Moderate"));
 
   const sizeStyles = {
     sm: "px-2 py-0.5 text-[10px] gap-1",

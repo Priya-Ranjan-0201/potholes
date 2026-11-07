@@ -8,4 +8,9 @@ export * from "./OrnamentFrame";
 export * from "./CatsEye";
 export * from "./RoadLoader";
 export * from "./EmptyState";
-
+export * from "./PatternBand";
+export * from "./KpiPlate";
+export * from "./BentoGrid";
+export * from "./Marquee";
+export * from "./PetalBurst";
+export * from "./ThemePicker";

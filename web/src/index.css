@@ -3,38 +3,210 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* DHABA DAWN (Light Theme) */
-    --theme-bg: #FFF8EC;
+  /* =========================================================================
+     THEME A — "HOLI HIGHWAY" (Default; Vibrant, festive, saffron to magenta)
+     ========================================================================= */
+  :root,
+  [data-theme="holi-highway"] {
+    --theme-bg: #FFF6EC;
+    --theme-bg-wash: linear-gradient(135deg, #FFF6EC 0%, #FFE9F1 100%);
     --theme-surface: #FFFFFF;
-    --theme-surface-2: #FFF0D6;
-    --theme-border: #EBD9B8;
-    --theme-text: #1B1308;
-    --theme-muted: #5C4A2E;
-    --theme-primary: #2B2F8F;
+    --theme-surface-2: #FFF1E0;
+    --theme-border: rgba(91, 61, 245, 0.16);
+    --theme-text: #1A1026;
+    --theme-muted: #5A4A6B;
+    --theme-primary: #FF3D81;
     --theme-primary-contrast: #FFFFFF;
-    --theme-accent: #E8452C;
+    --theme-primary-gradient: linear-gradient(135deg, #FF3D81 0%, #FF8A00 100%);
+    --theme-secondary: #5B3DF5;
+    --theme-accent: #00B8A9;
+    --theme-accent-2: #7ED321;
     --theme-success: #1F8F5F;
-    --theme-warn: #C77700;
-    --theme-danger: #C62828;
-    --theme-focus-ring: #00A3A3;
+    --theme-warn: #FF8A00;
+    --theme-danger: #D7263D;
+    --theme-focus-ring: #5B3DF5;
+    --theme-glow-1: rgba(255, 61, 129, 0.28);
+    --theme-glow-2: rgba(255, 138, 0, 0.22);
+    --theme-glow-3: rgba(91, 61, 245, 0.18);
+    --theme-shadow: 0 10px 30px -4px rgba(91, 61, 245, 0.08);
   }
 
-  html.dark {
-    /* HIGHWAY NIGHT (Dark Theme) */
-    --theme-bg: #0A0C12;
-    --theme-surface: rgba(20, 24, 36, 0.88);
-    --theme-surface-2: #141926;
-    --theme-border: rgba(255, 200, 80, 0.18);
-    --theme-text: #F3EEE2;
-    --theme-muted: #A9A18F;
-    --theme-primary: #FFB300;
-    --theme-primary-contrast: #1A1200;
-    --theme-accent: #00D1D1;
+  html.dark,
+  html.dark[data-theme="holi-highway"] {
+    --theme-bg: #0B0714;
+    --theme-bg-wash: radial-gradient(circle at 10% 20%, rgba(255, 77, 148, 0.14) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(140, 107, 255, 0.15) 0%, transparent 50%), #0B0714;
+    --theme-surface: rgba(28, 16, 48, 0.82);
+    --theme-surface-2: #180F2B;
+    --theme-border: rgba(255, 77, 148, 0.25);
+    --theme-text: #F7F1FF;
+    --theme-muted: #B7A8D1;
+    --theme-primary: #FF4D94;
+    --theme-primary-contrast: #0B0714;
+    --theme-primary-gradient: linear-gradient(135deg, #FF4D94 0%, #FFB000 100%);
+    --theme-secondary: #8C6BFF;
+    --theme-accent: #2EE6D6;
+    --theme-accent-2: #98E836;
     --theme-success: #35D49A;
-    --theme-warn: #FFB84D;
+    --theme-warn: #FFB000;
+    --theme-danger: #FF4D4D;
+    --theme-focus-ring: #FFB000;
+    --theme-glow-1: rgba(255, 77, 148, 0.45);
+    --theme-glow-2: rgba(140, 107, 255, 0.35);
+    --theme-glow-3: rgba(255, 176, 0, 0.3);
+    --theme-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.7);
+  }
+
+  /* =========================================================================
+     THEME B — "TRUCK ART NEON" (Bold, high-contrast, poster-like)
+     ========================================================================= */
+  [data-theme="truck-art-neon"] {
+    --theme-bg: #FFFBEA;
+    --theme-bg-wash: linear-gradient(180deg, #FFFBEA 0%, #FFF4C2 100%);
+    --theme-surface: #FFFFFF;
+    --theme-surface-2: #FFF4C2;
+    --theme-border: #14110A;
+    --theme-text: #14110A;
+    --theme-muted: #5C523D;
+    --theme-primary: #E8161C;
+    --theme-primary-contrast: #FFFFFF;
+    --theme-primary-gradient: linear-gradient(135deg, #E8161C 0%, #FF9F00 100%);
+    --theme-secondary: #0B3C8C;
+    --theme-accent: #00A859;
+    --theme-accent-2: #FFD400;
+    --theme-success: #00A859;
+    --theme-warn: #FF9F00;
+    --theme-danger: #E8161C;
+    --theme-focus-ring: #E8161C;
+    --theme-glow-1: rgba(232, 22, 28, 0.22);
+    --theme-glow-2: rgba(255, 159, 0, 0.25);
+    --theme-glow-3: rgba(11, 60, 140, 0.18);
+    --theme-shadow: 4px 4px 0px #14110A;
+  }
+
+  html.dark[data-theme="truck-art-neon"] {
+    --theme-bg: #0A0A0F;
+    --theme-bg-wash: radial-gradient(circle at top right, rgba(255, 59, 59, 0.15) 0%, transparent 50%), radial-gradient(circle at bottom left, rgba(61, 123, 255, 0.15) 0%, transparent 50%), #0A0A0F;
+    --theme-surface: #14141C;
+    --theme-surface-2: #1C1C28;
+    --theme-border: rgba(255, 194, 26, 0.35);
+    --theme-text: #FFF8E1;
+    --theme-muted: #A8A18E;
+    --theme-primary: #FF3B3B;
+    --theme-primary-contrast: #0A0A0F;
+    --theme-primary-gradient: linear-gradient(135deg, #FF3B3B 0%, #FFC21A 100%);
+    --theme-secondary: #3D7BFF;
+    --theme-accent: #1FE08A;
+    --theme-accent-2: #FFD400;
+    --theme-success: #1FE08A;
+    --theme-warn: #FFC21A;
+    --theme-danger: #FF3B3B;
+    --theme-focus-ring: #FFC21A;
+    --theme-glow-1: rgba(255, 59, 59, 0.4);
+    --theme-glow-2: rgba(255, 194, 26, 0.35);
+    --theme-glow-3: rgba(61, 123, 255, 0.3);
+    --theme-shadow: 0 0 20px rgba(255, 194, 26, 0.15);
+  }
+
+  /* =========================================================================
+     THEME C — "MONSOON DUSK" (Calm, cinematic, teal-indigo-mango)
+     ========================================================================= */
+  [data-theme="monsoon-dusk"] {
+    --theme-bg: #F2FBFA;
+    --theme-bg-wash: linear-gradient(135deg, #F2FBFA 0%, #E6F6F5 100%);
+    --theme-surface: #FFFFFF;
+    --theme-surface-2: #E1F5F3;
+    --theme-border: rgba(15, 181, 174, 0.22);
+    --theme-text: #0E1B2B;
+    --theme-muted: #48607A;
+    --theme-primary: #0FB5AE;
+    --theme-primary-contrast: #FFFFFF;
+    --theme-primary-gradient: linear-gradient(135deg, #0FB5AE 0%, #4F46E5 100%);
+    --theme-secondary: #4F46E5;
+    --theme-accent: #FFB020;
+    --theme-accent-2: #FF6B57;
+    --theme-success: #1F8F5F;
+    --theme-warn: #FFB020;
+    --theme-danger: #E8452C;
+    --theme-focus-ring: #0FB5AE;
+    --theme-glow-1: rgba(15, 181, 174, 0.25);
+    --theme-glow-2: rgba(79, 70, 229, 0.2);
+    --theme-glow-3: rgba(255, 176, 32, 0.2);
+    --theme-shadow: 0 10px 28px -4px rgba(15, 181, 174, 0.12);
+  }
+
+  html.dark[data-theme="monsoon-dusk"] {
+    --theme-bg: #060E1B;
+    --theme-bg-wash: radial-gradient(circle at top, rgba(34, 211, 197, 0.15) 0%, transparent 60%), radial-gradient(circle at bottom right, rgba(124, 108, 255, 0.14) 0%, transparent 50%), #060E1B;
+    --theme-surface: rgba(10, 24, 44, 0.85);
+    --theme-surface-2: #0E1F38;
+    --theme-border: rgba(34, 211, 197, 0.28);
+    --theme-text: #E9F6FF;
+    --theme-muted: #86A2C2;
+    --theme-primary: #22D3C5;
+    --theme-primary-contrast: #060E1B;
+    --theme-primary-gradient: linear-gradient(135deg, #22D3C5 0%, #7C6CFF 100%);
+    --theme-secondary: #7C6CFF;
+    --theme-accent: #FFC15A;
+    --theme-accent-2: #FF8575;
+    --theme-success: #35D49A;
+    --theme-warn: #FFC15A;
     --theme-danger: #FF6B6B;
-    --theme-focus-ring: #FFD54A;
+    --theme-focus-ring: #22D3C5;
+    --theme-glow-1: rgba(34, 211, 197, 0.4);
+    --theme-glow-2: rgba(124, 108, 255, 0.35);
+    --theme-glow-3: rgba(255, 193, 90, 0.25);
+    --theme-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.7);
+  }
+
+  /* =========================================================================
+     THEME D — "PUNJAB FIELDS" (Mustard blossom, wheat, phulkari pink)
+     ========================================================================= */
+  [data-theme="punjab-fields"] {
+    --theme-bg: #FFFCEB;
+    --theme-bg-wash: linear-gradient(135deg, #FFFCEB 0%, #FDF3C7 100%);
+    --theme-surface: #FFFFFF;
+    --theme-surface-2: #FDF3C7;
+    --theme-border: rgba(245, 180, 0, 0.25);
+    --theme-text: #1D1606;
+    --theme-muted: #614F26;
+    --theme-primary: #F5B400;
+    --theme-primary-contrast: #1D1606;
+    --theme-primary-gradient: linear-gradient(135deg, #F5B400 0%, #E4572E 100%);
+    --theme-secondary: #0C7A43;
+    --theme-accent: #E83E8C;
+    --theme-accent-2: #2D9CDB;
+    --theme-success: #0C7A43;
+    --theme-warn: #F5B400;
+    --theme-danger: #D7263D;
+    --theme-focus-ring: #E4572E;
+    --theme-glow-1: rgba(245, 180, 0, 0.28);
+    --theme-glow-2: rgba(228, 87, 46, 0.22);
+    --theme-glow-3: rgba(232, 62, 140, 0.2);
+    --theme-shadow: 0 10px 28px -4px rgba(245, 180, 0, 0.12);
+  }
+
+  html.dark[data-theme="punjab-fields"] {
+    --theme-bg: #0C0F08;
+    --theme-bg-wash: radial-gradient(circle at 20% 20%, rgba(255, 201, 51, 0.15) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(255, 95, 162, 0.12) 0%, transparent 50%), #0C0F08;
+    --theme-surface: "rgba(24, 28, 14, 0.85)";
+    --theme-surface-2: #191E0E;
+    --theme-border: rgba(255, 201, 51, 0.28);
+    --theme-text: #FFF7D6;
+    --theme-muted: #B8B08C;
+    --theme-primary: #FFC933;
+    --theme-primary-contrast: #0C0F08;
+    --theme-primary-gradient: linear-gradient(135deg, #FFC933 0%, #FF6F3C 100%);
+    --theme-secondary: #2EC27E;
+    --theme-accent: #FF5FA2;
+    --theme-accent-2: #4EB3EB;
+    --theme-success: #2EC27E;
+    --theme-warn: #FFC933;
+    --theme-danger: #FF5252;
+    --theme-focus-ring: #FFC933;
+    --theme-glow-1: rgba(255, 201, 51, 0.4);
+    --theme-glow-2: rgba(255, 111, 60, 0.35);
+    --theme-glow-3: rgba(255, 95, 162, 0.28);
+    --theme-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.7);
   }
 
   body {
@@ -46,172 +218,97 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* Dhaba Dawn: Cream paper canvas with subtle warm ambient aura */
-  body {
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(255, 179, 0, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(232, 69, 44, 0.06) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(0, 163, 163, 0.04) 0px, transparent 65%),
-      radial-gradient(at 0% 100%, rgba(43, 47, 143, 0.05) 0px, transparent 50%);
-    background-size: 100% 100%;
-    background-attachment: fixed;
-  }
-
-  /* Highway Night: Deep asphalt with reflector glows & starry sky */
-  html.dark body {
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(255, 179, 0, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(0, 209, 209, 0.12) 0px, transparent 50%),
-      radial-gradient(at 50% 50%, rgba(232, 69, 44, 0.08) 0px, transparent 60%),
-      radial-gradient(at 0% 100%, rgba(43, 47, 143, 0.12) 0px, transparent 50%);
-    background-size: 100% 100%;
-    background-attachment: fixed;
-  }
 }
 
-/* Truck-Art & Night Highway Card Classes */
+/* Card Styling with Theme-Specific Glowing Edges and Glass Surface */
 .dhaba-card {
   background-color: var(--theme-surface);
   border: 1.5px solid var(--theme-border);
-  box-shadow: 0 4px 14px -2px rgba(92, 74, 46, 0.08);
-  border-radius: 1rem;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: var(--theme-shadow);
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
 }
 
 html.dark .dhaba-card {
-  background-color: var(--theme-surface);
-  backdrop-filter: blur(14px);
-  border: 1.5px solid var(--theme-border);
-  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 200, 80, 0.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .dhaba-card:hover {
-  border-color: var(--theme-accent);
+  border-color: var(--theme-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -4px var(--theme-glow-1);
 }
 
-html.dark .dhaba-card:hover {
-  border-color: rgba(255, 179, 0, 0.45);
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.7), 0 0 18px rgba(255, 179, 0, 0.12);
-}
-
-/* Kilometre Stone (Milestone) Styling */
-.milestone-stone {
-  border-radius: 28px 28px 8px 8px;
-  border: 2px solid var(--theme-border);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.milestone-top-yellow {
-  background: linear-gradient(180deg, #F7C61B 0%, #E8B400 100%);
-  color: #1A1200;
-  font-weight: 900;
-  text-align: center;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
-}
-
-.milestone-top-green {
-  background: linear-gradient(180deg, #2FA66A 0%, #1F8F5F 100%);
-  color: #FFFFFF;
-  font-weight: 900;
-  text-align: center;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
-}
-
-/* Painted Dhaba Signboard Plate */
-.dhaba-plate {
-  border: 2px solid #1B1308;
-  background: #FFF0D6;
-  color: #1B1308;
-  box-shadow: 3px 3px 0px 0px #1B1308;
-  border-radius: 6px;
+/* Vibrant Primary Gradient Buttons */
+.btn-vibrant-primary {
+  background: var(--theme-primary-gradient);
+  color: var(--theme-primary-contrast);
   font-weight: 800;
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  box-shadow: 0 4px 16px -2px var(--theme-glow-1);
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-html.dark .dhaba-plate {
-  border: 2px solid #FFB300;
-  background: #141926;
-  color: #F3EEE2;
-  box-shadow: 3px 3px 0px 0px rgba(255, 179, 0, 0.4);
+.btn-vibrant-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -2px var(--theme-glow-1);
 }
 
-/* Cat's-Eye Reflector Dot */
-.cats-eye-dot {
-  width: 8px;
-  height: 8px;
+.btn-vibrant-primary:active {
+  transform: scale(0.98);
+}
+
+/* Vibrant Secondary Buttons */
+.btn-vibrant-secondary {
+  background-color: var(--theme-surface);
+  border: 1.5px solid var(--theme-border);
+  color: var(--theme-text);
+  font-weight: 700;
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-vibrant-secondary:hover {
+  border-color: var(--theme-primary);
+  color: var(--theme-primary);
+  background-color: var(--theme-surface-2);
+}
+
+/* Ambient Background Blobs (Drifting Glow Mesh) */
+.ambient-glow-mesh {
+  position: absolute;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
-  background: #FFB300;
-  box-shadow: 0 0 6px 1px rgba(255, 179, 0, 0.7);
-  display: inline-block;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  filter: blur(120px);
+  pointer-events: none;
+  opacity: 0.35;
+  z-index: 0;
+  animation: driftMesh 24s ease-in-out infinite alternate;
 }
 
-.cats-eye-dot:hover, .cats-eye-dot:focus {
-  transform: scale(1.4);
-  box-shadow: 0 0 12px 3px rgba(255, 179, 0, 0.95);
+@keyframes driftMesh {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(80px, 50px) scale(1.15); }
+  100% { transform: translate(-60px, 90px) scale(0.95); }
 }
 
-.cats-eye-peacock {
-  background: #00D1D1;
-  box-shadow: 0 0 6px 1px rgba(0, 209, 209, 0.7);
-}
-
-/* Jaali Mesh Texture */
-.jaali-texture {
-  background-image: radial-gradient(circle, rgba(235, 217, 184, 0.4) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-
-html.dark .jaali-texture {
-  background-image: radial-gradient(circle, rgba(255, 200, 80, 0.12) 1px, transparent 1px);
-  background-size: 16px 16px;
-}
-
-/* Road Lane Animation */
-@keyframes laneStream {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -40; }
-}
-
-.road-lane-animated {
-  animation: laneStream 1.2s linear infinite;
-}
-
-/* Road Scan Beam Sweep */
-@keyframes roadScanSweep {
-  0% { transform: translateY(0%); opacity: 0.9; }
-  50% { opacity: 1; }
-  100% { transform: translateY(600%); opacity: 0.9; }
-}
-
-.scan-beam-active {
-  animation: roadScanSweep 2s ease-in-out infinite;
-}
-
-/* Accessibility: Respect Reduced Motion Preferences (Rule F8) */
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Custom Styled Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--theme-bg);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--theme-border);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-muted);
+/* Reduced Motion Override (Rule U6 & Accessibility) */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
 }

@@ -11,7 +11,7 @@ import {
   FileCheck2,
   Sparkles,
 } from "../components/Icons";
-import { MilestoneHeader, CatsEye } from "../ui";
+import { MilestoneHeader, CatsEye, PetalBurst, PatternBand } from "../ui";
 
 export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -124,6 +124,9 @@ export const MaintenancePage: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 w-full relative">
+      {/* Authentic Marigold Petal & Gulal Burst (Rule U5 & Section 5) */}
+      <PetalBurst active={showCelebration} onComplete={() => setShowCelebration(false)} />
+
       {/* Celebration Marigold Confetti Overlay when Human Engineer Signs Off */}
       {showCelebration && (
         <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
@@ -141,14 +144,16 @@ export const MaintenancePage: React.FC = () => {
         </div>
       )}
 
+      {/* Regional Pattern Band */}
+      <PatternBand regional height={6} opacity={0.4} />
+
       {/* Header with Milestone Stone and Create Dispatch Button */}
       <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <MilestoneHeader
-            km="02"
+            tag="WORK ORDERS"
             title={t("maintenanceTitle")}
             subtitle={t("maintenanceSubtitle")}
-            highway="NH-44"
             variant="yellow"
           />
         </div>
