@@ -14,8 +14,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setThemeState] = useState<Theme>(() => {
     const saved = localStorage.getItem("scamroad_theme");
     if (saved === "light" || saved === "dark") return saved;
-    // Default to dark for a high-tech modern civic feel if preferred, or check system
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "dark";
+    return "light";
   });
 
   useEffect(() => {
@@ -50,3 +49,4 @@ export const useTheme = (): ThemeContextType => {
   }
   return context;
 };
+

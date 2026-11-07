@@ -99,19 +99,19 @@ export const ModelsPage: React.FC = () => {
       {/* Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Cpu className="w-6 h-6 text-emerald-600" />
-            Edge AI Model Registry & Fleet Rollout
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Cpu className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            Edge AI Model Registry &amp; Fleet Rollout
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Audited neural network versions, quantization metrics, and hardware benchmarks across OPPO K13 and edge devices.
           </p>
         </div>
       </div>
 
       {actionNotice && (
-        <div className="mb-6 bg-emerald-50 border border-emerald-300 rounded-xl p-4 flex items-center gap-3 text-emerald-900 text-sm font-semibold shadow-sm">
-          <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="mb-6 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 rounded-xl p-4 flex items-center gap-3 text-emerald-900 dark:text-emerald-200 text-sm font-semibold shadow-sm">
+          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
           {actionNotice}
         </div>
       )}
@@ -121,30 +121,30 @@ export const ModelsPage: React.FC = () => {
         {models.map((model) => (
           <div
             key={model.id}
-            className={`bg-white rounded-2xl border p-6 shadow-sm transition-all ${
+            className={`civic-card rounded-2xl p-6 shadow-sm transition-all ${
               model.status === "ACTIVE"
-                ? "border-emerald-500 ring-2 ring-emerald-100"
-                : "border-slate-200 hover:border-slate-300"
+                ? "border-emerald-500 ring-2 ring-emerald-500/20"
+                : "hover:border-slate-400/40"
             }`}
           >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <div className="flex items-center gap-3">
-                  <span className="font-extrabold text-lg text-slate-900">{model.name}</span>
+                  <span className="font-extrabold text-lg text-slate-900 dark:text-white">{model.name}</span>
                   <span
                     className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
                       model.status === "ACTIVE"
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                     }`}
                   >
                     {model.status}
                   </span>
-                  <span className="text-xs font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">
+                  <span className="text-xs font-bold bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
                     {model.precision}
                   </span>
                 </div>
-                <div className="text-xs text-slate-500 mt-1 font-mono">
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
                   Runtime: {model.runtime} • SHA-256: {model.sha256.substring(0, 16)}...
                 </div>
               </div>

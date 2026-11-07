@@ -128,13 +128,13 @@ export const MaintenancePage: React.FC = () => {
   return (
     <div className="space-y-6 pb-16">
       {/* Header and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 civic-card p-5 rounded-xl shadow-xs">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-emerald-600" />
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             Maintenance Kanban &amp; Work Orders
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Lifecycle tracking from contractor assignment to mandatory human repair sign-off (Rule R8: AI never closes work orders).
           </p>
         </div>

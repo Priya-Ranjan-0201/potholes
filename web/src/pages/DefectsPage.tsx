@@ -79,19 +79,19 @@ export const DefectsPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-16">
       {/* Page Header & Filtering */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 civic-card p-5 rounded-xl shadow-xs">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             Canonical Defect Registry (One Pothole = One Record)
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Deduplicated physical road defects with persistent IDs, multi-pass sighting telemetry, and severity tracking.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-semibold">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
             <Filter className="w-3.5 h-3.5" />
             <span>Filter:</span>
           </div>
@@ -99,7 +99,7 @@ export const DefectsPage: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 font-medium focus:outline-none"
+            className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="ACTIVE">ACTIVE</option>
@@ -111,7 +111,7 @@ export const DefectsPage: React.FC = () => {
           <select
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 font-medium focus:outline-none"
+            className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium focus:outline-none"
           >
             <option value="">All Defect Classes</option>
             <option value="POTHOLE">POTHOLE</option>
@@ -122,10 +122,10 @@ export const DefectsPage: React.FC = () => {
       </div>
 
       {/* Defects Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="civic-card rounded-xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700">
-            <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-400 border-b border-slate-100">
+          <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
               <tr>
                 <th className="py-3 px-4">Defect ID</th>
                 <th className="py-3 px-4">Class</th>
