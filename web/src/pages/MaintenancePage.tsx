@@ -4,16 +4,15 @@ import { api, WorkOrder } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import {
-  ClipboardList,
   Plus,
   Clock,
   CheckCircle,
-  AlertCircle,
   HardHat,
-  ShieldAlert,
   X,
   FileCheck2,
+  Sparkles,
 } from "../components/Icons";
+import { MilestoneHeader, CatsEye } from "../ui";
 
 export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -24,7 +23,6 @@ export const MaintenancePage: React.FC = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newDefectId, setNewDefectId] = useState("");
   const [newContractorId, setNewContractorId] = useState("");
-  const [newSlaPolicyId, setNewSlaPolicyId] = useState("");
   const [newPriority, setNewPriority] = useState("HIGH");
   const [newCost, setNewCost] = useState("12000");
 
@@ -39,6 +37,7 @@ export const MaintenancePage: React.FC = () => {
   const [decisionReason, setDecisionReason] = useState(
     "Visual inspection confirmed smooth asphalt compaction and edge blending"
   );
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Queries
   const { data: woData, isLoading } = useQuery({
@@ -50,11 +49,6 @@ export const MaintenancePage: React.FC = () => {
   const { data: contractors } = useQuery({
     queryKey: ["contractorsList"],
     queryFn: api.listContractors,
-  });
-
-  const { data: slaPolicies } = useQuery({
-    queryKey: ["slaPoliciesList"],
-    queryFn: api.listSlaPolicies,
   });
 
   // Mutations
@@ -108,16 +102,19 @@ export const MaintenancePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["workOrders"] });
       queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
       setVerifyModalWo(null);
+      // Trigger momentary marigold celebration burst on human engineer sign-off (Rule 5)
+      setShowCelebration(true);
+      setTimeout(() => setShowCelebration(false), 2500);
     },
   });
 
   const workOrders = woData?.items || [];
 
   const columns = [
-    { key: "ASSIGNED", label: t("colAssigned"), color: "border-blue-400 bg-blue-50/30 dark:bg-blue-950/20" },
-    { key: "IN_PROGRESS", label: t("colInProgress"), color: "border-amber-400 bg-amber-50/30 dark:bg-amber-950/20" },
-    { key: "COMPLETED", label: t("colVerified"), color: "border-purple-400 bg-purple-50/30 dark:bg-purple-950/20" },
-    { key: "VERIFIED", label: t("colResolved"), color: "border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20" },
+    { key: "ASSIGNED", label: "Lane 1: Assigned", color: "border-blue-500/40 bg-blue-500/[0.04]", catseye: "peacock" as const },
+    { key: "IN_PROGRESS", label: "Lane 2: In Repair", color: "border-amber-500/40 bg-amber-500/[0.04]", catseye: "amber" as const },
+    { key: "COMPLETED", label: "Lane 3: Pending Audit", color: "border-purple-500/40 bg-purple-500/[0.04]", catseye: "amber" as const },
+    { key: "VERIFIED", label: "Lane 4: Verified Closure", color: "border-emerald-500/40 bg-emerald-500/[0.04]", catseye: "peacock" as const },
   ];
 
   const getOrdersForColumn = (colKey: string) => {
@@ -128,15 +125,34 @@ export const MaintenancePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Header and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 civic-card p-5 rounded-xl shadow-xs">
+    <div className="space-y-6 pb-16 w-full relative">
+      {/* Celebration Marigold Confetti Overlay when Human Engineer Signs Off */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center">
+          <div className="p-6 rounded-2xl bg-[#0A0C12]/95 border-2 border-amber-400 text-white shadow-2xl flex items-center gap-3 animate-bounce">
+            <Sparkles className="w-8 h-8 text-amber-400" />
+            <div>
+              <h4 className="font-black text-base text-amber-400 font-signboard">
+                Work Order Verified &amp; Closed!
+              </h4>
+              <p className="text-xs text-stone-300 font-mono">
+                Field compaction confirmed by human municipal engineer.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header with Milestone Stone and Create Dispatch Button */}
+      <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            {t("maintenanceTitle")}
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 mb-1.5">
+            <MilestoneHeader km="02" title={t("maintenanceTitle")} highway="NH-44" variant="yellow" />
+            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
+              Highway Lane Kanban
+            </span>
+          </div>
+          <p className="text-xs text-stone-600 dark:text-stone-400">
             {t("maintenanceSubtitle")}
           </p>
         </div>
@@ -144,133 +160,137 @@ export const MaintenancePage: React.FC = () => {
         {(activeRole === "engineer" || activeRole === "admin") && (
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 rounded-xl text-xs font-black transition shadow-md"
           >
             <Plus className="w-4 h-4" />
-            {t("dispatchWoBtn")}
+            <span>{t("dispatchWoBtn")}</span>
           </button>
         )}
       </div>
 
-      {/* Kanban Board Columns */}
+      {/* Kanban Board Columns styled as Highway Lanes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {columns.map((col) => {
           const colOrders = getOrdersForColumn(col.key);
           return (
             <div
               key={col.key}
-              className={`rounded-xl border p-4 flex flex-col h-[680px] ${col.color}`}
+              className={`rounded-2xl border-2 p-4 flex flex-col h-[680px] ${col.color} dhaba-card shadow-xs`}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200/70 mb-3">
-                <span className="font-bold text-xs uppercase tracking-wide text-slate-700">
-                  {col.label}
-                </span>
-                <span className="w-6 h-6 rounded-full bg-white text-slate-700 text-xs font-bold flex items-center justify-center border border-slate-200">
+              <div className="flex items-center justify-between pb-3 border-b border-[#EBD9B8] dark:border-stone-800 mb-3">
+                <div className="flex items-center gap-1.5">
+                  <CatsEye color={col.catseye} size="sm" />
+                  <span className="font-black text-xs uppercase tracking-wide text-stone-800 dark:text-stone-200 font-mono">
+                    {col.label}
+                  </span>
+                </div>
+                <span className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-black flex items-center justify-center border border-amber-500/40 font-mono">
                   {colOrders.length}
                 </span>
               </div>
 
               <div className="space-y-3 flex-1 overflow-y-auto pr-1">
                 {isLoading ? (
-                  <div className="text-center text-xs text-slate-400 py-8">Loading orders...</div>
+                  <div className="text-center text-xs text-stone-400 py-8 font-mono">
+                    Loading highway lane orders...
+                  </div>
                 ) : colOrders.length > 0 ? (
                   colOrders.map((wo) => {
                     const contractor = contractors?.find((c) => c.id === wo.contractor_id);
                     return (
                       <div
                         key={wo.id}
-                        className="bg-white rounded-lg p-3.5 border border-slate-200 shadow-xs space-y-2 text-xs hover:border-slate-300 transition"
+                        className="bg-white dark:bg-stone-900 rounded-xl p-3.5 border-2 border-[#EBD9B8] dark:border-stone-800 shadow-xs space-y-2 text-xs hover:border-amber-500/50 transition"
                       >
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                            className={`px-2 py-0.5 rounded text-[10px] font-black uppercase font-mono ${
                               wo.priority === "CRITICAL"
-                                ? "bg-red-100 text-red-700"
+                                ? "bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/40"
                                 : wo.priority === "HIGH"
-                                  ? "bg-orange-100 text-orange-700"
-                                  : "bg-blue-100 text-blue-700"
+                                ? "bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40"
+                                : "bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/40"
                             }`}
                           >
                             {wo.priority}
                           </span>
-                          <span className="font-mono text-[10px] text-slate-400">
+                          <span className="font-mono text-[10px] text-stone-400">
                             #{wo.id.slice(0, 6)}
                           </span>
                         </div>
 
                         <div>
-                          <span className="text-slate-500 text-[11px] block">Target Defect:</span>
-                          <span className="font-mono font-bold text-slate-800">
+                          <span className="text-stone-500 dark:text-stone-400 text-[11px] block font-mono">
+                            Target Defect:
+                          </span>
+                          <span className="font-mono font-bold text-stone-900 dark:text-stone-100">
                             {wo.defect_id.slice(0, 13)}&hellip;
                           </span>
                         </div>
 
                         {contractor && (
-                          <div className="flex items-center gap-1.5 text-slate-600">
+                          <div className="flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
                             <HardHat className="w-3.5 h-3.5 text-amber-500" />
-                            <span className="font-medium truncate">{contractor.name}</span>
+                            <span className="font-semibold truncate">{contractor.name}</span>
                           </div>
                         )}
 
                         {wo.deadline && (
-                          <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
-                            <Clock className="w-3.5 h-3.5" />
+                          <div className="flex items-center gap-1.5 text-stone-500 dark:text-stone-400 text-[11px] font-mono">
+                            <Clock className="w-3.5 h-3.5 text-amber-500" />
                             <span>Due: {new Date(wo.deadline).toLocaleDateString()}</span>
                           </div>
                         )}
 
-                        {/* Interactive Workflow Actions */}
-                        <div className="pt-2 border-t border-slate-100 flex flex-col gap-1.5">
-                          {/* ASSIGNED -> IN_PROGRESS */}
-                          {(wo.status === "CREATED" || wo.status === "ASSIGNED") && (
+                        {/* Actions based on state */}
+                        <div className="pt-2 border-t border-[#EBD9B8] dark:border-stone-800 flex items-center justify-between gap-1">
+                          {col.key === "ASSIGNED" && (
                             <button
                               onClick={() =>
                                 transitionMutation.mutate({
                                   id: wo.id,
                                   new_status: "IN_PROGRESS",
-                                  notes: "Contractor crews arrived on site",
+                                  notes: "Contractor mobilized crew to road segment",
                                 })
                               }
-                              className="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-semibold text-[11px] transition"
+                              className="w-full py-1.5 bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold rounded-lg hover:bg-amber-500/25 transition text-center"
                             >
-                              Start Repair Work
+                              Mobilize Crew &rarr;
                             </button>
                           )}
 
-                          {/* IN_PROGRESS -> Submit Repair Record */}
-                          {wo.status === "IN_PROGRESS" && (
+                          {col.key === "IN_PROGRESS" && (
                             <button
                               onClick={() => setRepairModalWo(wo)}
-                              className="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-[11px] transition shadow-2xs"
+                              className="w-full py-1.5 bg-purple-500/15 text-purple-800 dark:text-purple-300 font-bold rounded-lg hover:bg-purple-500/25 transition text-center"
                             >
-                              Submit Repair Completion
+                              Log Patch Materials &rarr;
                             </button>
                           )}
 
-                          {/* COMPLETED -> Human Repair Verification (Rule R8) */}
-                          {wo.status === "COMPLETED" && (
+                          {col.key === "COMPLETED" && (
                             <button
                               onClick={() => setVerifyModalWo(wo)}
-                              className="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded font-bold text-[11px] flex items-center justify-center gap-1 transition shadow-2xs"
+                              className="w-full py-1.5 bg-emerald-500 text-white font-bold rounded-lg hover:bg-emerald-600 transition text-center shadow-xs"
                             >
-                              <FileCheck2 className="w-3.5 h-3.5" />
-                              Rule R8 Verification Sign-off
+                              Engineer Sign-Off &rarr;
                             </button>
                           )}
 
-                          {/* VERIFIED -> Verified badge */}
-                          {wo.status === "VERIFIED" && (
-                            <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-[11px]">
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Verified by Engineer</span>
-                            </div>
+                          {col.key === "VERIFIED" && (
+                            <span className="w-full py-1 text-center font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Closed &amp; Verified</span>
+                            </span>
                           )}
                         </div>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="text-center text-xs text-slate-400 py-8">No work orders</div>
+                  <div className="text-center text-xs text-stone-400 py-12 font-mono">
+                    Lane Clear
+                  </div>
                 )}
               </div>
             </div>
@@ -278,157 +298,126 @@ export const MaintenancePage: React.FC = () => {
         })}
       </div>
 
-      {/* Dispatch Work Order Modal */}
-      {createModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-base">Dispatch Repair Work Order</h3>
-              <button onClick={() => setCreateModalOpen(false)}>
-                <X className="w-4 h-4 text-slate-400" />
+      {/* Human Engineer Verification Modal (Rule R5 & R8) */}
+      {verifyModalWo && (
+        <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="dhaba-card max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+              <div className="flex items-center gap-2">
+                <FileCheck2 className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
+                  Human Municipal Engineer Sign-Off
+                </h3>
+              </div>
+              <button onClick={() => setVerifyModalWo(null)} className="text-stone-400 hover:text-stone-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
+
+            <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+              In accordance with municipal guidelines (Rule R5), an authorized human engineer must visually inspect the patched asphalt before signing off closure. The AI provides diagnostic assistance only.
+            </p>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Target Defect ID</label>
-                <input
-                  type="text"
-                  placeholder="Enter Defect UUID"
-                  value={newDefectId}
-                  onChange={(e) => setNewDefectId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 font-mono"
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Engineer Decision:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHumanDecision("APPROVED")}
+                    className={`py-2 rounded-xl font-black text-xs transition border ${
+                      humanDecision === "APPROVED"
+                        ? "bg-emerald-500 text-white border-emerald-600 shadow-md"
+                        : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700"
+                    }`}
+                  >
+                    Approve &amp; Close Order
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHumanDecision("REJECTED")}
+                    className={`py-2 rounded-xl font-black text-xs transition border ${
+                      humanDecision === "REJECTED"
+                        ? "bg-red-500 text-white border-red-600 shadow-md"
+                        : "bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700"
+                    }`}
+                  >
+                    Reject (Requires Recasting)
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Field Inspection Notes:
+                </label>
+                <textarea
+                  value={decisionReason}
+                  onChange={(e) => setDecisionReason(e.target.value)}
+                  rows={3}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Assigned Contractor</label>
-                <select
-                  value={newContractorId}
-                  onChange={(e) => setNewContractorId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium"
-                >
-                  <option value="">-- Select Contractor --</option>
-                  {contractors?.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.phone})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">SLA Resolution Policy</label>
-                <select
-                  value={newSlaPolicyId}
-                  onChange={(e) => setNewSlaPolicyId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium"
-                >
-                  <option value="">-- Select SLA Policy --</option>
-                  {slaPolicies?.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.max_resolution_hours}h deadline)
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Priority</label>
-                  <select
-                    value={newPriority}
-                    onChange={(e) => setNewPriority(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium"
-                  >
-                    <option value="CRITICAL">CRITICAL</option>
-                    <option value="HIGH">HIGH</option>
-                    <option value="MEDIUM">MEDIUM</option>
-                    <option value="LOW">LOW</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Estimated Cost (₹)</label>
-                  <input
-                    type="number"
-                    value={newCost}
-                    onChange={(e) => setNewCost(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg p-2 font-medium"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setCreateModalOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
               <button
                 onClick={() =>
-                  createMutation.mutate({
-                    defect_id: newDefectId,
-                    contractor_id: newContractorId || undefined,
-                    sla_policy_id: newSlaPolicyId || undefined,
-                    priority: newPriority,
-                    estimated_cost: parseFloat(newCost) || undefined,
+                  verifyRepairMutation.mutate({
+                    id: verifyModalWo.id,
+                    pct: 92.5,
+                    aiRec: "VERIFY_REPAIR",
+                    decision: humanDecision,
+                    reason: decisionReason,
                   })
                 }
-                disabled={!newDefectId.trim() || createMutation.isPending}
-                className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-50 transition"
+                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition shadow-md"
               >
-                {createMutation.isPending ? "Dispatching..." : "Dispatch Order"}
+                Sign &amp; Seal Verification Record
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Contractor Repair Submission Modal */}
+      {/* Log Patch Materials Modal */}
       {repairModalWo && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-base">Submit Repair Completion Report</h3>
-              <button onClick={() => setRepairModalWo(null)}>
-                <X className="w-4 h-4 text-slate-400" />
+        <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+              <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
+                Log Contractor Patch Materials
+              </h3>
+              <button onClick={() => setRepairModalWo(null)} className="text-stone-400 hover:text-stone-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-slate-500">
-              Contractor completion sign-off. Transitions status to COMPLETED for municipal engineering review.
-            </p>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Materials Used</label>
-                <textarea
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Materials Used:
+                </label>
+                <input
+                  type="text"
                   value={materialsUsed}
                   onChange={(e) => setMaterialsUsed(e.target.value)}
-                  rows={2}
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Actual Incurred Cost (₹)</label>
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Actual Cost (₹):
+                </label>
                 <input
                   type="number"
                   value={actualCost}
                   onChange={(e) => setActualCost(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2 font-medium"
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
-            </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setRepairModalWo(null)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
               <button
                 onClick={() =>
                   submitRepairMutation.mutate({
@@ -437,121 +426,100 @@ export const MaintenancePage: React.FC = () => {
                     cost: parseFloat(actualCost) || 0,
                   })
                 }
-                disabled={submitRepairMutation.isPending}
-                className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition"
+                className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs transition shadow-md"
               >
-                {submitRepairMutation.isPending ? "Submitting..." : "Submit Completion"}
+                Submit for Municipal Audit
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Authoritative Human Verification Modal (Rule R8) */}
-      {verifyModalWo && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-purple-600" />
-                  Authoritative Human Verification (Rule R8)
-                </h3>
-                <span className="text-xs text-slate-500">
-                  AI repair verification is advisory; a human engineer decides. AI never closes work orders.
-                </span>
-              </div>
-              <button onClick={() => setVerifyModalWo(null)}>
-                <X className="w-4 h-4 text-slate-400" />
+      {/* Create Work Order Modal */}
+      {createModalOpen && (
+        <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+              <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
+                Dispatch New Road Work Order
+              </h3>
+              <button onClick={() => setCreateModalOpen(false)} className="text-stone-400 hover:text-stone-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Advisory AI Recommendation Card */}
-            <div className="bg-purple-50 border border-purple-200 rounded-xl p-3.5 space-y-1">
-              <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">
-                Advisory Edge AI Post-Repair Assessment
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-700">Estimated Damage Reduction:</span>
-                <span className="text-base font-black text-purple-900">92.4%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-700">AI Recommendation:</span>
-                <span className="inline-block px-2 py-0.5 rounded text-[11px] font-black bg-purple-200 text-purple-900">
-                  PASS (Advisory Only)
-                </span>
-              </div>
-            </div>
-
-            {/* Human Decision Controls */}
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Human Engineering Decision (Mandatory)
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Defect ID:
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setHumanDecision("APPROVED")}
-                    className={`py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      humanDecision === "APPROVED"
-                        ? "bg-emerald-500 text-white border-emerald-600"
-                        : "bg-slate-50 text-slate-700 border-slate-300"
-                    }`}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Approve &amp; Close Defect
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setHumanDecision("REJECTED")}
-                    className={`py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                      humanDecision === "REJECTED"
-                        ? "bg-red-500 text-white border-red-600"
-                        : "bg-slate-50 text-slate-700 border-slate-300"
-                    }`}
-                  >
-                    <AlertCircle className="w-4 h-4" />
-                    Reject (Return to Contractor)
-                  </button>
-                </div>
+                <input
+                  type="text"
+                  placeholder="Enter or paste Defect UUID..."
+                  value={newDefectId}
+                  onChange={(e) => setNewDefectId(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Engineer Reason &amp; Inspection Audit Note
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Contractor:
                 </label>
-                <textarea
-                  value={decisionReason}
-                  onChange={(e) => setDecisionReason(e.target.value)}
-                  rows={2}
-                  className="w-full border border-slate-300 rounded-lg p-2"
+                <select
+                  value={newContractorId}
+                  onChange={(e) => setNewContractorId(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                >
+                  <option value="">Select Contractor...</option>
+                  {contractors?.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Priority:
+                </label>
+                <select
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                >
+                  <option value="CRITICAL">Critical (24-Hr Compaction)</option>
+                  <option value="HIGH">High (48-Hr SLA)</option>
+                  <option value="MEDIUM">Medium (72-Hr SLA)</option>
+                  <option value="LOW">Low (7-Day Routine)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-stone-700 dark:text-stone-300 block mb-1 font-mono">
+                  Estimated Cost (₹):
+                </label>
+                <input
+                  type="number"
+                  value={newCost}
+                  onChange={(e) => setNewCost(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
-            </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                onClick={() => setVerifyModalWo(null)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                Cancel
-              </button>
               <button
                 onClick={() =>
-                  verifyRepairMutation.mutate({
-                    id: verifyModalWo.id,
-                    pct: 92.4,
-                    aiRec: "PASS",
-                    decision: humanDecision,
-                    reason: decisionReason,
+                  createMutation.mutate({
+                    defect_id: newDefectId,
+                    contractor_id: newContractorId || undefined,
+                    priority: newPriority,
+                    estimated_cost: parseFloat(newCost) || 12000,
                   })
                 }
-                disabled={decisionReason.trim().length < 5 || verifyRepairMutation.isPending}
-                className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold disabled:opacity-50 transition shadow-xs"
+                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-black text-xs transition shadow-md"
               >
-                {verifyRepairMutation.isPending ? "Authorizing..." : "Submit Authoritative Sign-off"}
+                Dispatch to Contractor Queue
               </button>
             </div>
           </div>

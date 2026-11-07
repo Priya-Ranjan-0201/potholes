@@ -4,7 +4,6 @@ import { api, DefectItem } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import {
-  AlertTriangle,
   Filter,
   Eye,
   Sliders,
@@ -17,6 +16,7 @@ import {
   LayoutGrid,
   CheckCircle,
 } from "../components/Icons";
+import { MilestoneHeader, SeverityBadge, EmptyState } from "../ui";
 
 export const DefectsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -73,18 +73,7 @@ export const DefectsPage: React.FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getSeverityBadgeClass = (level?: string | null) => {
-    switch (level) {
-      case "Critical":
-        return "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800";
-      case "Severe":
-        return "bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800";
-      case "Moderate":
-        return "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
-      default:
-        return "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
-    }
-  };
+
 
   // Filter defects based on query and severity dropdown
   const filteredItems = (data?.items || []).filter((defect: DefectItem) => {
@@ -102,36 +91,31 @@ export const DefectsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Page Header & Filtering */}
-      <div className="civic-card p-5 rounded-2xl shadow-sm border border-slate-200/90 dark:border-slate-800 space-y-4">
+    <div className="space-y-6 pb-16 w-full">
+      {/* Page Header & Filtering with Milestone Stone */}
+      <div className="dhaba-card p-5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                <AlertTriangle className="w-5 h-5" />
-              </span>
-              <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                {t("defectsTitle")}
-              </h1>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-1.5">
+              <MilestoneHeader km="04" title={t("defectsTitle")} highway="NH-44" variant="yellow" />
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
                 Spatial Registry
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {t("defectsSubtitle")} Coordinates, road segments, multi-pass sightings, and human audit trail.
+            <p className="text-xs text-stone-600 dark:text-stone-400">
+              {t("defectsSubtitle")} Coordinates, road corridors, multi-pass sightings, and human audit trail.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             {/* View mode toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center p-1 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
               <button
                 onClick={() => setViewMode("table")}
                 className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
                   viewMode === "table"
-                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs"
-                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                    ? "bg-white dark:bg-stone-900 text-stone-900 dark:text-white shadow-xs"
+                    : "text-stone-500 hover:text-stone-900 dark:hover:text-white"
                 }`}
                 title="Table View"
               >
@@ -212,7 +196,7 @@ export const DefectsPage: React.FC = () => {
 
       {/* Defects List (Table or Card Grid) */}
       {viewMode === "table" ? (
-        <div className="civic-card rounded-2xl shadow-xs overflow-hidden border border-slate-200/90 dark:border-slate-800">
+        <div className="dhaba-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
@@ -292,13 +276,7 @@ export const DefectsPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold border ${getSeverityBadgeClass(
-                            defect.severity_level
-                          )}`}
-                        >
-                          {defect.severity_level || "Minor"}
-                        </span>
+                        <SeverityBadge level={defect.severity_level || "Minor"} size="sm" showScore={false} />
                       </td>
                       <td className="py-3 px-4 text-center font-bold text-slate-900 dark:text-white">
                         {defect.normalized_score !== null && defect.normalized_score !== undefined
@@ -351,19 +329,17 @@ export const DefectsPage: React.FC = () => {
             filteredItems.map((defect: DefectItem) => (
               <div
                 key={defect.id}
-                className="civic-card p-4 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3 hover:shadow-md transition"
+                className="dhaba-card p-4 space-y-3 hover:shadow-md transition"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-sm text-slate-900 dark:text-white">
                     {defect.class_code.toUpperCase()}
                   </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-bold border ${getSeverityBadgeClass(
-                      defect.severity_level
-                    )}`}
-                  >
-                    {defect.severity_level || "Minor"} ({Math.round(defect.normalized_score ?? 0)})
-                  </span>
+                  <SeverityBadge
+                    level={defect.severity_level || "Minor"}
+                    score={defect.normalized_score ?? undefined}
+                    size="sm"
+                  />
                 </div>
 
                 <div className="text-xs space-y-1">
@@ -425,8 +401,13 @@ export const DefectsPage: React.FC = () => {
               </div>
             ))
           ) : (
-            <div className="col-span-full py-8 text-center text-xs text-slate-400">
-              No matching defects found.
+            <div className="col-span-full">
+              <EmptyState
+                title="No Matching Defects in Registry"
+                description="No road distress records match your current filter settings. All corridors in this selection are clear."
+                actionLabel="Scan New Road Photo"
+                actionLink="/scanner"
+              />
             </div>
           )}
         </div>
@@ -522,13 +503,11 @@ export const DefectsPage: React.FC = () => {
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       Severity Scoring (Rubric Inspired by IRC:SP:84-2019)
                     </h3>
-                    <span
-                      className={`px-2.5 py-0.5 rounded text-xs font-black uppercase border ${getSeverityBadgeClass(
-                        defectDetail.defect.severity_level
-                      )}`}
-                    >
-                      {defectDetail.defect.severity_level || "Minor"}
-                    </span>
+                    <SeverityBadge
+                      level={defectDetail.defect.severity_level || "Minor"}
+                      score={defectDetail.defect.normalized_score ?? undefined}
+                      size="md"
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-2">

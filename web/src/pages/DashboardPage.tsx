@@ -3,15 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import {
-  AlertOctagon,
-  CheckCircle2,
-  Clock,
-  Activity,
   Layers,
   TrendingUp,
   Building2,
-  HardHat,
   ArrowRight,
+  Activity,
+  Radio,
+  FileText,
 } from "../components/Icons";
 import {
   ResponsiveContainer,
@@ -31,17 +29,19 @@ import {
 
 import { useLanguage } from "../context/LanguageContext";
 import { RoadHeroScene } from "../components/RoadHeroScene";
+import { SeverityBadge, Sign, MilestoneHeader, CatsEye } from "../ui";
 
-// Canonical Severity Colors adhering to config/severity_thresholds.json
+// Canonical Severity Colors adhering to config/severity_thresholds.json & Design System
 const SEVERITY_COLORS: Record<string, string> = {
-  Critical: "#E5233A", // 76-100
-  Severe: "#FB6A2F",   // 51-75
-  Moderate: "#FFB703", // 26-50
-  Minor: "#2EC4B6",    // 0-25
+  Critical: "#D7263D", // 76-100 (Red Octagon)
+  Severe: "#F26A1B",   // 51-75 (Orange Diamond)
+  Moderate: "#F2B705", // 26-50 (Yellow Triangle)
+  Minor: "#1E78D0",    // 0-25 (Blue Circle)
 };
 
 export const DashboardPage: React.FC = () => {
   const { t } = useLanguage();
+
   const { data: stats, isLoading: loadingStats } = useQuery({
     queryKey: ["statsOverview"],
     queryFn: api.getOverview,
@@ -60,18 +60,14 @@ export const DashboardPage: React.FC = () => {
     refetchInterval: 15000,
   });
 
-  const { data: contractors, isLoading: loadingContractors } = useQuery({
-    queryKey: ["statsContractors"],
-    queryFn: api.getContractorsStats,
-    refetchInterval: 15000,
-  });
-
   if (loadingStats && !stats) {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <Activity className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-2" />
-          <p className="text-slate-500 dark:text-slate-400 font-medium">Loading municipal road health telemetry...</p>
+          <p className="text-stone-600 dark:text-stone-400 font-medium font-mono text-sm">
+            Connecting to municipal road telemetry pipeline...
+          </p>
         </div>
       </div>
     );
@@ -99,174 +95,182 @@ export const DashboardPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-6 pb-12 w-full">
       {/* Animated Road Perspective Scene Hero & Scientific Evidence Strip */}
       <RoadHeroScene />
 
-      {/* Page Title & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md transition-colors">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>{t("appName")}</span>
-            </span>
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
+      {/* Page Title & Milestone Header */}
+      <div className="dhaba-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <MilestoneHeader km="00" title="Overview" highway="NH-44" variant="yellow" />
+            <span className="text-xs font-bold text-stone-500 dark:text-stone-400 font-mono hidden md:inline">
               {t("standardsNotice")}
             </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-            <span>{t("dashboardTitle")}</span>
+          <h1 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
+            Road Infrastructure Distress &amp; Maintenance Command Center
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400">
             {t("dashboardSubtitle")}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+
+        <div className="flex items-center gap-2.5 shrink-0">
           <Link
             to="/defects"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-stone-900 dark:bg-amber-400 text-white dark:text-stone-950 hover:opacity-90 transition shadow-xs"
           >
             <span>{t("navDefects")}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shadow-xs font-mono">
+            <CatsEye color="peacock" size="sm" pulse />
             <span>{t("telemetryOnline")}</span>
           </span>
         </div>
       </div>
 
-      {/* KPI Cards (Uniform Height & Balanced Alignment) */}
+      {/* 4 Balanced KPI Cards (Uniform Height & Road Sign Accents) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between h-full min-h-[140px]">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block min-h-[32px] flex items-center">
+        {/* Total Road Defects */}
+        <div className="dhaba-card p-5 flex flex-col justify-between min-h-[145px] hover:border-amber-500/60 transition-all">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 font-mono">
               {t("totalDefects")}
             </span>
-            <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shrink-0">
-              <Layers className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-700 dark:text-stone-200 border border-stone-200 dark:border-stone-700">
+              <Layers className="w-4 h-4 text-amber-500" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-black text-slate-900 dark:text-white block font-mono">
-              {stats?.total_defects ?? 0}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block font-medium truncate">
-              <strong className="text-amber-600 dark:text-amber-400">{stats?.open_defects ?? 0} {t("activeDefects")}</strong> | {stats?.repaired_defects ?? 0} {t("repairedDefects")}
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-stone-900 dark:text-stone-100 font-mono">
+                {stats?.total_defects ?? 0}
+              </span>
+              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">
+                {stats?.open_defects ?? 0} {t("activeDefects")}
+              </span>
+            </div>
+            <span className="text-xs text-stone-500 dark:text-stone-400 mt-1 block font-medium truncate">
+              {stats?.repaired_defects ?? 0} {t("repairedDefects")}
             </span>
           </div>
         </div>
 
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-red-200/90 dark:border-red-900/60 shadow-md hover:border-red-300 dark:hover:border-red-800 transition-all flex flex-col justify-between h-full min-h-[140px] bg-gradient-to-br from-white via-white to-red-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-red-950/20">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider block min-h-[32px] flex items-center">
-              {t("criticalPotholes")}
+        {/* Critical Potholes (24-hr Priority) */}
+        <div className="dhaba-card p-5 flex flex-col justify-between min-h-[145px] border-red-500/30 hover:border-red-500 transition-all bg-red-500/[0.03]">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 font-mono flex items-center gap-1.5">
+              <CatsEye color="red" size="sm" pulse />
+              <span>{t("criticalPotholes")}</span>
             </span>
-            <div className="w-11 h-11 rounded-xl bg-red-100 dark:bg-red-950/80 flex items-center justify-center text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">
-              <AlertOctagon className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-red-500/10 flex items-center justify-center text-red-600 border border-red-500/30">
+              <Sign level="Critical" size="sm" showIconOnly />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-black text-red-600 dark:text-red-400 block font-mono">
-              {stats?.critical_defects ?? 0}
-            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-red-600 dark:text-red-400 font-mono">
+                {stats?.critical_defects ?? 0}
+              </span>
+              <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-red-500/20 text-red-700 dark:text-red-300 font-mono border border-red-500/40">
+                24-Hr SLA
+              </span>
+            </div>
             <span className="text-xs text-red-700 dark:text-red-300 font-bold mt-1 block truncate">
               {t("immediateRemediation")}
             </span>
           </div>
         </div>
 
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between h-full min-h-[140px]">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block min-h-[32px] flex items-center">
+        {/* Citizen Grievances */}
+        <div className="dhaba-card p-5 flex flex-col justify-between min-h-[145px] hover:border-amber-500/60 transition-all">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 font-mono">
               {t("citizenGrievances")}
             </span>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shrink-0">
-              <Clock className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/30">
+              <FileText className="w-4 h-4 text-blue-500" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-black text-slate-900 dark:text-white block font-mono">
-              {stats?.total_complaints ?? 0}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block font-medium truncate">
-              <strong className="text-blue-600 dark:text-blue-400">{stats?.complaints_by_status?.["SUBMITTED"] ?? 0} {t("pendingReview")}</strong>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-stone-900 dark:text-stone-100 font-mono">
+                {stats?.total_complaints ?? 0}
+              </span>
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">
+                {stats?.complaints_by_status?.["SUBMITTED"] ?? 0} Pending
+              </span>
+            </div>
+            <span className="text-xs text-stone-500 dark:text-stone-400 mt-1 block font-medium truncate">
+              Public photo grievance audit
             </span>
           </div>
         </div>
 
-        <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between h-full min-h-[140px]">
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block min-h-[32px] flex items-center">
+        {/* PWD Work Orders */}
+        <div className="dhaba-card p-5 flex flex-col justify-between min-h-[145px] hover:border-amber-500/60 transition-all">
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 font-mono">
               {t("workOrdersDispatched")}
             </span>
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/30">
+              <Radio className="w-4 h-4 text-emerald-500" />
             </div>
           </div>
           <div className="mt-2">
-            <span className="text-3xl font-black text-slate-900 dark:text-white block font-mono">
-              {stats?.total_work_orders ?? 0}
-            </span>
-            <span className="text-xs text-emerald-700 dark:text-emerald-400 font-bold mt-1 block truncate">
-              {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} {t("verifiedCompleted")}
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-stone-900 dark:text-stone-100 font-mono">
+                {stats?.total_work_orders ?? 0}
+              </span>
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} Verified
+              </span>
+            </div>
+            <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold mt-1 block truncate">
+              Human engineer verified closure
             </span>
           </div>
         </div>
       </div>
 
       {/* Ward Hotspot Grid (Non-geographic heat-grid) */}
-      <div className="civic-card rounded-2xl p-6 shadow-md border border-slate-200/80 dark:border-slate-800">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-slate-100 dark:border-slate-800 pb-4">
+      <div className="dhaba-card p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-[#EBD9B8] dark:border-stone-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
+              <Building2 className="w-5 h-5 text-amber-500" />
+              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
                 Ward Hotspot Grid
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                Non-Geographic Health Heat-Grid
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-mono">
+                Administrative Divisions
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Real-time damage concentration across administrative wards, color-coded by defect density and critical hazards.
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+              Real-time damage concentration across municipal divisions, paired with canonical road-sign severity shapes.
             </p>
           </div>
-          <div className="flex items-center gap-3 text-xs font-bold">
-            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-md bg-[#2EC4B6]"></span> Minor
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-md bg-[#FFB703]"></span> Moderate
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-md bg-[#FB6A2F]"></span> Severe
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-              <span className="w-3 h-3 rounded-md bg-[#E5233A]"></span> Critical
-            </span>
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+            <SeverityBadge level="Minor" size="sm" showScore={false} />
+            <SeverityBadge level="Moderate" size="sm" showScore={false} />
+            <SeverityBadge level="Severe" size="sm" showScore={false} />
+            <SeverityBadge level="Critical" size="sm" showScore={false} />
           </div>
         </div>
 
         {loadingWards ? (
-          <div className="py-12 text-center text-xs text-slate-400">Loading ward hotspot grid...</div>
+          <div className="py-12 text-center text-xs text-stone-400 font-mono">
+            Loading ward hotspot grid...
+          </div>
         ) : wards && wards.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-4">
             {wards.map((ward) => {
-              // Determine risk category based on critical defects & total volume
               const isCrit = ward.critical_defects > 3;
               const isSev = ward.critical_defects > 0 && ward.critical_defects <= 3;
               const isMod = !isCrit && !isSev && ward.total_defects > 5;
-              const riskColor = isCrit
-                ? "#E5233A"
-                : isSev
-                ? "#FB6A2F"
-                : isMod
-                ? "#FFB703"
-                : "#2EC4B6";
-              const riskLabel = isCrit ? "Critical" : isSev ? "Severe" : isMod ? "Moderate" : "Minor";
-
+              const riskLevel = isCrit ? "Critical" : isSev ? "Severe" : isMod ? "Moderate" : "Minor";
               const repairPct = ward.total_defects > 0
                 ? Math.min(100, Math.round((ward.repaired_defects / ward.total_defects) * 100))
                 : 100;
@@ -274,41 +278,29 @@ export const DashboardPage: React.FC = () => {
               return (
                 <div
                   key={ward.ward_id}
-                  className="p-4.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between h-full min-h-[175px]"
+                  className="p-4 rounded-xl border-2 border-[#EBD9B8] dark:border-stone-800 bg-white/70 dark:bg-stone-900/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[175px]"
                 >
-                  <div
-                    className="absolute top-0 left-0 right-0 h-1.5"
-                    style={{ backgroundColor: riskColor }}
-                  />
-                  <div className="flex items-center justify-between mb-2 pt-1">
-                    <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-amber-500/10 text-stone-800 dark:text-stone-200 border border-amber-500/30">
                       {ward.ward_code || "W-XX"}
                     </span>
-                    <span
-                      className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: `${riskColor}15`,
-                        color: riskColor,
-                        border: `1px solid ${riskColor}40`,
-                      }}
-                    >
-                      {riskLabel} Risk
-                    </span>
+                    <SeverityBadge level={riskLevel} size="sm" showScore={false} />
                   </div>
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+
+                  <h3 className="font-bold text-sm text-stone-900 dark:text-stone-100 truncate">
                     {ward.ward_name}
                   </h3>
 
-                  <div className="grid grid-cols-2 gap-2 my-3 text-xs">
-                    <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Defects</span>
-                      <span className="text-base font-black text-slate-900 dark:text-white">
+                  <div className="grid grid-cols-2 gap-2 my-2.5 text-xs">
+                    <div className="p-2 rounded-lg bg-stone-50 dark:bg-stone-800/60">
+                      <span className="text-[10px] uppercase font-bold text-stone-400 block font-mono">Defects</span>
+                      <span className="text-base font-black text-stone-900 dark:text-white font-mono">
                         {ward.total_defects}
                       </span>
                     </div>
-                    <div className="p-2 rounded-lg bg-red-50/60 dark:bg-red-950/40 border border-red-100 dark:border-red-900/40">
-                      <span className="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 block">Critical</span>
-                      <span className="text-base font-black text-red-600 dark:text-red-400">
+                    <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <span className="text-[10px] uppercase font-bold text-red-600 dark:text-red-400 block font-mono">Critical</span>
+                      <span className="text-base font-black text-red-600 dark:text-red-400 font-mono">
                         {ward.critical_defects}
                       </span>
                     </div>
@@ -316,185 +308,66 @@ export const DashboardPage: React.FC = () => {
 
                   {/* Repair Progress */}
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                    <div className="flex items-center justify-between text-[10px] text-stone-500 dark:text-stone-400 font-semibold font-mono">
                       <span>Repaired ({ward.repaired_defects})</span>
                       <span>{repairPct}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-emerald-500 rounded-full transition-all"
                         style={{ width: `${repairPct}%` }}
                       />
                     </div>
                   </div>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                    <span>Allocated: ₹{(ward.allocated_budget / 100000).toFixed(1)}L</span>
-                    <span>Spent: ₹{(ward.spent_budget / 100000).toFixed(1)}L</span>
-                  </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="py-8 text-center text-xs text-slate-400">No municipal ward records found.</div>
+          <div className="py-8 text-center text-xs text-stone-400 font-mono">
+            No municipal division records found.
+          </div>
         )}
       </div>
 
-      {/* Municipal Ward Defect Registry Table (100% Real Database Records) */}
-      <div className="civic-card rounded-2xl p-6 shadow-md border border-slate-200/80 dark:border-slate-800">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-slate-100 dark:border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-red-600 dark:text-red-400" />
-              <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
-                Municipal Ward Damage Leaderboard
-              </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                Live DB Records
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Real-time municipal jurisdictions ordered by critical defect severity and repair completion status.
-            </p>
-          </div>
-          <Link
-            to="/defects"
-            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-          >
-            <span>Open Defect Registry</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto">
-          {sortedWards.length > 0 ? (
-            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
-              <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
-                <tr>
-                  <th className="py-3 px-4 text-center">Rank</th>
-                  <th className="py-3 px-4">Ward Name &amp; Code</th>
-                  <th className="py-3 px-4 text-center">Total Defects</th>
-                  <th className="py-3 px-4 text-center">Critical Potholes</th>
-                  <th className="py-3 px-4 text-center">Repaired</th>
-                  <th className="py-3 px-4 text-center">Repair Progress</th>
-                  <th className="py-3 px-4 text-center">Allocated Budget</th>
-                  <th className="py-3 px-4 text-right">Priority Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {sortedWards.map((ward, idx) => {
-                  const isCritAction = ward.critical_defects > 0;
-                  const isHighPri = ward.total_defects > ward.repaired_defects;
-                  const repairPct = ward.total_defects > 0 ? Math.round((ward.repaired_defects / ward.total_defects) * 100) : 0;
-
-                  return (
-                    <tr key={ward.ward_id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition">
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black ${
-                            idx < 3
-                              ? "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          #{idx + 1}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                        <div className="flex items-center gap-1.5">
-                          <span>{ward.ward_name}</span>
-                          {ward.ward_code && (
-                            <span className="font-mono text-[10px] text-slate-400">({ward.ward_code})</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center font-bold text-slate-800 dark:text-slate-200">
-                        {ward.total_defects}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-block px-2.5 py-0.5 rounded text-xs font-black bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
-                          {ward.critical_defects}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center font-bold text-emerald-600 dark:text-emerald-400">
-                        {ward.repaired_defects}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="inline-flex items-center gap-2">
-                          <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-emerald-500 rounded-full"
-                              style={{ width: `${repairPct}%` }}
-                            />
-                          </div>
-                          <span className="font-mono text-xs text-slate-600 dark:text-slate-400">{repairPct}%</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-center font-mono text-xs">
-                        ₹{(ward.allocated_budget / 100000).toFixed(1)}L
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span
-                          className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                            isCritAction
-                              ? "bg-red-600 text-white"
-                              : isHighPri
-                              ? "bg-amber-500 text-white"
-                              : "bg-emerald-600 text-white"
-                          }`}
-                        >
-                          {isCritAction ? "Immediate Patch" : isHighPri ? "Repair Queue" : "Routine Scan"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="py-8 text-center text-xs text-slate-400">No municipal ward records found.</div>
-          )}
-        </div>
-      </div>
-
-      {/* Visual Analytics Grid */}
+      {/* Visual Analytics Grid: 14-Day Activity Trends & Severity Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 14-Day Activity Trends Line Chart */}
-        <div className="civic-card p-6 rounded-xl shadow-xs">
+        <div className="dhaba-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                {t("severityDistributionTitle")}
+              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 flex items-center gap-2 font-signboard">
+                <TrendingUp className="w-5 h-5 text-amber-500" />
+                <span>14-Day Pothole Discovery &amp; Repair Trends</span>
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {t("dashboardSubtitle")}
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                Corridor distress observation volume over 14-day rolling window
               </p>
             </div>
           </div>
           <div className="h-64">
             {loadingTrends ? (
-              <div className="h-full flex items-center justify-center text-xs text-slate-400">
-                Loading...
+              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-mono">
+                Loading activity trends...
               </div>
             ) : trendsData?.trends && trendsData.trends.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendsData.trends}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,179,0,0.15)" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 11, fill: "#64748b" }}
+                    tick={{ fontSize: 11, fill: "#888888" }}
                     tickFormatter={(val) => val.slice(5)}
                   />
-                  <YAxis tick={{ fontSize: 11, fill: "#64748b" }} allowDecimals={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#888888" }} allowDecimals={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
-                      color: "#fff",
+                      backgroundColor: "#0A0C12",
+                      color: "#F3EEE2",
                       borderRadius: "8px",
-                      border: "none",
+                      border: "1px solid rgba(255,179,0,0.3)",
                       fontSize: "12px",
+                      fontFamily: "monospace",
                     }}
                   />
                   <Legend />
@@ -502,45 +375,45 @@ export const DashboardPage: React.FC = () => {
                     type="monotone"
                     dataKey="observations_count"
                     name={t("navDefects")}
-                    stroke="#2EC4B6"
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
+                    stroke="#FFB300"
+                    strokeWidth={2.5}
+                    dot={{ r: 3.5, fill: "#FFB300" }}
                   />
                   <Line
                     type="monotone"
                     dataKey="complaints_count"
                     name={t("citizenGrievances")}
-                    stroke="#3b82f6"
+                    stroke="#00D1D1"
                     strokeWidth={2}
-                    dot={{ r: 3 }}
+                    dot={{ r: 3, fill: "#00D1D1" }}
                   />
                   <Line
                     type="monotone"
                     dataKey="repairs_count"
                     name="Repairs"
-                    stroke="#FFB703"
+                    stroke="#35D49A"
                     strokeWidth={2}
-                    dot={{ r: 3 }}
+                    dot={{ r: 3, fill: "#35D49A" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-xs text-slate-400">
-                No observation data recorded in past 14 days
+              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-mono">
+                No telemetry recorded in past 14 days
               </div>
             )}
           </div>
         </div>
 
         {/* Severity Breakdown & Defect Class Distributions */}
-        <div className="civic-card p-6 rounded-xl shadow-xs flex flex-col justify-between">
+        <div className="dhaba-card p-6 flex flex-col justify-between">
           <div>
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
-              <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              {t("severityDistributionTitle")}
+            <h2 className="text-base font-black text-stone-900 dark:text-stone-100 flex items-center gap-2 mb-1 font-signboard">
+              <Activity className="w-5 h-5 text-amber-500" />
+              <span>Severity Breakdown &amp; Class Distribution</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              {t("dashboardSubtitle")}
+            <p className="text-xs text-stone-500 dark:text-stone-400 mb-4">
+              Real-time classification based on IRC:82-2023 distress guidelines
             </p>
           </div>
 
@@ -551,36 +424,53 @@ export const DashboardPage: React.FC = () => {
                 <PieChart>
                   <Pie
                     data={severityPieData}
-                    dataKey="value"
-                    nameKey="name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={65}
-                    innerRadius={35}
+                    innerRadius={45}
+                    outerRadius={75}
                     paddingAngle={3}
+                    dataKey="value"
                   >
                     {severityPieData.map((entry) => (
                       <Cell
                         key={`cell-${entry.name}`}
-                        fill={SEVERITY_COLORS[entry.name] || "#2EC4B6"}
+                        fill={SEVERITY_COLORS[entry.name] || "#FFB300"}
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0A0C12",
+                      color: "#F3EEE2",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,179,0,0.3)",
+                      fontSize: "12px",
+                      fontFamily: "monospace",
+                    }}
+                  />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Bar Chart */}
+            {/* Bar Chart by Defect Class */}
             <div className="h-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={classBarData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} />
-                  <YAxis tick={{ fontSize: 10, fill: "#64748b" }} allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="count" name="Count" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,179,0,0.15)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#888888" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "#888888" }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0A0C12",
+                      color: "#F3EEE2",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255,179,0,0.3)",
+                      fontSize: "12px",
+                      fontFamily: "monospace",
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#FFB300" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -588,70 +478,114 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Contractor Workload & SLA Compliance Table */}
-      <div className="civic-card rounded-xl shadow-xs overflow-hidden">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <HardHat className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-base font-bold text-slate-900 dark:text-white">{t("contractorLeaderboardTitle")}</h2>
+      {/* Ward Defect Registry Table (100% Real Database Records) */}
+      <div className="dhaba-card p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-[#EBD9B8] dark:border-stone-800 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-red-500" />
+              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
+                Corridor Damage Leaderboard
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-mono">
+                Live DB Records
+              </span>
+            </div>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+              Corridors ordered by critical defect volume and 24-hr remediation urgency.
+            </p>
           </div>
-          <span className="text-xs text-slate-400 font-medium">Municipal Engineering Division</span>
+          <Link
+            to="/defects"
+            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-mono"
+          >
+            <span>Open Defect Registry</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
-              <tr>
-                <th className="py-3 px-4">{t("colContractor")}</th>
-                <th className="py-3 px-4 text-center">{t("workOrdersDispatched")}</th>
-                <th className="py-3 px-4 text-center">{t("repairedDefects")}</th>
-                <th className="py-3 px-4 text-center">{t("verifiedCompleted")}</th>
-                <th className="py-3 px-4 text-right">{t("colSLA")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {loadingContractors ? (
+          {sortedWards.length > 0 ? (
+            <table className="w-full text-left text-sm text-stone-700 dark:text-stone-300">
+              <thead className="bg-[#FFF0D6]/60 dark:bg-stone-800/80 text-xs font-bold uppercase text-stone-500 dark:text-stone-400 border-b border-[#EBD9B8] dark:border-stone-700 font-mono">
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-xs text-slate-400">
-                    Loading contractor statistics...
-                  </td>
+                  <th className="py-3 px-4 text-center">Rank</th>
+                  <th className="py-3 px-4">Division Name &amp; Code</th>
+                  <th className="py-3 px-4 text-center">Total Defects</th>
+                  <th className="py-3 px-4 text-center">Critical Hazards</th>
+                  <th className="py-3 px-4 text-center">Repaired</th>
+                  <th className="py-3 px-4 text-center">Repair Progress</th>
+                  <th className="py-3 px-4 text-center">Budget Allocated</th>
+                  <th className="py-3 px-4 text-right">Priority SLA</th>
                 </tr>
-              ) : contractors && contractors.length > 0 ? (
-                contractors.map((c) => (
-                  <tr key={c.contractor_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{c.contractor_name}</td>
-                    <td className="py-3 px-4 text-center">{c.total_assigned}</td>
-                    <td className="py-3 px-4 text-center">{c.total_completed}</td>
-                    <td className="py-3 px-4 text-center text-emerald-600 font-bold">
-                      {c.total_verified}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {c.sla_compliance_rate_pct !== null ? (
+              </thead>
+              <tbody className="divide-y divide-[#EBD9B8] dark:divide-stone-800">
+                {sortedWards.map((ward, idx) => {
+                  const isCritAction = ward.critical_defects > 0;
+                  const isHighPri = ward.total_defects > ward.repaired_defects;
+                  const repairPct = ward.total_defects > 0 ? Math.round((ward.repaired_defects / ward.total_defects) * 100) : 0;
+
+                  return (
+                    <tr key={ward.ward_id} className="hover:bg-amber-500/[0.04] transition">
+                      <td className="py-3 px-4 text-center font-mono font-bold">
+                        #{idx + 1}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-stone-900 dark:text-stone-100">
+                        <div className="flex items-center gap-1.5">
+                          <span>{ward.ward_name}</span>
+                          {ward.ward_code && (
+                            <span className="font-mono text-[10px] text-stone-400">({ward.ward_code})</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
+                        {ward.total_defects}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-block px-2.5 py-0.5 rounded text-xs font-black bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/40 font-mono">
+                          {ward.critical_defects}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {ward.repaired_defects}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="inline-flex items-center gap-2">
+                          <div className="w-16 h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-emerald-500 rounded-full"
+                              style={{ width: `${repairPct}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs text-stone-600 dark:text-stone-400">{repairPct}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono text-xs">
+                        ₹{(ward.allocated_budget / 100000).toFixed(1)}L
+                      </td>
+                      <td className="py-3 px-4 text-right">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded text-xs font-black ${
-                            c.sla_compliance_rate_pct >= 90
-                              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                              : c.sla_compliance_rate_pct >= 75
-                                ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                                : "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
+                          className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider font-mono ${
+                            isCritAction
+                              ? "bg-red-600 text-white"
+                              : isHighPri
+                              ? "bg-amber-500 text-stone-950"
+                              : "bg-emerald-600 text-white"
                           }`}
                         >
-                          {c.sla_compliance_rate_pct}%
+                          {isCritAction ? "24-Hr Patch" : isHighPri ? "Repair Queue" : "Routine"}
                         </span>
-                      ) : (
-                        <span className="text-xs text-slate-400">N/A</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-6 text-center text-xs text-slate-400">
-                    No contractors registered
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-8 text-center text-xs text-stone-400 font-mono">
+              No corridor records found.
+            </div>
+          )}
         </div>
       </div>
     </div>
