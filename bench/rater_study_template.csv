@@ -1,0 +1,10 @@
+sample_id,image_filename,relative_path,class_code,relative_area_pct,engine_score,engine_level,rater_1_level,rater_2_level,rater_3_level
+SMP-001,India_000001.jpg,data/sample/splits/images/val/India_000001.jpg,POTHOLE,2.7,55.1,Severe,,,
+SMP-002,India_000002.jpg,data/sample/splits/images/val/India_000002.jpg,CRACK_LONG,3.9,40.1,Moderate,,,
+SMP-003,India_000003.jpg,data/sample/splits/images/val/India_000003.jpg,POTHOLE,5.1,62.6,Severe,,,
+SMP-004,India_000004.jpg,data/sample/splits/images/val/India_000004.jpg,CRACK_LONG,6.3,47.6,Moderate,,,
+SMP-005,India_000005.jpg,data/sample/splits/images/val/India_000005.jpg,POTHOLE,7.5,70.1,Severe,,,
+SMP-006,India_000006.jpg,data/sample/splits/images/val/India_000006.jpg,CRACK_LONG,8.7,55.1,Severe,,,
+SMP-007,India_000007.jpg,data/sample/splits/images/val/India_000007.jpg,POTHOLE,9.9,77.6,Critical,,,
+SMP-008,India_000008.jpg,data/sample/splits/images/val/India_000008.jpg,CRACK_LONG,1.5,32.6,Moderate,,,
+SMP-009,India_000009.jpg,data/sample/splits/images/val/India_000009.jpg,POTHOLE,2.7,55.1,Severe,,,

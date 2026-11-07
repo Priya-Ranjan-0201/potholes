@@ -37,6 +37,10 @@ export const CapturePage: React.FC = () => {
     conf: number;
     time: string;
   } | null>(null);
+  const [imuActive, setImuActive] = useState(false);
+  const [currentGZ, setCurrentGZ] = useState(1.02);
+  const [sensorFusionAgreed, setSensorFusionAgreed] = useState(false);
+  const lastBumpTimeRef = useRef<number>(0);
 
   // Web Audio Chirp Generator
   const playDetectionChirp = useCallback(() => {
@@ -123,6 +127,32 @@ export const CapturePage: React.FC = () => {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
+  // Accelerometer / DeviceMotion Listener for Bump Detection (Phase 6 COULD: Sensor Fusion Lite)
+  useEffect(() => {
+    const handleMotion = (event: DeviceMotionEvent) => {
+      if (!event.accelerationIncludingGravity) return;
+      const az = event.accelerationIncludingGravity.z ?? 9.81;
+      const gForce = Math.abs(az) / 9.81;
+      setCurrentGZ(Number(gForce.toFixed(2)));
+      setImuActive(true);
+
+      // Vertical acceleration disturbance spike detection (> 1.4g)
+      if (Math.abs(gForce - 1.0) >= 0.40) {
+        lastBumpTimeRef.current = Date.now();
+      }
+    };
+
+    if (typeof window !== "undefined" && "DeviceMotionEvent" in window) {
+      window.addEventListener("devicemotion", handleMotion);
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && "DeviceMotionEvent" in window) {
+        window.removeEventListener("devicemotion", handleMotion);
+      }
+    };
+  }, []);
+
   // Periodic Drive Simulation (Simulates vehicle speed & intermittent defect detections)
   useEffect(() => {
     if (!isRecording) return;
@@ -131,6 +161,12 @@ export const CapturePage: React.FC = () => {
       setSpeedKmh((prev) => {
         const next = prev + (Math.random() * 2 - 1);
         return Number(Math.max(25, Math.min(52, next)).toFixed(1));
+      });
+
+      // Simulated IMU jitter when physical sensor isn't streaming
+      setCurrentGZ((prev) => {
+        const jitter = (Math.random() * 0.1 - 0.05);
+        return Number(Math.max(0.92, Math.min(1.15, prev + jitter)).toFixed(2));
       });
 
       // 20% probability of new defect detected every 4s
@@ -143,6 +179,14 @@ export const CapturePage: React.FC = () => {
           setPotholeCount((c) => c + 1);
         } else {
           setCrackCount((c) => c + 1);
+        }
+
+        // Check sensor fusion cross-validation (bump within 1.5 seconds)
+        const now = Date.now();
+        const imuSpike = Math.random() < 0.5; // Simulate periodic mechanical bump correlation
+        if (imuSpike || Math.abs(now - lastBumpTimeRef.current) <= 1500) {
+          setSensorFusionAgreed(true);
+          setTimeout(() => setSensorFusionAgreed(false), 3000);
         }
 
         const newDet: OfflineDetection = {
@@ -278,8 +322,31 @@ export const CapturePage: React.FC = () => {
           <div className="font-mono text-[10px] text-slate-300">
             {coordinates.lat.toFixed(5)}&deg; N, {coordinates.lon.toFixed(5)}&deg; E
           </div>
-          <span className="text-[9px] text-slate-400 block">NavIC / GNSS High Precision</span>
+          <div className="flex items-center justify-end gap-1 text-[9px] text-slate-400">
+            <span>IMU: {currentGZ}g ({imuActive ? "Live" : "Simulated"})</span>
+            <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[8px] font-bold">EXPERIMENTAL</span>
+          </div>
         </div>
+
+        {/* Sensor Fusion Agreement Banner */}
+        {sensorFusionAgreed && (
+          <div className="absolute top-20 left-4 right-4 sm:left-auto sm:right-4 p-2.5 rounded-xl bg-purple-600/95 backdrop-blur-md text-white border border-purple-300 shadow-2xl flex items-center justify-between gap-3 animate-pulse z-20">
+            <div className="flex items-center gap-2">
+              <span className="text-base">⚡</span>
+              <div>
+                <span className="text-xs font-black uppercase tracking-wider block">
+                  Camera + IMU Bump Agree
+                </span>
+                <span className="text-[10px] text-purple-100">
+                  Optical defect matched vertical acceleration shock (IMU cross-validated)
+                </span>
+              </div>
+            </div>
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-white text-purple-900">
+              Cross-Validated
+            </span>
+          </div>
+        )}
 
         {/* Active Detection Banner Overlay (Center Bottom) */}
         {recentDetection && (

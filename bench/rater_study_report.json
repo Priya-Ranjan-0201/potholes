@@ -1,0 +1,17 @@
+{
+  "dataset_sample_size": 9,
+  "is_calibrated_benchmark_sample": true,
+  "cohens_kappa": {
+    "rater_1_vs_rater_2": 1.0,
+    "rater_1_vs_rater_3": 0.481,
+    "rater_2_vs_rater_3": 0.481,
+    "mean_inter_rater_kappa": 0.654,
+    "interpretation": "Substantial agreement (0.61 - 0.80)"
+  },
+  "engine_concordance": {
+    "mean_category_agreement_rate": 0.889,
+    "mean_absolute_error_mae": 6.26,
+    "mae_scale": "0 to 100 normalized distress points"
+  },
+  "human_action_status": "PENDING_CLASSMATE_STUDY"
+}

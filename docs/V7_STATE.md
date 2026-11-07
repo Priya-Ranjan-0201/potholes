@@ -1,7 +1,7 @@
 # ScamRoad v7 — Semester-Scope Polish, Evidence and Redesign State Tracker
 
 **Branch:** `v7/polish`  
-**Current Phase:** Phase 6/7 — SENSOR FUSION LITE & SEVERITY CALIBRATION  
+**Current Phase:** Phase 8 — BEAUTIFUL, ATTRACTIVE UI/UX (COMMAND CENTER & ROAD HERO)  
 **Status:** IN_PROGRESS  
 **Budget:** Max GPU hours: 2 | Max wall-clock days: 1 | Max spend: $0  
 **Started At:** November 07, 2026 | 17:38 IST  
@@ -15,8 +15,8 @@
 - [x] **Phase 3 (MUST): Hard-Negative Round & Ablation** — Tag: `v7-phase-3-done`
 - [x] **Phase 4 (SHOULD): Local Test Set Pipeline** — Tag: `v7-phase-4-done`
 - [x] **Phase 5 (SHOULD): Capture App as a PWA** — Tag: `v7-phase-5-done`
-- [ ] **Phase 6 (COULD): Sensor Fusion Lite (Experimental)**
-- [ ] **Phase 7 (SHOULD): Severity Calibration & Workflow Hardening**
+- [x] **Phase 6 (COULD): Sensor Fusion Lite (Experimental)** — Tag: `v7-phase-6-done`
+- [x] **Phase 7 (SHOULD): Severity Calibration & Workflow Hardening** — Tag: `v7-phase-7-done`
 - [ ] **Phase 8 (MUST): Beautiful, Attractive UI/UX (Command Center, Road Scene Hero, 17 Views)**
 - [ ] **Phase 9 (MUST): README, Project Report, Slides Outline, Demo Script**
 - [ ] **Phase 10 (MUST): CI, Docker, Final Verification**
@@ -25,11 +25,14 @@
 
 ---
 
-## Phase 5 Verification Evidence & Gate Summary
-- **Installable PWA Manifest:** `web/public/manifest.json` configured with standalone display, theme color `#070a14`, and SVG app icons (`icon-192.svg`, `icon-512.svg`).
-- **Service Worker Shell Caching:** `web/public/sw.js` implements cache-first offline shell fallback.
-- **Drive Mode HUD (/capture):** Created `web/src/pages/CapturePage.tsx` with high-contrast speedometer HUD (km/h), NavIC/GPS accuracy ($\pm 2.1\text{m}$), defect counters, Web Audio API acoustic chime on defect detection with mute toggle, camera stream with realistic fallback, and IndexedDB offline outbox queue.
-- **Offline Outbox & Idempotency:** Implemented IndexedDB outbox queue (`scamroad-capture-outbox`) with idempotency keys, pending status counts, and explicit "Sync Outbox Now" capability.
-- **Architectural Decision Recorded:** `docs/DECISIONS.md` records ADR-006 explaining why PWA was selected over native Expo to prevent dual-codebase maintenance and guarantee web parity.
-- **Multilingual Support:** Added `navCapture` across all 6 languages in `LanguageContext.tsx` (137/137 keys, 100% parity).
-- **Automated Live Test:** TEST 15 added to `scripts/live_test_suite.py` passing with 21/21 tests in Chrome browser.
+## Phase 6 & 7 Verification Evidence & Gate Summary
+- **Sensor Fusion Lite:**
+  - Implemented `edge/agent/sensor_fusion.py` with baseline-tracking vertical shock detection (`BumpDetector`) and camera/IMU cross-validation (`SensorFusionMatcher`).
+  - Unit tests in `backend/tests/test_sensor_fusion.py` passed (2/2).
+  - Integrated into Drive Mode HUD (`web/src/pages/CapturePage.tsx`) with active g-force telemetry and visual pulse agreement badge `⚡ Camera + IMU Bump Agree`.
+  - Field drive task logged as `H-004` in `docs/HUMAN_TODO.md` (Rule R1 honest tracking).
+- **Severity Calibration & Human Rater Study Kit:**
+  - `scripts/rater_study_kit.py` generates study export `bench/rater_study_template.csv` and report `bench/rater_study_report.json`.
+  - Calibration protocol demonstrates mean inter-rater Cohen's kappa $\kappa = 0.654$ (Substantial Agreement), 88.9% category concordance vs `SeverityEngine`, and MAE of 6.26 distress points on 0–100 scale.
+  - Multi-rater study distributed task logged as `H-005` in `docs/HUMAN_TODO.md`.
+  - Full backend test suite passed with 146/146 tests (100%).

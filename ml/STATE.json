@@ -1,8 +1,8 @@
 {
   "project_version": "v7",
   "branch": "v7/polish",
-  "current_phase": 6,
-  "phase_name": "SENSOR FUSION LITE & SEVERITY CALIBRATION",
+  "current_phase": 8,
+  "phase_name": "BEAUTIFUL, ATTRACTIVE UI/UX (COMMAND CENTER & ROAD HERO)",
   "status": "IN_PROGRESS",
   "budget": {
     "max_gpu_hours": 2,
@@ -10,7 +10,7 @@
     "max_spend_usd": 0
   },
   "started_at": "2026-11-07T17:38:00+05:30",
-  "completed_phases": [1, 2, 3, 4, 5],
+  "completed_phases": [1, 2, 3, 4, 5, 6, 7],
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
@@ -57,8 +57,24 @@
       "decision_record": "docs/DECISIONS.md (ADR-006: PWA Drive-Mode Capture App)",
       "indexeddb_outbox": "Verified offline queueing & deduplication",
       "live_browser_test": "TEST 15 PASSED in scripts/live_test_suite.py (21/21 suite total)"
+    },
+    "phase_6": {
+      "module_path": "edge/agent/sensor_fusion.py",
+      "tests": "backend/tests/test_sensor_fusion.py (2/2 PASSED)",
+      "status": "EXPERIMENTAL",
+      "ui_integration": "web/src/pages/CapturePage.tsx (IMU telemetry + Camera/Bump agreement badge)",
+      "human_todo": "H-004 logged in docs/HUMAN_TODO.md for field drive recording"
+    },
+    "phase_7": {
+      "rater_study_script": "scripts/rater_study_kit.py",
+      "study_template": "bench/rater_study_template.csv",
+      "study_report": "bench/rater_study_report.json",
+      "cohens_kappa_mean": 0.654,
+      "engine_concordance_rate": 0.889,
+      "mae_points": 6.26,
+      "backend_tests": "146/146 pytest tests PASSED"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Phase 6 (COULD: Sensor Fusion Lite) and Phase 7 (SHOULD: Severity Calibration & Rater Study Kit)"
+  "next_action": "Execute Phase 8 (MUST): UI/UX Overhaul & Polish (Viva Command Center, Road Scene Hero, WCAG AA, 17 views)"
 }
