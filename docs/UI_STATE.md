@@ -16,10 +16,10 @@
 - [x] **P4: Landing & Animated Scene Hero (Dhaba Dawn / Highway Night Looping Road, Roadmap)** — Tag: `ui-phase-4-done`
 - [x] **P5: Core Operations Redesign (Dashboard, Defect Registry, Complaints, Kanban, Repair Sign-off)** — Tag: `ui-phase-5-done`
 - [x] **P6: Specialized Pages (AI Scanner, Evaluation, Models, Settings, 404 Mascot, Demo Mode)** — Tag: `ui-phase-6-done`
-- [ ] **P7: Motion Polish, Reduced-Motion, Performance & Asset Credits** — Tag: `ui-phase-7-done`
-- [ ] **P8: Visual QA & Accessibility Report (Multi-viewport, 6 Languages, axe & Lighthouse)** — Tag: `ui-phase-8-done`
-- [ ] **Pass 2: Hostile Design Review (`docs/UI_BACKLOG.md`)**
-- [ ] **Pass 3: Clean-Clone Freeze (`ui-v1.0`)**
+- [x] **P7: Motion Polish, Reduced-Motion, Performance & Asset Credits** — Tag: `ui-phase-7-done`
+- [x] **P8: Visual QA & Accessibility Report (Multi-viewport, 6 Languages, axe & Lighthouse)** — Tag: `ui-phase-8-done`
+- [x] **Pass 2: Hostile Design Review (`docs/UI_BACKLOG.md`)**
+- [x] **Pass 3: Clean-Clone Freeze (`ui-v1.0`)**
 
 ---
 

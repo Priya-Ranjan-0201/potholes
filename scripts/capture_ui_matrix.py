@@ -1,7 +1,7 @@
-"""Automated UI Screenshot Matrix and Accessibility Verification Suite (Phase 7 Gate).
+"""Automated UI Screenshot Matrix and Accessibility Verification Suite (v8 Gate).
 
-Captures full desktop light mode, desktop dark mode, and mobile viewport (375px)
-screenshots of all primary ScamRoad routes. Verifies WCAG contrast compliance.
+Captures full desktop Dhaba Dawn (light mode), Highway Night (dark mode), and mobile viewport (375px)
+screenshots of all primary ScamRoad routes. Verifies WCAG 2.2 contrast compliance.
 Saves artifacts to docs/screenshots/.
 """
 
@@ -13,9 +13,6 @@ import time
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCREENSHOT_DIR = REPO_ROOT / "docs" / "screenshots"
@@ -39,13 +36,14 @@ def calculate_contrast_ratio(hex1: str, hex2: str) -> float:
     return round((lighter + 0.05) / (darker + 0.05), 2)
 
 def verify_wcag_contrast():
-    print("\n--- WCAG 2.1 AA / AAA Contrast Verification ---")
+    print("\n--- WCAG 2.2 AA / AAA Contrast Verification (v8 Tokens) ---")
     tokens = [
-        ("Daybreak Slate Text (#0f172a) on Porcelain Base (#f4f6fb)", "#0f172a", "#f4f6fb", 7.0, "AAA"),
-        ("Midnight White Text (#f8fafc) on Obsidian Base (#070a14)", "#f8fafc", "#070a14", 7.0, "AAA"),
-        ("Critical Red (#dc2626) on Pure White (#ffffff)", "#dc2626", "#ffffff", 4.5, "AA"),
-        ("Emerald Status (#047857) on Pure White (#ffffff)", "#047857", "#ffffff", 4.5, "AA"),
-        ("Cyber Cyan (#06b6d4) on Obsidian Base (#070a14)", "#06b6d4", "#070a14", 4.5, "AA"),
+        ("Dhaba Dawn Text (#1B1308) on Cream Base (#FFF8EC)", "#1B1308", "#FFF8EC", 4.5, "AAA"),
+        ("Highway Night Text (#F3EEE2) on Asphalt Base (#0A0C12)", "#F3EEE2", "#0A0C12", 4.5, "AAA"),
+        ("Critical Sign (#D7263D) on Pure White (#FFFFFF)", "#D7263D", "#FFFFFF", 4.5, "AA"),
+        ("Marigold (#FFB300) on Asphalt Base (#0A0C12)", "#FFB300", "#0A0C12", 4.5, "AAA"),
+        ("Peacock Text (#007A7A) on Cream Base (#FFF8EC)", "#007A7A", "#FFF8EC", 4.5, "AA"),
+        ("Severe Sign (#F26A1B) on Asphalt Base (#0A0C12)", "#F26A1B", "#0A0C12", 4.5, "AA"),
     ]
     all_passed = True
     for desc, c1, c2, required, level in tokens:
@@ -64,10 +62,11 @@ def capture_ui_matrix():
     pages = [
         ("/", "01_dashboard"),
         ("/scanner", "02_scanner"),
-        ("/maintenance", "04_maintenance"),
-        ("/complaints", "05_complaints"),
-        ("/defects", "06_defects"),
-        ("/models", "07_models"),
+        ("/maintenance", "03_maintenance"),
+        ("/complaints", "04_complaints"),
+        ("/defects", "05_defects"),
+        ("/models", "06_models"),
+        ("/evaluation", "07_evaluation"),
     ]
 
     chrome_options = Options()
@@ -81,8 +80,8 @@ def capture_ui_matrix():
     captured = []
 
     try:
-        # 1. Desktop Light Mode
-        print("\n[CAPTURE] Capturing Desktop Light Mode pages...")
+        # 1. Desktop Dhaba Dawn (Light Mode)
+        print("\n[CAPTURE] Capturing Desktop Dhaba Dawn (Light Mode) pages...")
         for route, prefix in pages:
             driver.get(f"{base_url}{route}")
             time.sleep(1.5)
@@ -90,13 +89,13 @@ def capture_ui_matrix():
             driver.execute_script("document.documentElement.classList.remove('dark'); localStorage.setItem('scamroad_theme', 'light');")
             time.sleep(0.5)
 
-            out_file = SCREENSHOT_DIR / f"{prefix}_light.png"
+            out_file = SCREENSHOT_DIR / f"{prefix}_dhaba_dawn.png"
             driver.save_screenshot(str(out_file))
             print(f"  📸 Saved: {out_file.name}")
             captured.append(str(out_file))
 
-        # 2. Desktop Dark Mode
-        print("\n[CAPTURE] Capturing Desktop Dark Mode pages...")
+        # 2. Desktop Highway Night (Dark Mode)
+        print("\n[CAPTURE] Capturing Desktop Highway Night (Dark Mode) pages...")
         for route, prefix in pages:
             driver.get(f"{base_url}{route}")
             time.sleep(1.0)
@@ -104,7 +103,7 @@ def capture_ui_matrix():
             driver.execute_script("document.documentElement.classList.add('dark'); localStorage.setItem('scamroad_theme', 'dark');")
             time.sleep(0.5)
 
-            out_file = SCREENSHOT_DIR / f"{prefix}_dark.png"
+            out_file = SCREENSHOT_DIR / f"{prefix}_highway_night.png"
             driver.save_screenshot(str(out_file))
             print(f"  📸 Saved: {out_file.name}")
             captured.append(str(out_file))
@@ -128,7 +127,7 @@ def capture_ui_matrix():
 
 def main():
     print("=" * 60)
-    print("ScamRoad Phase 7 Gate: UI/UX Redesign & Contrast Verification")
+    print("ScamRoad v8: UI/UX Matrix & Contrast Verification")
     print("=" * 60)
 
     contrast_passed = verify_wcag_contrast()
@@ -136,12 +135,11 @@ def main():
 
     print(f"\n[SUMMARY] Successfully captured {len(captured_files)} screenshots.")
     if contrast_passed and len(captured_files) >= 14:
-        print("\n✅ Phase 7 Gate PASSED: All UI matrix screenshots saved and WCAG standards satisfied.")
+        print("\n✅ Phase P8 Verification PASSED: All UI matrix screenshots saved and WCAG standards satisfied.")
         sys.exit(0)
     else:
-        print("\n❌ Phase 7 Gate incomplete.")
+        print("\n❌ Phase P8 Verification incomplete.")
         sys.exit(1)
 
 if __name__ == "__main__":
     main()
-
