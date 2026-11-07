@@ -102,20 +102,15 @@ try:
         theme_toggle_btn[0].click()
         time.sleep(0.5)
 
-    # Open Theme Preset Selector
+    # Verify Single Signature Theme is enforced
+    current_theme = driver.find_element(By.TAG_NAME, "html").get_attribute("data-theme")
+    log_test("Single Signature Theme Active (Truck Art Neon)", current_theme == "truck-art-neon", f"Data-theme: {current_theme}")
+    
+    # Verify Theme dropdown removed (Clean uncluttered navbar)
     theme_preset_btn = driver.find_elements(By.XPATH, "//button[@aria-label='Select Theme']")
-    if theme_preset_btn:
-        theme_preset_btn[0].click()
-        time.sleep(0.8)
-        dropdown = driver.find_elements(By.XPATH, "//button[contains(., 'Truck Art Neon')]")
-        log_test("Vibrant Theme Dropdown Opens", len(dropdown) > 0, "Theme options rendered")
-        if dropdown:
-            dropdown[0].click()
-            time.sleep(0.8)
-            current_theme = driver.find_element(By.TAG_NAME, "html").get_attribute("data-theme")
-            log_test("Truck Art Neon Theme Applied", current_theme == "truck-art-neon", f"Data-theme: {current_theme}")
-            driver.save_screenshot(os.path.join(SCREEN_DIR, "03_theme_truck_art_neon.png"))
-            print("  -> Saved 03_theme_truck_art_neon.png")
+    log_test("Clean Navbar (No Redundant Theme Dropdown)", len(theme_preset_btn) == 0, "Single unified theme active")
+    driver.save_screenshot(os.path.join(SCREEN_DIR, "03_theme_truck_art_neon.png"))
+    print("  -> Saved 03_theme_truck_art_neon.png")
 
     # -------------------------------------------------------------------------
     # TEST 3: LANGUAGE SWITCHER (i18n)
@@ -175,7 +170,7 @@ try:
 
     # Verify Telemetry Card on Right
     telemetry_panel = driver.find_element(By.XPATH, "//main").text
-    log_test("Model Confidence & Relative Area Computed", "MODEL CONFIDENCE" in telemetry_panel and "RELATIVE AREA" in telemetry_panel, "Telemetry metrics verified")
+    log_test("Model Confidence & Relative Area Computed", "MODEL CONFIDENCE" in telemetry_panel.upper() and "RELATIVE AREA" in telemetry_panel.upper(), "Telemetry metrics verified")
     log_test("No Fake Depth (Uncalibrated notice)", "Uncalibrated pixels" in telemetry_panel or "uncalibrated" in telemetry_panel.lower(), "Adheres to Rule R4")
 
     # Test Benchmark Sample Buttons

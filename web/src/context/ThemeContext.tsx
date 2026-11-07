@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ThemePreset, THEME_DEFINITIONS } from "../ui/tokens";
+import { ThemePreset } from "../ui/tokens";
 
 type ThemeMode = "light" | "dark";
 
@@ -17,13 +17,8 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [themePreset, setThemePresetState] = useState<ThemePreset>(() => {
-    const saved = localStorage.getItem("scamroad_theme_preset");
-    if (saved && saved in THEME_DEFINITIONS) {
-      return saved as ThemePreset;
-    }
-    return "holi-highway"; // Default: Theme A (Holi Highway)
-  });
+  // Single Unified Theme for ScamRoad: "truck-art-neon" (Vibrant Night Highway)
+  const themePreset: ThemePreset = "truck-art-neon";
 
   const [mode, setModeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem("scamroad_theme");
@@ -38,9 +33,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const root = document.documentElement;
 
-    // Apply preset attribute
-    root.setAttribute("data-theme", themePreset);
-    localStorage.setItem("scamroad_theme_preset", themePreset);
+    // Apply single signature theme preset
+    root.setAttribute("data-theme", "truck-art-neon");
+    localStorage.setItem("scamroad_theme_preset", "truck-art-neon");
 
     // Apply dark/light class
     if (mode === "dark") {
@@ -57,14 +52,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.remove("reduce-motion");
     }
     localStorage.setItem("scamroad_reduced_motion", String(reducedMotion));
-  }, [themePreset, mode, reducedMotion]);
+  }, [mode, reducedMotion]);
 
   const toggleTheme = () => {
     setModeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  const setThemePreset = (preset: ThemePreset) => {
-    setThemePresetState(preset);
+  const setThemePreset = (_preset: ThemePreset) => {
+    // Single theme locked
   };
 
   const setMode = (newMode: ThemeMode) => {

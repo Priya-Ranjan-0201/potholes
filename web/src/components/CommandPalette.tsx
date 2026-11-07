@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
-import { ThemePreset } from "../ui/tokens";
 import {
   Compass,
   Camera,
@@ -31,7 +30,7 @@ export const CommandPalette: React.FC = () => {
   const [easterEggChai, setEasterEggChai] = useState(false);
 
   const navigate = useNavigate();
-  const { setThemePreset, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme();
   const { setLanguage } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -122,34 +121,6 @@ export const CommandPalette: React.FC = () => {
     },
 
     // Themes
-    {
-      id: "theme-holi",
-      title: "Theme: Holi Highway (Vibrant Festive)",
-      category: "Theme",
-      icon: <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-pink-500 to-amber-500 inline-block" />,
-      action: () => { setThemePreset("holi-highway" as ThemePreset); setIsOpen(false); },
-    },
-    {
-      id: "theme-neon",
-      title: "Theme: Truck Art Neon (Bold High-Contrast)",
-      category: "Theme",
-      icon: <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-red-600 to-amber-400 inline-block" />,
-      action: () => { setThemePreset("truck-art-neon" as ThemePreset); setIsOpen(false); },
-    },
-    {
-      id: "theme-monsoon",
-      title: "Theme: Monsoon Dusk (Cinematic Teal-Indigo)",
-      category: "Theme",
-      icon: <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-teal-400 to-indigo-600 inline-block" />,
-      action: () => { setThemePreset("monsoon-dusk" as ThemePreset); setIsOpen(false); },
-    },
-    {
-      id: "theme-punjab",
-      title: "Theme: Punjab Fields (Mustard & Wheat)",
-      category: "Theme",
-      icon: <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-amber-400 to-rose-500 inline-block" />,
-      action: () => { setThemePreset("punjab-fields" as ThemePreset); setIsOpen(false); },
-    },
     {
       id: "toggle-dark-mode",
       title: "Toggle Light / Dark Mode",

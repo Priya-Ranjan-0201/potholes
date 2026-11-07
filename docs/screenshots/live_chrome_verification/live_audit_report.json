@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-08T01:03:10Z",
+  "timestamp": "2026-11-08T01:15:48Z",
   "browser": "Google Chrome (Headless Automated)",
   "passed": 34,
   "failed": 0,
@@ -37,7 +37,7 @@
     {
       "name": "Data Analytics Visualizations (Recharts)",
       "status": "PASS",
-      "details": "Found 38 SVG graphics"
+      "details": "Found 37 SVG graphics"
     },
     {
       "name": "Light Mode Toggle",
@@ -45,14 +45,14 @@
       "details": "HTML class: ''"
     },
     {
-      "name": "Vibrant Theme Dropdown Opens",
-      "status": "PASS",
-      "details": "Theme options rendered"
-    },
-    {
-      "name": "Truck Art Neon Theme Applied",
+      "name": "Single Signature Theme Active (Truck Art Neon)",
       "status": "PASS",
       "details": "Data-theme: truck-art-neon"
+    },
+    {
+      "name": "Clean Navbar (No Redundant Theme Dropdown)",
+      "status": "PASS",
+      "details": "Single unified theme active"
     },
     {
       "name": "Language Dropdown Opened",
@@ -77,7 +77,7 @@
     {
       "name": "YOLO11n Neural Detection Bounding Box Rendered",
       "status": "PASS",
-      "details": "Found 2 detected defect boxes"
+      "details": "Found 6 detected defect boxes"
     },
     {
       "name": "Model Confidence & Relative Area Computed",

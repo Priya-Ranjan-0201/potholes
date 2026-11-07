@@ -12,33 +12,26 @@ import {
   Moon,
   Globe,
   Search,
-  Sparkles,
 } from "./Icons";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import { Logo } from "./Logo";
 import { PatternBand } from "../ui/PatternBand";
-import { THEME_DEFINITIONS, ThemePreset } from "../ui/tokens";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { theme, toggleTheme, themePreset, setThemePreset } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t, currentOption } = useLanguage();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const langDropdownRef = useRef<HTMLDivElement>(null);
-  const themeDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
         setLangDropdownOpen(false);
-      }
-      if (themeDropdownRef.current && !themeDropdownRef.current.contains(e.target as Node)) {
-        setThemeDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -63,14 +56,6 @@ export const Navbar: React.FC = () => {
     { to: "/evaluation", label: "Model Evaluation" },
     { to: "/models", label: "Edge Telemetry" },
     { to: "/capture", label: "Drive PWA" },
-    { to: "/design-lab", label: "Theme Design Lab" },
-  ];
-
-  const themeKeys: ThemePreset[] = [
-    "holi-highway",
-    "truck-art-neon",
-    "monsoon-dusk",
-    "punjab-fields",
   ];
 
   return (
@@ -150,59 +135,6 @@ export const Navbar: React.FC = () => {
                 <Search className="w-3.5 h-3.5 text-amber-500" />
                 <span className="text-[11px] font-bold">⌘K</span>
               </button>
-
-              {/* Theme Palette Chooser */}
-              <div className="relative" ref={themeDropdownRef}>
-                <button
-                  onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold border border-stone-200 dark:border-stone-700 transition"
-                  aria-label="Select Theme"
-                  title="Switch vibrant theme"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="hidden xl:inline text-xs">{THEME_DEFINITIONS[themePreset].name}</span>
-                </button>
-
-                {themeDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-700 rounded-xl shadow-xl p-2 z-50 space-y-1">
-                    <span className="text-[10px] uppercase font-mono font-black text-stone-400 px-2 block mb-1">
-                      Vibrant Themes
-                    </span>
-                    {themeKeys.map((key) => {
-                      const def = THEME_DEFINITIONS[key];
-                      const isSelected = themePreset === key;
-                      return (
-                        <button
-                          key={key}
-                          onClick={() => {
-                            setThemePreset(key);
-                            setThemeDropdownOpen(false);
-                          }}
-                          className={`w-full px-2.5 py-2 text-left rounded-lg text-xs flex items-center justify-between transition ${
-                            isSelected
-                              ? "bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold"
-                              : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
-                          }`}
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-bold">{def.name}</span>
-                            <div className="flex items-center gap-1 mt-1">
-                              {def.swatches.map((swatch, idx) => (
-                                <div
-                                  key={idx}
-                                  className="w-2.5 h-2.5 rounded-full"
-                                  style={{ backgroundColor: swatch }}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
 
               {/* Language Switcher */}
               <div className="relative" ref={langDropdownRef}>

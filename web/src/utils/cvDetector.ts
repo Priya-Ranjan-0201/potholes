@@ -24,13 +24,16 @@ export interface InspectionResult {
   overallScore: number;
   boxes: DefectBox[];
   latencyMs: number;
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
 /**
  * Runs defect detection on an image (File, Blob, or base64 Data URL)
  */
 export async function detectDefects(
-  imageSource: File | Blob | string
+  imageSource: File | Blob | string,
+  confThresh: number = 0.15
 ): Promise<InspectionResult> {
   const startTime = performance.now();
 
@@ -50,7 +53,7 @@ export async function detectDefects(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-    const apiRes = await fetch("/api/v1/infer", {
+    const apiRes = await fetch(`/api/v1/infer?conf_thresh=${confThresh}`, {
       method: "POST",
       body: formData,
       signal: controller.signal,
@@ -81,6 +84,8 @@ export async function detectDefects(
         overallScore: data.overall_health_score ?? (boxes.length > 0 ? boxes[0].score : 100),
         boxes,
         latencyMs: latency,
+        imageWidth: data.image_width,
+        imageHeight: data.image_height,
       };
     } else {
       console.error("[ScamRoad AI] Inference API error:", apiRes.status, await apiRes.text());
