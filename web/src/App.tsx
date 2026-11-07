@@ -34,9 +34,9 @@ function App() {
         <LanguageProvider>
           <AuthProvider>
             <BrowserRouter>
-              <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300">
+              <div className="min-h-screen flex flex-col font-sans antialiased text-stone-900 dark:text-stone-100 bg-[#FFF8EC] dark:bg-[#0A0C12] transition-colors duration-300">
                 <Navbar />
-                <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 transition-all duration-200">
+                <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6 pb-20 xl:pb-8 transition-all duration-200">
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/scanner" element={<ScannerPage />} />

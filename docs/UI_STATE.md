@@ -12,7 +12,7 @@
 
 - [x] **P1: Audit & Cleanup, Tokens Scaffolding, Motion Tokens, Gaps Inventory** — Tag: `ui-phase-1-done`
 - [x] **P2: Design System Component Library (`web/src/ui/`) & UI Guide** — Tag: `ui-phase-2-done`
-- [ ] **P3: Shell & Navigation (Highway Exits Rail, Milestone Breadcrumb, Mobile Tab Bar, Reflector Header)** — Tag: `ui-phase-3-done`
+- [x] **P3: Shell & Navigation (Highway Exits Rail, Milestone Breadcrumb, Mobile Tab Bar, Reflector Header)** — Tag: `ui-phase-3-done`
 - [ ] **P4: Landing & Animated Scene Hero (Dhaba Dawn / Highway Night Looping Road, Roadmap)** — Tag: `ui-phase-4-done`
 - [ ] **P5: Core Operations Redesign (Dashboard, Defect Registry, Complaints, Kanban, Repair Sign-off)** — Tag: `ui-phase-5-done`
 - [ ] **P6: Specialized Pages (AI Scanner, Evaluation, Models, Settings, 404 Mascot, Demo Mode)** — Tag: `ui-phase-6-done`
