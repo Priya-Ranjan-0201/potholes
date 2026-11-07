@@ -9,7 +9,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="mt-auto bg-slate-900 dark:bg-black text-slate-300 border-t border-slate-800 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand & Research Identity */}
           <div className="md:col-span-2 space-y-3">

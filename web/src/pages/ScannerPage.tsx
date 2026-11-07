@@ -132,7 +132,7 @@ export const ScannerPage: React.FC = () => {
   const activeDefect = inspection.boxes.find((b) => b.id === selectedBoxId) || inspection.boxes[0];
 
   return (
-    <div className="space-y-6 pb-16 max-w-7xl mx-auto">
+    <div className="space-y-6 pb-16 w-full">
       {/* Top Header Card */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-md transition-colors">
         <div>

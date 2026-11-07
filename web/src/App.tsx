@@ -36,7 +36,7 @@ function App() {
             <BrowserRouter>
               <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300">
                 <Navbar />
-                <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 transition-all duration-200">
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/scanner" element={<ScannerPage />} />

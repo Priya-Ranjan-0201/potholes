@@ -254,7 +254,7 @@ export const CapturePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 max-w-4xl mx-auto pb-12">
+    <div className="space-y-4 w-full max-w-6xl mx-auto pb-16">
       <canvas ref={hiddenCanvasRef} className="hidden" />
 
       {/* Top HUD Bar */}

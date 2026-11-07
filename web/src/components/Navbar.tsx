@@ -7,7 +7,6 @@ import {
   MessageSquareWarning,
   Layers,
   Cpu,
-  UploadCloud,
   Menu,
   X,
   AlertTriangle,
@@ -53,50 +52,50 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-300">
-      {/* Student Research Disclaimer & Standards Notice */}
-      <div className="bg-slate-900 dark:bg-black text-slate-300 py-1 px-4 sm:px-6 lg:px-8 text-[11px] font-medium border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-amber-400 font-bold">{t("appName")}</span>
-            <span className="hidden sm:inline text-slate-600">|</span>
-            <span className="hidden sm:inline text-slate-300">
-              {t("govtBanner")}
-            </span>
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xs border-b border-slate-200/90 dark:border-slate-800 transition-colors duration-300">
+      {/* Student Research Disclaimer & Standards Notice Ticker */}
+      <div className="bg-slate-950 text-slate-300 py-1.5 px-4 sm:px-6 lg:px-8 xl:px-10 text-[11px] font-medium border-b border-slate-800/80">
+        <div className="w-full flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+            <span className="text-amber-400 font-extrabold tracking-wider">{t("appName")}</span>
+            <span className="text-slate-600 hidden sm:inline">|</span>
+            <span className="text-slate-300 truncate hidden sm:inline">{t("govtBanner")}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden md:inline text-emerald-400 font-semibold">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="hidden md:inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
               ● {t("standardsNotice")}
             </span>
-            <span className="text-slate-400">{t("helplineText")}</span>
+            <span className="text-slate-400 font-mono text-[10px]">{t("helplineText")}</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Official Emblem & Logo */}
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <Logo showWordmark={false} size="md" />
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-black text-lg text-slate-900 dark:text-white tracking-tight">
-                    {t("appName")}
-                  </span>
-                  <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50">
-                    {t("appHindiName")}
-                  </span>
-                </div>
-                <span className="text-[10px] block text-slate-500 dark:text-slate-400 font-semibold tracking-wider uppercase -mt-0.5">
-                  {t("appSubtitle")}
+      {/* Main Navigation Bar */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div className="flex items-center justify-between min-h-[64px] py-2 gap-4">
+          {/* Official Logo & Brand */}
+          <Link to="/" className="flex items-center gap-3 shrink-0 group">
+            <Logo showWordmark={false} size="md" />
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-xl text-slate-900 dark:text-white tracking-tight">
+                  Scam<span className="text-amber-500">Road</span>
+                </span>
+                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30 uppercase">
+                  {t("appHindiName")}
+                </span>
+                <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                  v1.2.0
                 </span>
               </div>
-            </Link>
-          </div>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider hidden md:block whitespace-nowrap">
+                Edge AI Road Defect &amp; Municipal Portal
+              </span>
+            </div>
+          </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/90 dark:border-slate-700/80">
+          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 shrink-0">
             {navLinks.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to;
@@ -104,9 +103,9 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                     isActive
-                      ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm border border-slate-300/80 dark:border-slate-700 text-amber-600 dark:text-amber-400"
+                      ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs border border-slate-300/80 dark:border-slate-700 font-black"
                       : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/60"
                   }`}
                 >
@@ -117,8 +116,8 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* Right Action Controls: Lang Switcher, Theme Switcher, Quick Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Right Action Controls: Lang Switcher, Theme Switcher, Quick CTA */}
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Language Selector Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
@@ -133,7 +132,7 @@ export const Navbar: React.FC = () => {
               </button>
 
               {langDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl py-1 z-50 animate-in fade-in zoom-in-95">
                   <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
                     {t("selectLanguage")}
                   </div>
@@ -175,27 +174,19 @@ export const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Quick Actions */}
+            {/* Quick 1-Click Action */}
             <Link
               to="/complaints"
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 dark:text-amber-300 text-xs font-bold border border-amber-400/40 transition-all shadow-xs"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black transition-all shadow-xs active:scale-98 whitespace-nowrap"
             >
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <AlertTriangle className="w-3.5 h-3.5" />
               <span>{t("reportPotholeBtn")}</span>
-            </Link>
-
-            <Link
-              to="/scanner"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white text-xs font-extrabold transition-all shadow-sm border border-amber-400/30 active:scale-98"
-            >
-              <UploadCloud className="w-3.5 h-3.5 text-white" />
-              <span>{t("scanPhotoBtn")}</span>
             </Link>
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-1.5 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700"
               aria-label="Toggle Navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -204,9 +195,9 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer Menu (screens < lg) */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-4 space-y-1 shadow-lg">
+        <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-4 space-y-1 shadow-lg">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.to;
@@ -246,26 +237,6 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Mobile Quick Bottom Bar */}
-      <div className="sm:hidden flex items-center justify-around py-1.5 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
-        {navLinks.slice(0, 4).map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.to;
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2 text-[10px] font-bold ${
-                isActive ? "text-amber-600 dark:text-amber-400 font-extrabold" : "text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
     </header>
   );
 };
