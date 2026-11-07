@@ -203,7 +203,7 @@ export const ScannerPage: React.FC = () => {
           className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
         >
           {/* Canvas Viewport */}
-          <div className="relative rounded-xl overflow-hidden bg-slate-950 aspect-[16/10] sm:aspect-[4/3] flex items-center justify-center border border-slate-900/50">
+          <div className="relative rounded-xl overflow-hidden bg-slate-950 min-h-[420px] max-h-[600px] flex items-center justify-center border border-slate-900/50 p-2 sm:p-4">
             {isScanning ? (
               <div className="text-center p-8 z-20">
                 <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mx-auto mb-3" />
@@ -211,14 +211,14 @@ export const ScannerPage: React.FC = () => {
                 <p className="text-slate-400 text-xs mt-1">Analyzing road surface depth & defect boundaries</p>
               </div>
             ) : (
-              <>
+              <div className="relative inline-block max-w-full max-h-full">
                 <img
                   src={activeImageSrc}
                   alt="Road Defect View"
-                  className="w-full h-full object-contain sm:object-cover select-none"
+                  className="max-h-[520px] w-auto max-w-full block select-none rounded-lg shadow-2xl object-contain mx-auto"
                 />
 
-                {/* Detected Bounding Boxes */}
+                {/* Detected Bounding Boxes directly mapped to the image */}
                 {showBoxes &&
                   inspection.boxes.map((box) => {
                     const isSelected = box.id === selectedBoxId;
@@ -261,28 +261,28 @@ export const ScannerPage: React.FC = () => {
                       </div>
                     );
                   })}
-
-                {/* Privacy Badge */}
-                <div className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] text-slate-300 font-medium flex items-center gap-1.5 border border-slate-700/80 select-none">
-                  <Shield className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Rule R15 Privacy Blur Active</span>
-                </div>
-
-                {/* Total Found Badge */}
-                <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-semibold text-white flex items-center gap-2 border border-slate-700/80 select-none">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      inspection.totalDefects > 0 ? "bg-red-400 animate-pulse" : "bg-emerald-400"
-                    }`}
-                  />
-                  <span>
-                    {inspection.totalDefects > 0
-                      ? `${inspection.totalDefects} Defect${inspection.totalDefects > 1 ? "s" : ""} Located`
-                      : "Clear / No Defects"}
-                  </span>
-                </div>
-              </>
+              </div>
             )}
+
+            {/* Privacy Badge */}
+            <div className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-[11px] text-slate-300 font-medium flex items-center gap-1.5 border border-slate-700/80 select-none z-10">
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Rule R15 Privacy Blur Active</span>
+            </div>
+
+            {/* Total Found Badge */}
+            <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-semibold text-white flex items-center gap-2 border border-slate-700/80 select-none z-10">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  inspection.totalDefects > 0 ? "bg-red-400 animate-pulse" : "bg-emerald-400"
+                }`}
+              />
+              <span>
+                {inspection.totalDefects > 0
+                  ? `${inspection.totalDefects} Defect${inspection.totalDefects > 1 ? "s" : ""} Located`
+                  : "Clear / No Defects"}
+              </span>
+            </div>
           </div>
 
           {/* Under-canvas Corridor Info */}
