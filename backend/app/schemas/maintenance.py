@@ -50,6 +50,7 @@ class WorkOrderCreate(BaseModel):
     priority: str = Field(default="MEDIUM", pattern="^(LOW|MEDIUM|HIGH|CRITICAL)$")
     estimated_cost: float | None = Field(default=None, ge=0.0)
     deadline: datetime | None = None
+    is_demo: bool = False
 
 
 class WorkOrderStatusTransition(BaseModel):
@@ -116,6 +117,7 @@ class WorkOrderResponse(BaseModel):
     status: str
     estimated_cost: float | None = None
     deadline: datetime | None = None
+    is_demo: bool = False
     created_at: datetime
     history: list[WorkOrderHistoryItem] = Field(default_factory=list)
     repair_record: RepairRecordResponse | None = None

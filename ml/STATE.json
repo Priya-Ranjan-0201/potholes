@@ -1,6 +1,6 @@
 {
-  "current_phase": 4,
-  "phase_name": "BACKEND, DATABASE, SECURITY",
+  "current_phase": 5,
+  "phase_name": "RESTORE THE MAP AND CORE GIS FEATURES",
   "status": "IN_PROGRESS",
   "started_at": "2026-11-07T16:05:00+05:30",
   "completed_phases": [
@@ -30,6 +30,13 @@
         "ai_evaluation": "docs/AI_EVALUATION.md"
       },
       "gate_status": "PASSED"
+    },
+    {
+      "phase": 4,
+      "name": "BACKEND, DATABASE, SECURITY",
+      "completed_at": "2026-11-07T16:31:00+05:30",
+      "evidence": "backend/tests/test_security_matrix.py",
+      "gate_status": "PASSED"
     }
   ],
   "evidence_paths": {
@@ -42,5 +49,5 @@
     "calibration": "docs/CALIBRATION.md"
   },
   "open_issues": [],
-  "next_action": "Execute Phase 4: Backend hardening, idempotency, seed data is_demo tagging, RBAC audit log verification"
+  "next_action": "Execute Phase 5: Restore /map route with Leaflet + OpenStreetMap, severity markers, clustering, heatmap, and defect drawer"
 }

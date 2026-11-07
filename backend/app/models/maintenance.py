@@ -61,6 +61,7 @@ class WorkOrder(Base, UUIDMixin, TimestampMixin):
     deadline: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True, index=True
     )
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 
 class WorkOrderHistory(Base, UUIDMixin, TimestampMixin):

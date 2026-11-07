@@ -331,6 +331,7 @@ def seed_database() -> None:
                 priority="CRITICAL",
                 estimated_cost=18500.0,
                 deadline=now + timedelta(hours=24),
+                is_demo=True,
             )
             session.add(wo1)
 
@@ -344,6 +345,7 @@ def seed_database() -> None:
                 priority="HIGH",
                 estimated_cost=12000.0,
                 deadline=now + timedelta(hours=36),
+                is_demo=True,
             )
             session.add(wo2)
 
@@ -357,6 +359,7 @@ def seed_database() -> None:
                 priority="CRITICAL",
                 estimated_cost=24000.0,
                 deadline=now - timedelta(days=1),
+                is_demo=True,
             )
             session.add(wo3)
             session.flush()
@@ -394,6 +397,7 @@ def seed_database() -> None:
                 reporter_user_id=citizen_user.id,
                 location=loc_wkt,
                 description="Massive crater causing two-wheelers to swerve dangerously into oncoming traffic.",
+                is_demo=True,
             )
             session.add(rep)
             session.flush()
@@ -403,6 +407,7 @@ def seed_database() -> None:
                 defect_id=created_defects[0].id,
                 status="IN_PROGRESS",
                 assigned_to_user_id=eng_user.id,
+                is_demo=True,
             )
             session.add(c1)
             session.flush()
