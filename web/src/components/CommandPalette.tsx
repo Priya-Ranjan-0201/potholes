@@ -5,10 +5,7 @@ import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import {
   Compass,
   Camera,
-  Layers,
   ClipboardList,
-  MessageSquareWarning,
-  Sparkles,
   BarChart3,
   Sun,
   Search,
@@ -18,7 +15,7 @@ import {
 interface CommandItem {
   id: string;
   title: string;
-  category: "Navigation" | "Theme" | "Language" | "Actions";
+  category: "Navigation" | "Theme" | "Language";
   icon: React.ReactNode;
   action: () => void;
 }
@@ -27,7 +24,6 @@ export const CommandPalette: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [easterEggChai, setEasterEggChai] = useState(false);
 
   const navigate = useNavigate();
   const { toggleTheme } = useTheme();
@@ -55,77 +51,46 @@ export const CommandPalette: React.FC = () => {
       setTimeout(() => inputRef.current?.focus(), 50);
       setQuery("");
       setSelectedIndex(0);
-      setEasterEggChai(false);
     }
   }, [isOpen]);
 
-  // Check easter egg
-  useEffect(() => {
-    if (query.trim().toLowerCase() === "chai") {
-      setEasterEggChai(true);
-    } else {
-      setEasterEggChai(false);
-    }
-  }, [query]);
-
   const commands: CommandItem[] = [
-    // Navigation
+    // 4 Primary Navigation Links
     {
-      id: "nav-dash",
-      title: "Dashboard Overview",
+      id: "nav-overview",
+      title: "Overview",
       category: "Navigation",
-      icon: <Compass className="w-4 h-4 text-amber-500" />,
+      icon: <Compass className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
       action: () => { navigate("/"); setIsOpen(false); },
     },
     {
-      id: "nav-scan",
-      title: "AI Pothole Scanner",
+      id: "nav-scanner",
+      title: "Scanner",
       category: "Navigation",
-      icon: <Camera className="w-4 h-4 text-amber-500" />,
+      icon: <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
       action: () => { navigate("/scanner"); setIsOpen(false); },
     },
     {
-      id: "nav-def",
-      title: "Defect Registry",
+      id: "nav-maintenance",
+      title: "Maintenance",
       category: "Navigation",
-      icon: <Layers className="w-4 h-4 text-amber-500" />,
-      action: () => { navigate("/defects"); setIsOpen(false); },
-    },
-    {
-      id: "nav-wo",
-      title: "Work Orders & Maintenance",
-      category: "Navigation",
-      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
+      icon: <ClipboardList className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
       action: () => { navigate("/maintenance"); setIsOpen(false); },
     },
     {
-      id: "nav-comp",
-      title: "Citizen Grievances",
+      id: "nav-benchmarks",
+      title: "Model Benchmarks",
       category: "Navigation",
-      icon: <MessageSquareWarning className="w-4 h-4 text-blue-500" />,
-      action: () => { navigate("/complaints"); setIsOpen(false); },
-    },
-    {
-      id: "nav-eval",
-      title: "Model Proofs & Evaluation",
-      category: "Navigation",
-      icon: <BarChart3 className="w-4 h-4 text-cyan-400" />,
-      action: () => { navigate("/evaluation"); setIsOpen(false); },
-    },
-    {
-      id: "nav-lab",
-      title: "Design Lab (Theme Matrix)",
-      category: "Navigation",
-      icon: <Sparkles className="w-4 h-4 text-purple-400" />,
-      action: () => { navigate("/design-lab"); setIsOpen(false); },
+      icon: <BarChart3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
+      action: () => { navigate("/benchmarks"); setIsOpen(false); },
     },
 
-    // Themes
+    // Theme Toggle
     {
       id: "toggle-dark-mode",
       title: "Toggle Light / Dark Mode",
       category: "Theme",
-      icon: <Sun className="w-4 h-4 text-amber-400" />,
+      icon: <Sun className="w-4 h-4 text-slate-500" />,
       action: () => { toggleTheme(); setIsOpen(false); },
     },
 
@@ -147,10 +112,10 @@ export const CommandPalette: React.FC = () => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev + 1) % filtered.length);
+      setSelectedIndex((prev) => (prev + 1) % (filtered.length || 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+      setSelectedIndex((prev) => (prev - 1 + filtered.length) % (filtered.length || 1));
     } else if (e.key === "Enter" && filtered[selectedIndex]) {
       e.preventDefault();
       filtered[selectedIndex].action();
@@ -161,17 +126,17 @@ export const CommandPalette: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-stone-950/75 backdrop-blur-md flex items-start justify-center pt-20 px-4"
+      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-20 px-4"
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="w-full max-w-xl dhaba-card p-0 border-2 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-lg card p-0 border overflow-hidden shadow-xl"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center gap-3 p-4 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60">
-          <Search className="w-5 h-5 text-amber-500 shrink-0" />
+        <div className="flex items-center gap-2.5 p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -180,30 +145,19 @@ export const CommandPalette: React.FC = () => {
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Type a command or search (try 'scanner', 'theme', or 'chai')..."
-            className="w-full bg-transparent text-stone-900 dark:text-stone-100 text-sm font-medium focus:outline-hidden"
+            placeholder="Type a command or search..."
+            className="w-full bg-transparent text-slate-900 dark:text-slate-100 text-xs sm:text-sm font-normal focus:outline-hidden"
           />
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+            className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Easter Egg: Chai Stall */}
-        {easterEggChai && (
-          <div className="p-4 bg-amber-500/15 border-b border-amber-500/30 flex items-center gap-3 text-amber-900 dark:text-amber-200 text-xs font-mono">
-            <span className="text-2xl animate-bounce">☕</span>
-            <div>
-              <span className="font-bold block">Masala Chai Break on NH-44!</span>
-              <span className="text-[11px] opacity-80">Fresh ginger-cardamom tea brewed at the highway dhaba. Safe travels!</span>
-            </div>
-          </div>
-        )}
-
         {/* Command List */}
-        <div className="max-h-80 overflow-y-auto p-2 divide-y divide-stone-100 dark:divide-stone-800/60">
+        <div className="max-h-72 overflow-y-auto p-1.5 divide-y divide-transparent">
           {filtered.length > 0 ? (
             filtered.map((item, idx) => {
               const isSelected = idx === selectedIndex;
@@ -212,43 +166,37 @@ export const CommandPalette: React.FC = () => {
                   key={item.id}
                   onClick={item.action}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer text-xs font-medium transition ${
+                  className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer text-xs transition-colors ${
                     isSelected
-                      ? "bg-amber-500 text-stone-950 font-bold shadow-xs"
-                      : "text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                      ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-medium"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div className="shrink-0">{item.icon}</div>
                     <span>{item.title}</span>
                   </div>
-                  <span
-                    className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded ${
-                      isSelected
-                        ? "bg-stone-950/20 text-stone-950"
-                        : "bg-stone-100 dark:bg-stone-800 text-stone-400"
-                    }`}
-                  >
+                  <span className="text-[10px] text-slate-400 font-mono">
                     {item.category}
                   </span>
                 </div>
               );
             })
           ) : (
-            <div className="py-8 text-center text-xs text-stone-400 font-mono">
-              No matching highway commands found.
+            <div className="py-6 text-center text-xs text-slate-400">
+              No matching commands found.
             </div>
           )}
         </div>
 
         {/* Footer Hint */}
-        <div className="p-3 bg-stone-100 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[10px] text-stone-500 font-mono">
+        <div className="p-2.5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
             <span>ESC Close</span>
           </div>
-          <span className="text-amber-500 font-bold">ScamRoad v9 Palette Hub</span>
+          <span>ScamRoad</span>
         </div>
       </div>
     </div>

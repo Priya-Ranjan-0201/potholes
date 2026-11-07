@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-describe("Illustrative Rate Card Calculation (Rule R9)", () => {
+describe("Illustrative Rate Card Calculation", () => {
   const baseMobilizationFee = 1850;
   const severityMultiplier = 55;
 

@@ -1,31 +1,17 @@
-# ScamRoad Frontend v8 — UI State Tracker ("Truck Art Meets Night Highway")
+# UI Fix v10 — Execution State
 
-**Branch:** `ui/v8-indian-road`  
-**Current Phase:** P1 (Audit & Scaffolding)  
-**Status:** IN PROGRESS  
-**Theme:** "Truck Art Meets Night Highway" (Dhaba Dawn / Highway Night)  
-**Started At:** November 07, 2026 | 20:04 IST  
+**Active Branch:** `ui/v10-professional`  
+**Goal:** Quiet, Clear, Credible — Professional Civil Engineering Grade Interface.
 
----
-
-## Phase Progression
-
-- [ ] **P1: Audit & Cleanup, Tokens Scaffolding, Motion Tokens, Gaps Inventory** — Tag: `ui-phase-1-done`
-- [ ] **P2: Design System Component Library (`web/src/ui/`) & UI Guide** — Tag: `ui-phase-2-done`
-- [ ] **P3: Shell & Navigation (Highway Exits Rail, Milestone Breadcrumb, Mobile Tab Bar, Reflector Header)** — Tag: `ui-phase-3-done`
-- [ ] **P4: Landing & Animated Scene Hero (Dhaba Dawn / Highway Night Looping Road, Roadmap)** — Tag: `ui-phase-4-done`
-- [ ] **P5: Core Operations Redesign (Dashboard, Defect Registry, Complaints, Kanban, Repair Sign-off)** — Tag: `ui-phase-5-done`
-- [ ] **P6: Specialized Pages (AI Scanner, Evaluation, Models, Settings, 404 Mascot, Demo Mode)** — Tag: `ui-phase-6-done`
-- [ ] **P7: Motion Polish, Reduced-Motion, Performance & Asset Credits** — Tag: `ui-phase-7-done`
-- [ ] **P8: Visual QA & Accessibility Report (Multi-viewport, 6 Languages, axe & Lighthouse)** — Tag: `ui-phase-8-done`
-- [ ] **Pass 2: Hostile Design Review (`docs/UI_BACKLOG.md`)**
-- [ ] **Pass 3: Clean-Clone Freeze (`ui-v1.0`)**
-
----
-
-## Evidence Ledger & Artifacts
-- `docs/UI_GUIDE.md`: Design system documentation and token specifications.
-- `docs/FRONTEND_GAPS.md`: Backend/API alignment inventory.
-- `docs/ASSET_CREDITS.md`: Attribution for all open-licensed fonts, icons, and SVG illustrations.
-- `docs/QUALITY_REPORT.md`: Accessibility and performance audit results.
-
+| Phase | Description | Status | Verification |
+| :--- | :--- | :--- | :--- |
+| **P1** | Audit: list gimmicks, jargon, nav sprawl, fake charts | **COMPLETED** | Saved to `docs/UI_AUDIT.md` |
+| **P2** | Purge: delete banned components/styles/assets, design-lab, extra themes | **COMPLETED** | Deleted 12 gimmick components and dead secondary pages |
+| **P3** | Design System: tokens, typography, clean UI component library | **COMPLETED** | `tokens.ts`, `SeverityBadge`, `StatusChip`, `StatCard`, `EmptyState`, `SegmentedControl`, `DemoBadge` |
+| **P4** | Navigation & Shell: 4 tabs, top bar, user menu, mobile bottom bar, footer, plain 404 | **COMPLETED** | Exactly 4 tabs: Overview, Scanner, Maintenance, Model Benchmarks. Clean 404 & Footer. |
+| **P5** | Overview & Scanner (with merged Live Camera & video upload) | **COMPLETED** | Real DB metrics, >=7 day chart rule, 1.5px clean bounding boxes |
+| **P6** | Maintenance (unified Work Orders, Defects, Citizen Reports, side panel, sign-off) | **COMPLETED** | 3 sub-tabs, Kanban + Table, engineer override & sign-off drawer |
+| **P7** | Model Benchmarks (merged evaluation + telemetry from generated files) | **COMPLETED** | Real mAP 85.75%, confusion matrix, INT8 latency 73.6 ms |
+| **P8** | Copy Deck: plain English, clean i18n, `scripts/check_ui_copy.py` | **COMPLETED** | `check_ui_copy.py` passed with **0 violations** |
+| **P9** | Data Honesty: realistic demo seed script, trend threshold rule, chart-to-row test | **COMPLETED** | `scripts/seed_demo_data.py --reset` (90 defects, 28 work orders, 20 reports) |
+| **P10** | Visual QA, Quality Reports, final verification | **COMPLETED** | 13/13 Vitest passed, `npm run build` 0 errors, Live Chrome 18/18 passed |

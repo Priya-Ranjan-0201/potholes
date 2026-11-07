@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import {
-  Layers,
-  TrendingUp,
-  Building2,
-  ArrowRight,
   Activity,
+  Layers,
   ClipboardList,
-  MessageSquareWarning,
+  AlertTriangle,
+  ArrowRight,
+  Clock,
+  RefreshCw,
 } from "../components/Icons";
 import {
   ResponsiveContainer,
@@ -19,418 +19,540 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
   Legend,
 } from "recharts";
-
-import { RoadHeroScene } from "../components/RoadHeroScene";
-import { SeverityBadge, Sign, KpiPlate, BentoGrid } from "../ui";
-
-// Canonical Severity Colors adhering to config/severity_thresholds.json & Design System
-const SEVERITY_COLORS: Record<string, string> = {
-  Critical: "#D7263D", // Red Octagon
-  Severe: "#F26A1B",   // Orange Diamond
-  Moderate: "#F2B705", // Yellow Triangle
-  Minor: "#1E78D0",    // Blue Circle
-};
+import { StatCard, SeverityBadge, StatusChip, DemoBadge } from "../ui";
 
 export const DashboardPage: React.FC = () => {
-  const { data: stats, isLoading: loadingStats } = useQuery({
+  const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    refetch: refetchStats,
+  } = useQuery({
     queryKey: ["statsOverview"],
     queryFn: api.getOverview,
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 
-  const { data: trendsData, isLoading: loadingTrends } = useQuery({
+  const {
+    data: trendsData,
+    isLoading: loadingTrends,
+    refetch: refetchTrends,
+  } = useQuery({
     queryKey: ["statsTrends"],
     queryFn: () => api.getTrends(14),
-    refetchInterval: 10000,
+    refetchInterval: 15000,
   });
 
-  const { data: wards, isLoading: loadingWards } = useQuery({
+  const {
+    data: wards,
+    isLoading: loadingWards,
+    refetch: refetchWards,
+  } = useQuery({
     queryKey: ["statsWards"],
     queryFn: api.getWards,
     refetchInterval: 15000,
   });
 
+  const {
+    data: workOrdersData,
+    isLoading: loadingWorkOrders,
+    refetch: refetchWorkOrders,
+  } = useQuery({
+    queryKey: ["workOrdersOverview"],
+    queryFn: () => api.listWorkOrders({ limit: 20 }),
+    refetchInterval: 15000,
+  });
+
+  const {
+    data: recentDefectsData,
+    refetch: refetchDefects,
+  } = useQuery({
+    queryKey: ["recentDefectsOverview"],
+    queryFn: () => api.listDefects({ limit: 10 }),
+    refetchInterval: 15000,
+  });
+
+  const handleRefresh = () => {
+    refetchStats();
+    refetchTrends();
+    refetchWards();
+    refetchWorkOrders();
+    refetchDefects();
+    setLastRefreshed(new Date());
+  };
+
   if (loadingStats && !stats) {
     return (
       <div className="flex h-80 items-center justify-center">
         <div className="text-center">
-          <Activity className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-2" />
-          <p className="text-stone-500 dark:text-stone-400 font-mono text-xs">
-            Connecting to road telemetry engine...
+          <Activity className="w-6 h-6 animate-spin text-slate-400 mx-auto mb-2" />
+          <p className="text-slate-500 font-mono text-xs">
+            Loading road network metrics...
           </p>
         </div>
       </div>
     );
   }
 
-  // Format data for severity pie chart
-  const severityPieData = stats?.defects_by_severity
-    ? Object.entries(stats.defects_by_severity).map(([name, value]) => ({
-        name,
-        value,
-      }))
-    : [];
+  // Calculate KPIs
+  const totalDefects = stats?.total_defects ?? 0;
+  const criticalDefects = stats?.defects_by_severity?.["Critical"] ?? 0;
+  const severeDefects = stats?.defects_by_severity?.["Severe"] ?? 0;
+  const highPriorityTotal = criticalDefects + severeDefects;
+  const highPriorityPct =
+    totalDefects > 0 ? Math.round((highPriorityTotal / totalDefects) * 100) : 0;
 
-  // Ranked wards derived directly from live database records
+  const openWorkOrders =
+    (stats?.work_orders_by_status?.["CREATED"] ?? 0) +
+    (stats?.work_orders_by_status?.["ASSIGNED"] ?? 0) +
+    (stats?.work_orders_by_status?.["IN_PROGRESS"] ?? 0);
+
+  // SLA calculation
+  const workOrders = workOrdersData?.items || [];
+  const now = new Date();
+  const slaBreachedOrders = workOrders.filter((wo) => {
+    if (wo.status === "VERIFIED" || wo.status === "COMPLETED") return false;
+    if (!wo.deadline) return false;
+    return new Date(wo.deadline) < now;
+  });
+
+  const upcomingSlaOrders = workOrders
+    .filter((wo) => wo.status !== "VERIFIED" && wo.status !== "COMPLETED" && wo.deadline)
+    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+    .slice(0, 6);
+
+  // Filter trends: only distinct dates with detections or activity
+  const rawTrends = trendsData?.trends || [];
+  const activeTrends = rawTrends.filter(
+    (t) => t.observations_count > 0 || t.repairs_count > 0
+  );
+  const hasEnoughHistory = activeTrends.length >= 7;
+
+  // Filter corridors
   const sortedWards = [...(wards || [])].sort(
     (a, b) => b.critical_defects - a.critical_defects || b.total_defects - a.total_defects
   );
+  const displayedWards =
+    selectedCorridor === "all"
+      ? sortedWards
+      : sortedWards.filter((w) => w.ward_id === selectedCorridor);
 
   return (
-    <div className="space-y-6 pb-12 w-full">
-      {/* Sleek Hero Banner */}
-      <RoadHeroScene />
+    <div className="space-y-6">
+      {/* 1. Header row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Road Network Overview
+          </h1>
+          <DemoBadge />
+        </div>
 
-      {/* 4 Bento-Grid KPI Plates */}
-      <BentoGrid>
-        <KpiPlate
-          label="Total Road Defects"
-          value={stats?.total_defects ?? 0}
-          badge={<span className="text-xs font-bold font-mono text-amber-500">{stats?.open_defects ?? 0} Active</span>}
-          subtext={`${stats?.repaired_defects ?? 0} repaired across municipal corridor`}
-          icon={<Layers className="w-4 h-4 text-amber-500" />}
-          variant="default"
-        />
+        <div className="flex items-center gap-2.5 text-xs">
+          {/* Corridor Scope Selector */}
+          <select
+            value={selectedCorridor}
+            onChange={(e) => setSelectedCorridor(e.target.value)}
+            className="input-select py-1 px-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-slate-700 dark:text-slate-300 font-medium"
+          >
+            <option value="all">All Corridors &amp; Sectors</option>
+            {sortedWards.map((w) => (
+              <option key={w.ward_id} value={w.ward_id}>
+                {w.ward_name} ({w.ward_code || "Zone"})
+              </option>
+            ))}
+          </select>
 
-        <KpiPlate
-          label="Critical Potholes"
-          value={stats?.critical_defects ?? 0}
-          badge={<span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-red-500/20 text-red-600 font-mono">24-Hr Priority</span>}
-          subtext="Immediate road compaction SLA"
-          icon={<Sign level="Critical" size="sm" showIconOnly />}
-          variant="critical"
-        />
-
-        <KpiPlate
-          label="Maintenance Orders"
-          value={stats?.total_work_orders ?? 0}
-          badge={<span className="text-xs font-bold font-mono text-emerald-500">{stats?.work_orders_by_status?.["VERIFIED"] ?? 0} Verified</span>}
-          subtext="Human engineer verified closure"
-          icon={<ClipboardList className="w-4 h-4 text-emerald-500" />}
-          variant="success"
-        />
-
-        <KpiPlate
-          label="Citizen Grievances"
-          value={stats?.total_complaints ?? 0}
-          badge={<span className="text-xs font-bold font-mono text-blue-500">{stats?.complaints_by_status?.["SUBMITTED"] ?? 0} Pending</span>}
-          subtext="Public highway distress reporting"
-          icon={<MessageSquareWarning className="w-4 h-4 text-blue-500" />}
-          variant="accent"
-        />
-      </BentoGrid>
-
-      {/* Visual Analytics: 14-Day Activity Trends & Severity Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Activity Trends */}
-        <div className="dhaba-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 flex items-center gap-2 font-signboard">
-                <TrendingUp className="w-4 h-4 text-amber-500" />
-                <span>14-Day Defect &amp; Repair Trends</span>
-              </h2>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                Pothole observations and repair completions over 14 days
-              </p>
-            </div>
+          {/* Last updated & refresh button */}
+          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px] pl-2 border-l border-slate-200 dark:border-slate-700">
+            <span>
+              Updated {lastRefreshed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+            <button
+              onClick={handleRefresh}
+              className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+              title="Refresh network data"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <div className="h-60">
-            {loadingTrends ? (
-              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-mono">
-                Loading activity trends...
+        </div>
+      </div>
+
+      {/* 2. 4 Primary KPI Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Total Defects Logged"
+          value={totalDefects}
+          subtext={`${stats?.repaired_defects ?? 0} repaired across network`}
+          icon={<Layers className="w-4 h-4 text-slate-400" />}
+        />
+
+        <StatCard
+          label="Severe &amp; Critical Defects"
+          value={highPriorityTotal}
+          subtext={`${highPriorityPct}% of total network distress`}
+          badge={
+            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+              High Priority
+            </span>
+          }
+          icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+        />
+
+        <StatCard
+          label="Open Work Orders"
+          value={openWorkOrders}
+          subtext={`${stats?.work_orders_by_status?.["ASSIGNED"] ?? 0} currently dispatched to contractors`}
+          icon={<ClipboardList className="w-4 h-4 text-slate-400" />}
+        />
+
+        <StatCard
+          label="Overdue SLA Breaches"
+          value={slaBreachedOrders.length}
+          subtext={
+            slaBreachedOrders.length > 0
+              ? `${slaBreachedOrders.length} orders exceed deadline`
+              : "All active orders within SLA threshold"
+          }
+          className={
+            slaBreachedOrders.length > 0
+              ? "border-rose-200 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/10"
+              : ""
+          }
+          icon={
+            <Clock
+              className={`w-4 h-4 ${
+                slaBreachedOrders.length > 0 ? "text-rose-500" : "text-emerald-500"
+              }`}
+            />
+          }
+        />
+      </div>
+
+      {/* 3. Main 2-Column Layout (2/3 + 1/3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column (2/3) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Section: Defect Trends */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Defect Observations &amp; Repair Trends
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Chronological detections and completed repairs over 14 days
+                </p>
               </div>
-            ) : trendsData?.trends && trendsData.trends.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trendsData.trends}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,179,0,0.12)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11, fill: "#888888" }}
-                    tickFormatter={(val) => val.slice(5)}
-                  />
-                  <YAxis tick={{ fontSize: 11, fill: "#888888" }} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0A0C12",
-                      color: "#F3EEE2",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(255,179,0,0.3)",
-                      fontSize: "12px",
-                      fontFamily: "monospace",
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="observations_count"
-                    name="Defects Found"
-                    stroke="#FFB300"
-                    strokeWidth={2.5}
-                    dot={{ r: 3, fill: "#FFB300" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="repairs_count"
-                    name="Repairs Completed"
-                    stroke="#35D49A"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#35D49A" }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            </div>
+
+            {loadingTrends ? (
+              <div className="h-56 flex items-center justify-center text-xs text-slate-400 font-mono">
+                Loading trend history...
+              </div>
+            ) : hasEnoughHistory ? (
+              <div className="h-60 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={rawTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" strokeOpacity={0.6} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 11, fill: "#64748B" }}
+                      tickFormatter={(val) => val.slice(5)}
+                    />
+                    <YAxis tick={{ fontSize: 11, fill: "#64748B" }} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#1E293B",
+                        borderColor: "#334155",
+                        color: "#F8FAFC",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="observations_count"
+                      name="Defects Observed"
+                      stroke="#2563EB"
+                      strokeWidth={2}
+                      dot={{ r: 2.5, fill: "#2563EB" }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="repairs_count"
+                      name="Repairs Verified"
+                      stroke="#0EA5A4"
+                      strokeWidth={2}
+                      dot={{ r: 2.5, fill: "#0EA5A4" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-xs text-stone-400 font-mono">
-                No telemetry recorded in past 14 days
+              <div>
+                <p className="text-xs text-slate-500 mb-3 italic">
+                  Not enough history yet ({activeTrends.length} records over 14 days). Showing raw detections table:
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th className="text-right">Observations</th>
+                        <th className="text-right">Complaints</th>
+                        <th className="text-right">Repairs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rawTrends.slice(-5).map((row) => (
+                        <tr key={row.date}>
+                          <td className="font-mono text-xs">{row.date}</td>
+                          <td className="text-right font-mono">{row.observations_count}</td>
+                          <td className="text-right font-mono">{row.complaints_count}</td>
+                          <td className="text-right font-mono">{row.repairs_count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Severity Breakdown */}
-        <div className="dhaba-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 flex items-center gap-2 font-signboard">
-                <Activity className="w-4 h-4 text-amber-500" />
-                <span>Distress Severity Breakdown</span>
-              </h2>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                Classification adhering to IRC:82-2023 road guidance
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center h-60">
-            {/* Pie Chart */}
-            <div className="h-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={severityPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={70}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {severityPieData.map((entry) => (
-                      <Cell
-                        key={`cell-${entry.name}`}
-                        fill={SEVERITY_COLORS[entry.name] || "#FFB300"}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0A0C12",
-                      color: "#F3EEE2",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(255,179,0,0.3)",
-                      fontSize: "12px",
-                      fontFamily: "monospace",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Severity Legend with Road Sign Badges */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <SeverityBadge level="Critical" size="sm" showScore={false} />
-                <span className="font-mono font-bold text-stone-700 dark:text-stone-300">
-                  {stats?.defects_by_severity?.["Critical"] ?? 0}
-                </span>
+          {/* Section: Corridor Health Table */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Corridor Health &amp; Maintenance Status
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Sector-wise defect density and repair allocation
+                </p>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <SeverityBadge level="Severe" size="sm" showScore={false} />
-                <span className="font-mono font-bold text-stone-700 dark:text-stone-300">
-                  {stats?.defects_by_severity?.["Severe"] ?? 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <SeverityBadge level="Moderate" size="sm" showScore={false} />
-                <span className="font-mono font-bold text-stone-700 dark:text-stone-300">
-                  {stats?.defects_by_severity?.["Moderate"] ?? 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <SeverityBadge level="Minor" size="sm" showScore={false} />
-                <span className="font-mono font-bold text-stone-700 dark:text-stone-300">
-                  {stats?.defects_by_severity?.["Minor"] ?? 0}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Ward Hotspot Grid as Coloured Heat Tiles (Section 6) */}
-      <div className="dhaba-card p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="text-sm font-black font-signboard text-stone-900 dark:text-stone-100">
-              Ward Hotspot Grid
-            </h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400">
-              Corridor distress severity heat map across municipal zones
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-[11px] font-mono">
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Normal</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Caution</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Critical</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {sortedWards.map((w) => {
-            const isCrit = w.critical_defects > 0;
-            const isMod = w.total_defects > w.repaired_defects;
-            const heatColor = isCrit
-              ? "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-300"
-              : isMod
-              ? "border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-              : "border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
-
-            return (
-              <div
-                key={w.ward_id}
-                className={`p-3 rounded-xl border-2 transition hover:scale-105 flex flex-col justify-between ${heatColor}`}
+              <Link
+                to="/maintenance?tab=defects"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-black text-xs font-mono">{w.ward_code || "W-Zone"}</span>
-                  {isCrit ? (
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  ) : (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  )}
-                </div>
-                <div className="my-1 truncate font-bold text-xs" title={w.ward_name}>
-                  {w.ward_name}
-                </div>
-                <div className="flex items-baseline justify-between text-[11px] font-mono">
-                  <span>{w.total_defects} defects</span>
-                  <span className="font-bold">{w.critical_defects} crit</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Single Clean Table: Municipal Corridors & Divisions */}
-      <div className="dhaba-card p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-stone-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-amber-500" />
-              <h2 className="text-base font-black text-stone-900 dark:text-stone-100 tracking-tight font-signboard">
-                Corridor Damage &amp; Repair Status
-              </h2>
+                <span>View all defects</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              Municipal road sectors ranked by critical repair priority
-            </p>
+
+            <div className="overflow-x-auto">
+              {loadingWards ? (
+                <div className="py-6 text-center text-xs text-slate-400 font-mono">
+                  Loading corridor metrics...
+                </div>
+              ) : displayedWards.length > 0 ? (
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Corridor / Sector</th>
+                      <th className="text-right">Total Defects</th>
+                      <th className="text-right">Critical Hazards</th>
+                      <th className="text-right">Repaired</th>
+                      <th className="text-right">Progress</th>
+                      <th className="text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedWards.map((w) => {
+                      const repairPct =
+                        w.total_defects > 0
+                          ? Math.round((w.repaired_defects / w.total_defects) * 100)
+                          : 100;
+                      const hasCritical = w.critical_defects > 0;
+
+                      return (
+                        <tr key={w.ward_id}>
+                          <td className="font-medium text-slate-900 dark:text-slate-100">
+                            <span>{w.ward_name}</span>
+                            {w.ward_code && (
+                              <span className="font-mono text-[10px] text-slate-400 ml-1.5">
+                                ({w.ward_code})
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-right font-mono">{w.total_defects}</td>
+                          <td className="text-right font-mono">
+                            {hasCritical ? (
+                              <span className="text-rose-600 dark:text-rose-400 font-semibold">
+                                {w.critical_defects}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">0</span>
+                            )}
+                          </td>
+                          <td className="text-right font-mono text-emerald-600 dark:text-emerald-400">
+                            {w.repaired_defects}
+                          </td>
+                          <td className="text-right">
+                            <div className="inline-flex items-center gap-2">
+                              <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-emerald-500 rounded-full"
+                                  style={{ width: `${repairPct}%` }}
+                                />
+                              </div>
+                              <span className="font-mono text-[11px] text-slate-500">
+                                {repairPct}%
+                              </span>
+                            </div>
+                          </td>
+                          <td className="text-right">
+                            {hasCritical ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                                Immediate Patch
+                              </span>
+                            ) : w.total_defects > w.repaired_defects ? (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                In Queue
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                Clear
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="py-6 text-center text-xs text-slate-400">
+                  No corridor data found.
+                </div>
+              )}
+            </div>
           </div>
-          <Link
-            to="/defects"
-            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-mono"
-          >
-            <span>View All Defects</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          {loadingWards ? (
-            <div className="py-8 text-center text-xs text-stone-400 font-mono">
-              Loading corridor records...
+        {/* Right Column (1/3) */}
+        <div className="space-y-6">
+          {/* Section: SLA Breaches & Upcoming */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                SLA Deadlines &amp; Priority
+              </h2>
+              <Link
+                to="/maintenance"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
+                View all
+              </Link>
             </div>
-          ) : sortedWards.length > 0 ? (
-            <table className="w-full text-left text-sm text-stone-700 dark:text-stone-300">
-              <thead className="bg-slate-50 dark:bg-slate-900/80 text-xs font-bold uppercase text-stone-500 dark:text-stone-400 border-b border-slate-200 dark:border-slate-800 font-mono">
-                <tr>
-                  <th className="py-2.5 px-3">Corridor / Division</th>
-                  <th className="py-2.5 px-3 text-center">Total Defects</th>
-                  <th className="py-2.5 px-3 text-center">Critical Hazards</th>
-                  <th className="py-2.5 px-3 text-center">Repaired</th>
-                  <th className="py-2.5 px-3 text-center">Repair Progress</th>
-                  <th className="py-2.5 px-3 text-right">Action Priority</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-stone-800 text-xs">
-                {sortedWards.map((ward) => {
-                  const isCritAction = ward.critical_defects > 0;
-                  const isHighPri = ward.total_defects > ward.repaired_defects;
-                  const repairPct = ward.total_defects > 0 ? Math.round((ward.repaired_defects / ward.total_defects) * 100) : 0;
+
+            {loadingWorkOrders ? (
+              <div className="py-6 text-center text-xs text-slate-400 font-mono">
+                Checking SLA schedules...
+              </div>
+            ) : upcomingSlaOrders.length > 0 ? (
+              <div className="space-y-2.5">
+                {upcomingSlaOrders.map((wo) => {
+                  const deadlineDate = new Date(wo.deadline!);
+                  const diffHours = Math.round(
+                    (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+                  );
+                  const isOverdue = diffHours < 0;
 
                   return (
-                    <tr key={ward.ward_id} className="hover:bg-amber-500/[0.04] transition">
-                      <td className="py-3 px-3 font-bold text-stone-900 dark:text-stone-100">
-                        <div className="flex items-center gap-2">
-                          <span>{ward.ward_name}</span>
-                          {ward.ward_code && (
-                            <span className="font-mono text-[10px] text-stone-400">({ward.ward_code})</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
-                        {ward.total_defects}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {ward.critical_defects > 0 ? (
-                          <span className="inline-block px-2 py-0.5 rounded text-xs font-black bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/40 font-mono">
-                            {ward.critical_defects} Critical
+                    <div
+                      key={wo.id}
+                      className="p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-2"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
+                            #{wo.id.slice(0, 8)}
                           </span>
-                        ) : (
-                          <span className="text-stone-400 font-mono">0</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {ward.repaired_defects}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="inline-flex items-center gap-2">
-                          <div className="w-20 h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-emerald-500 rounded-full"
-                              style={{ width: `${repairPct}%` }}
-                            />
-                          </div>
-                          <span className="font-mono text-[11px] text-stone-500">{repairPct}%</span>
+                          <StatusChip status={wo.status} />
                         </div>
-                      </td>
-                      <td className="py-3 px-3 text-right">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                          Priority: {wo.priority}
+                        </p>
+                      </div>
+
+                      <div className="text-right shrink-0">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider font-mono ${
-                            isCritAction
-                              ? "bg-red-600 text-white"
-                              : isHighPri
-                              ? "bg-amber-500 text-stone-950"
-                              : "bg-emerald-600 text-white"
+                          className={`inline-block font-mono text-[11px] font-semibold ${
+                            isOverdue
+                              ? "text-rose-600 dark:text-rose-400"
+                              : diffHours <= 12
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-slate-600 dark:text-slate-400"
                           }`}
                         >
-                          {isCritAction ? "24-Hr Patch" : isHighPri ? "Repair Queue" : "Routine"}
+                          {isOverdue ? `${Math.abs(diffHours)}h overdue` : `${diffHours}h left`}
                         </span>
-                      </td>
-                    </tr>
+                        <Link
+                          to={`/maintenance?id=${wo.id}`}
+                          className="block text-[10px] text-blue-600 hover:underline"
+                        >
+                          Inspect &rarr;
+                        </Link>
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="py-8 text-center text-xs text-stone-400 font-mono">
-              No corridor records found.
+              </div>
+            ) : (
+              <div className="py-6 text-center text-xs text-slate-400">
+                No active work orders pending SLA.
+              </div>
+            )}
+          </div>
+
+          {/* Section: Recent Activity Feed */}
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Recent Network Activity
+              </h2>
             </div>
-          )}
+
+            <div className="space-y-3">
+              {recentDefectsData?.items && recentDefectsData.items.length > 0 ? (
+                recentDefectsData.items.slice(0, 5).map((def) => {
+                  const seenDate = new Date(def.last_seen);
+                  return (
+                    <div key={def.id} className="flex items-start gap-2.5 text-xs">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-mono text-slate-800 dark:text-slate-200 font-medium truncate">
+                            {def.class_code} detected
+                          </span>
+                          <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                            {seenDate.toLocaleDateString([], { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <SeverityBadge level={def.severity_level || "Minor"} size="sm" showScore={false} />
+                          <span className="text-[10px] font-mono text-slate-400">
+                            times seen: {def.times_seen}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-4 text-center text-xs text-slate-400">
+                  No recent activity logged.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

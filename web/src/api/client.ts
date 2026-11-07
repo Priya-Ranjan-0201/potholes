@@ -422,6 +422,7 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
-  // AI Model Evaluation Metrics (Rule R1)
+  // AI Model Evaluation Metrics
   getModelEvaluation: () => request<ModelEvaluationResponse>("/models/evaluation"),
+  health: () => request<any>("/health"),
 };

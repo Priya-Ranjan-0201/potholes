@@ -22,11 +22,11 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   en: {
     // Brand & Banner
     govtBanner: "Student Research Project | AI Road Defect & Municipal Workflow Portal (Not an official government portal)",
-    standardsNotice: "Severity rubric inspired by IRC:82-2023 (Clause 4.2)",
+    standardsNotice: "Severity rubric inspired by IRC:82-2023",
     helplineText: "24x7 Citizen Helpline: 1800-ROAD-FIX",
     appName: "ScamRoad",
     appHindiName: "Road Safety",
-    appSubtitle: "Autonomous Edge AI Pothole & Road Defect Portal (Student Research)",
+    appSubtitle: "Edge AI Pothole & Road Defect Portal (Student Research)",
     
     // Navbar
     navOverview: "Dashboard",
@@ -52,7 +52,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     presetRural: "PMGSY Rural Road",
     presetGT: "GT Road Bitumen",
     presetClean: "Clean Surface (Zero Defect)",
-    privacyActive: "Rule R15 Privacy Shield Active (Faces & Plates Blurred)",
+    privacyActive: "Privacy Shield Active (Faces & Plates Blurred)",
     defectsLocated: "Defects Located",
     clearRoad: "Clean Surface / No Defects",
     corridorLoc: "Corridor Location:",
@@ -68,7 +68,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     dispatchWorkOrderBtn: "🚨 Dispatch PWD Work Order",
     workOrderDispatched: "Work Order #PWD-WO-2026-9814 Dispatched to Municipal PWD Division!",
     cleanSurfaceTitle: "Road Surface Clean & Safe",
-    cleanSurfaceDesc: "Complies with IRC:SP:84-2019 standards. No immediate repair required.",
+    cleanSurfaceDesc: "Road surface in good condition. No immediate repair required.",
     potholeLabel: "POTHOLE",
     crackLongLabel: "LONGITUDINAL CRACK",
     crackTransLabel: "TRANSVERSE CRACK",
@@ -173,8 +173,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "Student research project. Not an official government system. Not safety-certified.",
-    footerCompliance: "Severity rubric inspired by IRC:82-2023 Clause 4.2 & IRC:SP:84-2019",
-    footerPrivacy: "Rule R15 Privacy Shield active for public camera feeds",
+    footerCompliance: "Severity rubric inspired by IRC:82-2023",
+    footerPrivacy: "Privacy Shield active for public camera feeds",
     allRightsReserved: "Student Research Project. Open for academic and civic research.",
   },
 
@@ -227,7 +227,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     dispatchWorkOrderBtn: "🚨 PWD कार्य आदेश जारी करें",
     workOrderDispatched: "कार्य आदेश #PWD-WO-2026-9814 लोक निर्माण संभाग को सफलतापूर्वक प्रेषित!",
     cleanSurfaceTitle: "सड़क सतह स्वच्छ एवं सुरक्षित",
-    cleanSurfaceDesc: "IRC:SP:84-2019 मानकों के पूर्णतः अनुकूल। तत्काल मरम्मत की आवश्यकता नहीं।",
+    cleanSurfaceDesc: "सड़क की सतह अच्छी स्थिति में है। तत्काल मरम्मत की आवश्यकता नहीं।",
     potholeLabel: "गड्ढा (POTHOLE)",
     crackLongLabel: "अनुदैर्ध्य दरार",
     crackTransLabel: "अनुप्रस्थ दरार",
@@ -332,7 +332,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "छात्र अनुसंधान परियोजना। यह कोई आधिकारिक सरकारी प्रणाली नहीं है। सुरक्षा-प्रमाणित नहीं।",
-    footerCompliance: "IRC:82-2023 (खण्ड 4.2) एवं IRC:SP:84-2019 से प्रेरित मानक",
+    footerCompliance: "IRC:82-2023 से प्रेरित मानक",
     footerPrivacy: "सार्वजनिक कैमरा फुटेज हेतु नियम R15 गोपनीयता शील्ड सक्रिय",
     allRightsReserved: "छात्र अनुसंधान परियोजना। शैक्षणिक एवं नागरिक अनुसंधान हेतु।",
   },
@@ -491,7 +491,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "ਵਿਦਿਆਰਥੀ ਖੋਜ ਪ੍ਰੋਜੈਕਟ। ਕੋਈ ਅਧਿਕਾਰਤ ਸਰਕਾਰੀ ਪ੍ਰਣਾਲੀ ਨਹੀਂ। ਸੁਰੱਖਿਆ-ਪ੍ਰਮਾਣਿਤ ਨਹੀਂ।",
-    footerCompliance: "IRC:82-2023 (ਧਾਰਾ 4.2) ਤੇ IRC:SP:84-2019 ਤੋਂ ਪ੍ਰੇਰਿਤ ਰੂਬਰਿਕ",
+    footerCompliance: "IRC:82-2023 ਤੋਂ ਪ੍ਰੇਰਿਤ ਰੂਬਰਿਕ",
     footerPrivacy: "ਕੈਮਰਾ ਫੀਡ ਲਈ ਨਿਯਮ R15 ਨਿੱਜਤਾ ਸੁਰੱਖਿਆ ਲਾਗੂ ਹੈ",
     allRightsReserved: "ਵਿਦਿਆਰਥੀ ਖੋਜ ਪ੍ਰੋਜੈਕਟ। ਅਕਾਦਮਿਕ ਖੋਜ ਹਿੱਤ ਉਪਲਬਧ।",
   },
@@ -545,7 +545,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     dispatchWorkOrderBtn: "🚨 PWD பணி ஆணை அனுப்பு",
     workOrderDispatched: "பணி ஆணை #PWD-WO-2026-9814 PWD பிரிவுக்கு வெற்றிகரமாக அனுப்பப்பட்டது!",
     cleanSurfaceTitle: "சாலை மேற்பரப்பு சுத்தமாக உள்ளது",
-    cleanSurfaceDesc: "IRC:SP:84-2019 தரநிலைகளுக்கு முழுமையாக இணங்குகிறது. உடனடி பழுது தேவையில்லை.",
+    cleanSurfaceDesc: "சாலை மேற்பரப்பு நல்ல நிலையில் உள்ளது. உடனடி பழுது தேவையில்லை.",
     potholeLabel: "குழி (POTHOLE)",
     crackLongLabel: "நீள்வெட்டு விரிசல்",
     crackTransLabel: "குறுக்கு விரிசல்",
@@ -650,7 +650,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "மாணவர் ஆராய்ச்சி திட்டம். அதிகாரப்பூர்வ அரசு அமைப்பு அல்ல. பாதுகாப்பு சான்றிதழ் பெறப்படவில்லை.",
-    footerCompliance: "IRC:82-2023 (பிரிவு 4.2) மற்றும் IRC:SP:84-2019 வழிகாட்டல்",
+    footerCompliance: "IRC:82-2023 வழிகாட்டல்",
     footerPrivacy: "கேமரா காட்சிகளுக்கு விதி R15 தனியுரிமை கவசம் செயலில் உள்ளது",
     allRightsReserved: "மாணவர் ஆராய்ச்சி திட்டம். கல்வி மற்றும் ஆய்வு பயன்பாட்டிற்கு.",
   },
@@ -704,7 +704,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     dispatchWorkOrderBtn: "🚨 PWD పని ఆర్డర్ జారీ చేయండి",
     workOrderDispatched: "పని ఆర్డర్ #PWD-WO-2026-9814 PWD విభాగానికి విజయవంతంగా పంపబడింది!",
     cleanSurfaceTitle: "రోడ్డు ఉపరితలం శుభ్రంగా మరియు సురక్షితంగా ఉంది",
-    cleanSurfaceDesc: "IRC:SP:84-2019 ప్రమాణాలకు అనుగుణంగా ఉంది. తక్షణ మరమ్మతు అవసరం లేదు.",
+    cleanSurfaceDesc: "రోడ్డు ఉపరితలం మంచి స్థితిలో ఉంది. తక్షణ మరమ్మతు అవసరం లేదు.",
     potholeLabel: "గుంత (POTHOLE)",
     crackLongLabel: "నిలువు పగులు",
     crackTransLabel: "అడ్డ పగులు",
@@ -809,7 +809,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "విద్యార్థి పరిశోధన ప్రాజెక్ట్. అధికారిక ప్రభుత్వ వ్యవస్థ కాదు. భద్రతా-ధృవీకరించబడలేదు.",
-    footerCompliance: "IRC:82-2023 (క్లాజ్ 4.2) మరియు IRC:SP:84-2019 ప్రమాణాల ప్రేరణ",
+    footerCompliance: "IRC:82-2023 ప్రమాణాల ప్రేరణ",
     footerPrivacy: "కెమెరా ఫీడ్ కోసం నియమం R15 గోప్యతా కవచం సక్రియంగా ఉంది",
     allRightsReserved: "విద్యార్థి పరిశోధన ప్రాజెక్ట్. విద్యా మరియు పరిశోధన ప్రయోజనాల కోసం.",
   },
@@ -863,7 +863,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     dispatchWorkOrderBtn: "🚨 PWD কার্য আদেশ জারি করুন",
     workOrderDispatched: "কার্য আদেশ #PWD-WO-2026-9814 পূর্ত বিভাগে সফলভাবে পাঠানো হয়েছে!",
     cleanSurfaceTitle: "সড়ক পৃষ্ঠ পরিষ্কার এবং নিরাপদ",
-    cleanSurfaceDesc: "IRC:SP:84-2019 মানদণ্ড পুরোপুরি পূরণ করে। অবিলম্বে মেরামতের প্রয়োজন নেই।",
+    cleanSurfaceDesc: "রাস্তার পৃষ্ঠ ভাল অবস্থায় আছে। অবিলম্বে মেরামতের প্রয়োজন নেই।",
     potholeLabel: "গর্ত (POTHOLE)",
     crackLongLabel: "অনুদৈর্ঘ্য ফাটল",
     crackTransLabel: "অনুপ্রস্থ ফাটল",
@@ -968,7 +968,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
 
     // Footer
     footerNotice: "শিক্ষার্থী গবেষণা প্রকল্প। কোনও সরকারী ব্যবস্থা নয়। সুরক্ষা-প্রত্যয়িত নয়।",
-    footerCompliance: "IRC:82-2023 (ধারা ৪.২) ও IRC:SP:84-2019 অনুপ্রাণিত রুব্রিক",
+    footerCompliance: "IRC:82-2023 অনুপ্রাণিত রুব্রিক",
     footerPrivacy: "ক্যামেরা ফিডের জন্য নিয়ম R15 গোপনীয়তা শিল্ড সক্রিয়",
     allRightsReserved: "শিক্ষার্থী গবেষণা প্রকল্প। প্রাতিষ্ঠানিক ও নাগরিক গবেষণার জন্য উন্মুক্ত।",
   },

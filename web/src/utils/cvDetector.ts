@@ -94,7 +94,7 @@ export async function detectDefects(
     console.warn("[ScamRoad AI] Inference API connection issue:", err);
   }
 
-  // Pure adherence to Rule R2: Never fabricate mock or hallucinated boxes if neural backend is silent
+  // Return empty result when backend produces zero detections
   const latency = Math.round(performance.now() - startTime);
   return {
     source: "neural_api",
