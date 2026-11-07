@@ -1,7 +1,7 @@
 import { BoundingBox, DefectClassCode } from "../api/types";
 
 export class ModelNotReadyError extends Error {
-  constructor(message: string = "Model not loaded on device (Rule R2)") {
+  constructor(message: string = "Model not loaded on device") {
     super(message);
     this.name = "ModelNotReadyError";
   }
@@ -62,8 +62,8 @@ export class NativeEdgeInferenceEngine {
 
   /**
    * Runs inference on the frame buffer.
-   * Strictly enforces Rule R2: If model is not loaded, throws ModelNotReadyError.
-   * Strictly enforces Rule R4: Calculates relative area pct, never depth.
+   * If model is not loaded, throws ModelNotReadyError.
+   * Calculates relative area pct, avoiding uncalibrated depth estimates.
    */
   public predict(
     imageWidth: number,
@@ -95,7 +95,7 @@ export class NativeEdgeInferenceEngine {
       detections.push(box);
     }
 
-    // Calculate relative area % (Rule R4)
+    // Calculate relative area % over road surface
     let totalDefectArea = 0;
     for (const d of detections) {
       const w = Math.max(0, d.x_max - d.x_min);

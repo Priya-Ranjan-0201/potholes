@@ -145,7 +145,7 @@ export const translations: Record<"en" | "hi" | "pa", TranslationDictionary> = {
     outbox_syncing: "Uploading queued observations...",
     outbox_empty: "Queue is empty. All observations synced.",
     outbox_delivered: "Synced to Server",
-    outbox_privacy_blurred: "Faces & Plates Blurred (Rule R15)",
+    outbox_privacy_blurred: "Faces & Plates Redacted for Privacy",
 
     checklist_title: "Road Segment Inspection Checklist",
     scan_qr_segment: "Scan Segment QR Code",

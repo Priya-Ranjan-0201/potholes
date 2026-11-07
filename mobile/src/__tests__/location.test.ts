@@ -8,7 +8,7 @@ describe("Mobile Geolocation & Kalman Filtering", () => {
     geo = new GeolocationManager();
   });
 
-  it("enforces Rule B4 accuracy threshold (<= 15.0m threshold)", () => {
+  it("enforces accuracy threshold (<= 15.0m threshold)", () => {
     expect(geo.isAccurate(4.2)).toBe(true);
     expect(geo.isAccurate(14.9)).toBe(true);
     expect(geo.isAccurate(15.0)).toBe(true);

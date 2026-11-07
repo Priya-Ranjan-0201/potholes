@@ -1,5 +1,5 @@
 /**
- * Glanceable Audio Alert Chime for Hands-Free Driving HUD (Rule R16).
+ * Glanceable Audio Alert Chime for Hands-Free Driving HUD.
  * Produces synthesized hazard warning tones without external sound file dependencies.
  */
 

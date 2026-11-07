@@ -51,7 +51,7 @@ export const App: React.FC = () => {
         pendingOutboxCount={pendingOutboxCount}
       />
 
-      {/* Safety Banner (Rule R16) */}
+      {/* Safety Notice Banner */}
       <SafetyBanner />
 
       {/* Main Screen Content */}

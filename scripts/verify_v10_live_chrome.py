@@ -52,18 +52,18 @@ try:
     scanner_body = driver.find_element(By.TAG_NAME, "body").text
     record("Scanner Header", "Defect Scanner" in scanner_body, "Found 'Defect Scanner'")
     record("Inference Latency", "Inference:" in scanner_body or "INT8 CPU" in scanner_body, "Found inference latency chip")
-    record("Sample Chips", "Sample 1" in scanner_body or "Sample tests:" in scanner_body, "Found benchmark sample chips")
+    record("Sample Chips", "Field Captures:" in scanner_body or "NH-44 Asphalt Crater" in scanner_body, "Found field verification capture chips")
 
-    # Click Sample 2
+    # Click Reference Capture
     try:
-        sample_btns = driver.find_elements(By.XPATH, "//button[contains(text(), 'Sample 2')]")
+        sample_btns = driver.find_elements(By.XPATH, "//button[contains(text(), 'Unpaved Cluster')]")
         if sample_btns:
             sample_btns[0].click()
             time.sleep(1.5)
             driver.save_screenshot(os.path.join(SCREEN_DIR, "02b_scanner_sample2.png"))
-            record("Sample 2 Click Inspection", True, "Successfully switched to Sample 2")
+            record("Sample Click Inspection", True, "Successfully switched to Unpaved Cluster capture")
     except Exception as e:
-        record("Sample 2 Click Inspection", False, str(e))
+        record("Sample Click Inspection", False, str(e))
 
     # 3. Maintenance Page
     print("\n--- 3. Testing Maintenance (/maintenance) ---")

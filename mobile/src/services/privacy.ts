@@ -1,6 +1,6 @@
 /**
  * ScamRoad Mobile Privacy Service
- * Implements Rule R15: Edge-side redaction of faces and license plates before upload.
+ * Edge-side redaction of faces and license plates before upload.
  */
 
 export interface RedactionResult {

@@ -8,7 +8,7 @@ describe("Native Edge Inference Engine & Quality Gate", () => {
     engine = new NativeEdgeInferenceEngine();
   });
 
-  it("strictly raises ModelNotReadyError when model weights are not loaded (Rule R2)", () => {
+  it("strictly raises ModelNotReadyError when model weights are not loaded", () => {
     expect(() => {
       engine.predict(640, 480);
     }).toThrow(ModelNotReadyError);
@@ -37,7 +37,7 @@ describe("Native Edge Inference Engine & Quality Gate", () => {
     expect(good.pass).toBe(true);
   });
 
-  it("calculates relative defect area percentage without fabricating depth (Rule R4)", () => {
+  it("calculates relative defect area percentage without fabricating depth", () => {
     engine.loadModel("mock_model.onnx", "onnxruntime-mobile");
     expect(engine.getModelStatus().loaded).toBe(true);
 

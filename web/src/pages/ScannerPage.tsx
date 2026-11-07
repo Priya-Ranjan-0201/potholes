@@ -20,28 +20,28 @@ interface SampleImage {
 
 const SAMPLE_IMAGES: SampleImage[] = [
   {
-    id: "sample-1",
-    label: "Sample 1 (Deep Pothole)",
+    id: "capture-pothole",
+    label: "NH-44 Asphalt Crater",
     src: "/samples/asphalt_crater.jpg",
-    road: "Corridor Segment A-1",
+    road: "NH-44 GT Road Sector 12",
   },
   {
-    id: "sample-2",
-    label: "Sample 2 (Multi-Pothole Sector)",
+    id: "capture-multi",
+    label: "Unpaved Cluster",
     src: "/samples/unpaved_craters.jpg",
-    road: "Corridor Segment B-4",
+    road: "Gill Road Industrial Bypass Sector 4",
   },
   {
-    id: "sample-3",
-    label: "Sample 3 (Structural Crack)",
+    id: "capture-crack",
+    label: "Longitudinal Cracks",
     src: "/samples/cracks_ferozepur.jpg",
-    road: "Corridor Segment C-2",
+    road: "Ferozepur Road Sector 9",
   },
   {
-    id: "sample-4",
-    label: "Sample 4 (Clean Road)",
+    id: "capture-baseline",
+    label: "Highway Baseline",
     src: "/samples/pothole_nh44.jpg",
-    road: "Corridor Segment D-1",
+    road: "Civil Lines North Corridor",
   },
 ];
 
@@ -220,9 +220,9 @@ export const ScannerPage: React.FC = () => {
             />
           </div>
 
-          {/* Quick Benchmark Sample Chips */}
+          {/* Field Verification Captures */}
           <div className="flex items-center gap-2 overflow-x-auto pt-1 pb-1 text-xs">
-            <span className="text-[11px] text-slate-400 font-medium shrink-0">Sample tests:</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium shrink-0">Field Captures:</span>
             {SAMPLE_IMAGES.map((sample) => (
               <button
                 key={sample.id}
@@ -231,10 +231,10 @@ export const ScannerPage: React.FC = () => {
                   setActiveRoadName(sample.road);
                   setSelectedSampleId(sample.id);
                 }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors shrink-0 ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors shrink-0 ${
                   selectedSampleId === sample.id
-                    ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-semibold"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 font-semibold shadow-xs"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                 }`}
               >
                 {sample.label}

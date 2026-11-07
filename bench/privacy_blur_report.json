@@ -1,6 +1,6 @@
 {
   "evaluation_timestamp": "2026-11-07T10:56:14.536777+00:00",
-  "target_spec": "Rule R6 (Privacy blur on faces and license plates)",
+  "target_spec": "Privacy blur verification on faces and license plates",
   "sample_counts": {
     "plates": 50,
     "faces": 50,

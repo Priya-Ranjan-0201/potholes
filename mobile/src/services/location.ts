@@ -7,8 +7,7 @@ export interface KalmanState {
 }
 
 /**
- * High-precision GPS service for ScamRoad Mobile.
- * Implements Rule B4 & B11:
+ * High-precision GPS service for ScamRoad Mobile:
  * - Accuracy threshold gating (must be <= 15m for automatic outbox sync).
  * - Kalman filter smoothing on continuous coordinate streams.
  */

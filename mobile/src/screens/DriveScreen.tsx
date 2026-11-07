@@ -22,7 +22,7 @@ export const DriveScreen: React.FC = () => {
   const frameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Check initial model state (Rule R2)
+    // Check initial model state
     const status = inferenceEngine.getModelStatus();
     setModelLoaded(status.loaded);
 
@@ -60,7 +60,7 @@ export const DriveScreen: React.FC = () => {
         const newlyConfirmed = defectTracker.update(result.boxes);
 
         if (newlyConfirmed.length > 0) {
-          // Trigger glanceable visual and audio alert for driver safety (Rule R16)
+          // Trigger glanceable visual and audio alert for driver safety
           setActiveAlert(t("drive_hazard_alert"));
           audioAlertService.playHazardChime();
           setTimeout(() => setActiveAlert(null), 2500);
@@ -68,7 +68,7 @@ export const DriveScreen: React.FC = () => {
           for (const track of newlyConfirmed) {
             setDetectedCratersCount((prev) => prev + 1);
 
-            // Geotag and privacy blur on-device before enqueuing to outbox (Rule R15)
+            // Geotag and privacy blur on-device before enqueuing to outbox
             const location = locationService.createCoordinate(
               30.900965 + Math.random() * 0.002,
               75.857277 + Math.random() * 0.002,
@@ -153,7 +153,7 @@ export const DriveScreen: React.FC = () => {
         </button>
       </div>
 
-      {/* Glanceable Driver Hazard Alert Banner (Rule R16) */}
+      {/* Glanceable Driver Hazard Alert Banner */}
       {activeAlert && (
         <div style={{
           backgroundColor: "#b91c1c",
