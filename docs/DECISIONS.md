@@ -146,11 +146,11 @@ target Raspberry Pi or Jetson Nano in the initial phases.
 ### Context
 1. Ultralytics YOLO11 is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. Anyone modifying or distributing applications incorporating Ultralytics models over a network must provide source code under AGPL-3.0 unless an enterprise commercial license is obtained.
 2. The Road Damage Dataset 2022 (RDD2022) is licensed under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**, mandating that derivatives share adaptations under the same license terms with explicit attribution.
-3. Earlier project artifacts contained unverified claims of "Government of India / MoRTH / NHAI" affiliation and "IRC Compliant" badges, which violate ethical research guidelines.
+3. Earlier project artifacts contained unverified institutional affiliation claims and compliance badges, which violate ethical research guidelines.
 
 ### Decision
 1. **License Harmonization (Rule R11):** Explicitly declare that all components utilizing Ultralytics YOLO code and weights inherit AGPL-3.0 compliance terms. The standalone client web UI and schemas remain permissively available, while backend and ML pipelines follow AGPL-3.0 and CC BY-SA 4.0 share-alike provisions.
 2. **Student Project Identity (Rule R7):** State explicitly in all user interfaces, headers, footers, and documentation that ScamRoad is a **Student Research Project** and is **NOT** an official government portal, nor is it endorsed or operated by MoRTH, NHAI, or PWD.
-3. **Standards Honesty (Rule R8):** Remove all "IRC Compliant" claims. Reference Indian Road Congress specifications strictly as: "Severity rubric inspired by IRC:82-2023 Clause 4.2 and IRC:SP:84-2019".
+3. **Standards Honesty (Rule R8):** Remove all compliance claims. Reference Indian Road Congress specifications strictly as: "Severity rubric inspired by IRC:82-2023 Clause 4.2 and IRC:SP:84-2019".
 4. **Configurable Illustrative Rate Card (Rule R9):** Move repair costs from hardcoded static formulas to a structured JSON rate card (`config/rate_card.json`), accompanied by a clear disclosure: "Illustrative estimate, not an official Schedule of Rates".
 5. **Hardware Benchmark Honesty (Rule R10):** Disclose that physical on-device benchmarks are currently verified on AMD64 development hardware (`generic_best_bench.json`), while mobile (OPPO K13 Snapdragon NPU) and SBC targets (Raspberry Pi 5, Jetson Orin Nano) are categorized as `UNTESTED (Hardware Benchmark Pending)` until physical runs are executed.

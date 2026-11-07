@@ -150,7 +150,7 @@ def run_suite():
         time.sleep(1)
         clean_body = driver.find_element(By.TAG_NAME, "body").text
         has_clean_banner = "Clean" in clean_body or "स्वच्छ" in clean_body or "IRC:SP:84-2019" in clean_body
-        record_test("AI Scanner Clean Surface Verification", has_clean_banner, "Zero defects confirmed, IRC compliant badge shown")
+        record_test("AI Scanner Clean Surface Verification", has_clean_banner, "Zero defects confirmed, clean road surface verified")
         capture_screen(driver, "live_06_scanner_clean_surface.png", "Clean Surface Verification (Zero Defects)")
 
         # TEST 7: Test Dark Mode on AI Scanner
