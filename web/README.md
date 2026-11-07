@@ -9,7 +9,7 @@ React + TypeScript single-page application for the ScamRoad monitoring dashboard
 - **Styling:** Tailwind CSS
 - **Routing:** React Router v6
 - **Data Fetching:** TanStack React Query
-- **Maps:** Leaflet + React-Leaflet
+- **Defect Spatial Registry:** Non-geographic Ward Hotspot Grid & corridor rankings (external maps app link)
 - **Charts:** Recharts
 - **i18n:** i18next + react-i18next
 

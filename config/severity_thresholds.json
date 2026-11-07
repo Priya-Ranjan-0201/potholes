@@ -1,0 +1,45 @@
+{
+  "_notice": "Shared canonical severity thresholds for ScamRoad v7. Used across ML, backend, and frontend.",
+  "scale": {
+    "min": 0,
+    "max": 100
+  },
+  "tiers": [
+    {
+      "tier": "MINOR",
+      "min_score": 0,
+      "max_score": 25,
+      "label": "Minor",
+      "color_hex": "#2EC4B6",
+      "action": "Routine observation in periodic maintenance cycle"
+    },
+    {
+      "tier": "MODERATE",
+      "min_score": 26,
+      "max_score": 50,
+      "label": "Moderate",
+      "color_hex": "#FFB703",
+      "action": "Cold-mix patch / bituminous sealing in scheduled road sweep"
+    },
+    {
+      "tier": "SEVERE",
+      "min_score": 51,
+      "max_score": 75,
+      "label": "Severe",
+      "color_hex": "#FB6A2F",
+      "action": "Urgent asphalt compaction / warning marker placement within 72h"
+    },
+    {
+      "tier": "CRITICAL",
+      "min_score": 76,
+      "max_score": 100,
+      "label": "Critical",
+      "color_hex": "#E5233A",
+      "action": "Emergency barricade & full-depth reconstruction within 24h"
+    }
+  ],
+  "helper": {
+    "get_tier_code": "score <= 25 ? 'MINOR' : score <= 50 ? 'MODERATE' : score <= 75 ? 'SEVERE' : 'CRITICAL'"
+  }
+}
+

@@ -31,7 +31,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "Dashboard",
     navScanner: "AI Scanner",
-    navMap: "GIS Map",
     navWorkOrders: "Work Orders",
     navComplaints: "Grievances",
     navDefects: "Defects",
@@ -189,7 +188,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "डैशबोर्ड",
     navScanner: "एआई स्कैनर",
-    navMap: "मानचित्र",
     navWorkOrders: "कार्य आदेश",
     navComplaints: "नागरिक शिकायतें",
     navDefects: "सड़क दोष",
@@ -347,7 +345,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "ਡੈਸ਼ਬੋਰਡ",
     navScanner: "ਏਆਈ ਸਕੈਨਰ",
-    navMap: "ਨਕਸ਼ਾ",
     navWorkOrders: "ਕੰਮ ਆਦੇਸ਼",
     navComplaints: "ਨਾਗਰਿਕ ਸ਼ਿਕਾਇਤਾਂ",
     navDefects: "ਸੜਕੀ ਨੁਕਸ",
@@ -505,7 +502,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "டாஷ்போர்டு",
     navScanner: "AI ஸ்கேனர்",
-    navMap: "வரைபடம்",
     navWorkOrders: "பணி ஆணைகள்",
     navComplaints: "குடிமக்கள் புகார்கள்",
     navDefects: "சாலை குறைபாடுகள்",
@@ -663,7 +659,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "డాష్‌బోర్డ్",
     navScanner: "AI స్కానర్",
-    navMap: "నక్షా",
     navWorkOrders: "పని ఆర్డర్లు",
     navComplaints: "పౌర ఫిర్యాదులు",
     navDefects: "రోడ్డు లోపాలు",
@@ -821,7 +816,6 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     // Navbar
     navOverview: "ড্যাশবোর্ড",
     navScanner: "এআই স্ক্যানার",
-    navMap: "মানচিত্র",
     navWorkOrders: "কার্য আদেশ",
     navComplaints: "নাগরিক অভিযোগ",
     navDefects: "সড়ক ত্রুটি",

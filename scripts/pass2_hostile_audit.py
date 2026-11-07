@@ -22,6 +22,10 @@ BANNED_PHRASES = [
     "Zero Mock",
     "mission-critical",
     "Certified for official use",
+    "Leaflet",
+    "OpenStreetMap",
+    "/map",
+    "GIS map",
 ]
 
 EXEMPT_FILES = {
@@ -30,6 +34,8 @@ EXEMPT_FILES = {
     "docs/STATUS_AUDIT.md",
     "docs/FIX_AND_REDESIGN.md",
     "docs/PASS2_AUDIT.md",
+    "docs/V7_PLAN.md",
+    "docs/V7_STATE.md",
 }
 
 IGNORE_DIRS = {

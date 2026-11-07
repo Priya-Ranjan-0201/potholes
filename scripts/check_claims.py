@@ -18,8 +18,8 @@ SCANNED_TARGETS = [
     REPO_ROOT / "edge" / "agent",
 ]
 
-# Banned phrase patterns in user-facing UI, documentation, and claims
-BANNED_PATTERNS = [
+# General honesty and institutional banned phrases (apply to code and docs)
+GENERAL_BANNED_PATTERNS = [
     (r"Government of India", "Government of India (Rule R7: ScamRoad is a student project, not GoI)"),
     (r"सत्यमेव जयते", "National motto 'सत्यमेव जयते' (Rule R7)"),
     (r"National (AI )?Road Defect.*Portal", "Official national portal branding (Rule R7)"),
@@ -30,27 +30,88 @@ BANNED_PATTERNS = [
     (r"Designed for NHAI", "Designed for NHAI official branding (Rule R7)"),
 ]
 
+# Map banned phrases (Phase 1: completely removed from web/src, README.md, docs)
+MAP_BANNED_PATTERNS = [
+    (r"(?i)Leaflet", "Leaflet map mention (Phase 1: Map feature removed completely)"),
+    (r"(?i)OpenStreetMap", "OpenStreetMap mention (Phase 1: Map feature removed completely)"),
+    (r"/map\b", "/map route mention (Phase 1: Map feature removed completely)"),
+    (r"(?i)\bheatmap\b", "heatmap mention (Phase 1: Map feature removed completely)"),
+    (r"(?i)GIS\s+map", "GIS map mention (Phase 1: Map feature removed completely)"),
+]
+
+# Exception files in docs that explain why the map was removed or preserve prompt/changelog history
+DOCS_MAP_EXCEPTIONS = [
+    "CHANGELOG.md",
+    "migration",
+    "FIX_AND_REDESIGN.md",
+    "V7_PLAN.md",
+    "V7_STATE.md",
+    "STATUS_AUDIT.md",
+    "FIX_STATE.md",
+    "PHASE_REPORTS",
+]
+
 def check_banned_phrases():
     violations = []
-    for target in SCANNED_TARGETS:
+
+    # 1. Check general banned patterns across code & README
+    general_targets = [
+        REPO_ROOT / "README.md",
+        REPO_ROOT / "web" / "src",
+        REPO_ROOT / "backend" / "app",
+        REPO_ROOT / "edge" / "agent",
+    ]
+
+    for target in general_targets:
         if not target.exists():
             continue
-        files_to_check = [target] if target.is_file() else list(target.rglob("*.tsx")) + list(target.rglob("*.ts")) + list(target.rglob("*.py"))
-        
-        for fpath in files_to_check:
-            # Skip test files, check_claims itself, or node_modules
+        files = [target] if target.is_file() else list(target.rglob("*.tsx")) + list(target.rglob("*.ts")) + list(target.rglob("*.py"))
+        for fpath in files:
             if "node_modules" in str(fpath) or "check_claims.py" in str(fpath) or "patch_language_context.py" in str(fpath):
                 continue
             try:
                 content = fpath.read_text(encoding="utf-8")
-            except Exception as e:
+            except Exception:
                 continue
 
-            for pattern, reason in BANNED_PATTERNS:
+            for pattern, reason in GENERAL_BANNED_PATTERNS:
                 matches = list(re.finditer(pattern, content))
                 for m in matches:
                     line_num = content[:m.start()].count("\n") + 1
                     violations.append(f"{fpath.relative_to(REPO_ROOT)}:{line_num} - Found '{m.group(0)}' ({reason})")
+
+    # 2. Check map banned patterns in web/src/, README.md, and docs/ (Phase 1 requirement)
+    map_targets = [
+        REPO_ROOT / "web" / "src",
+        REPO_ROOT / "README.md",
+        REPO_ROOT / "docs",
+    ]
+
+    for target in map_targets:
+        if not target.exists():
+            continue
+        if target.is_file():
+            files = [target]
+        else:
+            files = list(target.rglob("*.tsx")) + list(target.rglob("*.ts")) + list(target.rglob("*.md"))
+
+        for fpath in files:
+            rel_path = str(fpath.relative_to(REPO_ROOT)).replace("\\", "/")
+            if any(exc in rel_path for exc in DOCS_MAP_EXCEPTIONS):
+                continue
+            if "node_modules" in rel_path:
+                continue
+            try:
+                content = fpath.read_text(encoding="utf-8")
+            except Exception:
+                continue
+
+            for pattern, reason in MAP_BANNED_PATTERNS:
+                matches = list(re.finditer(pattern, content))
+                for m in matches:
+                    line_num = content[:m.start()].count("\n") + 1
+                    violations.append(f"{fpath.relative_to(REPO_ROOT)}:{line_num} - Found '{m.group(0)}' ({reason})")
+
     return violations
 
 def check_traceability():

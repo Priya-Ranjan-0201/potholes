@@ -48,7 +48,7 @@ Monitor disk usage with `make disk-check`.
 
 ### L-006: No Web UI Beyond Health Check
 **Status:** Resolved (Phase 7)
-**Impact:** Complete React 18 / TypeScript / Tailwind CSS management console implemented in `web/`. Includes Operations KPI Dashboard with 14-day trends, interactive Leaflet defect map with severity color-coding, Canonical Defect Registry with Rule B6 human severity override, Maintenance Kanban with Rule R8 human repair verification sign-off, Citizen Complaints Portal with full state machine transitions, and Edge Fleet telemetry monitoring. Verified with Vitest tests and production build.
+**Impact:** Complete React 18 / TypeScript / Tailwind CSS management console implemented in `web/`. Includes Operations KPI Dashboard with 14-day trends, Canonical Defect Registry with Ward Hotspot Grid and Rule B6 human severity override, Maintenance Kanban with Rule R8 human repair verification sign-off, Citizen Complaints Portal with full state machine transitions, and Edge Fleet telemetry monitoring. Verified with Vitest tests and production build.
 
 ### L-007: No Mobile App Built
 **Status:** Resolved (Phase 8)

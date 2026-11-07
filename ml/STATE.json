@@ -1,123 +1,27 @@
 {
-  "current_phase": "COMPLETED",
-  "phase_name": "FREEZE v1.1.0 (ALL PHASES, PASS 2 & PASS 3 COMPLETE)",
-  "status": "COMPLETED",
-  "started_at": "2026-11-07T16:05:00+05:30",
-  "completed_at": "2026-11-07T16:57:00+05:30",
-  "release_version": "v1.1.0",
-  "completed_phases": [
-    {
-      "phase": 1,
-      "name": "REAL AUDIT",
-      "completed_at": "2026-11-07T16:16:00+05:30",
-      "evidence": "docs/STATUS_AUDIT.md",
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 2,
-      "name": "HONESTY AND CLAIM FIXES",
-      "completed_at": "2026-11-07T16:21:00+05:30",
-      "evidence": "scripts/check_claims.py",
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 3,
-      "name": "ML CORRECTNESS AND EVIDENCE",
-      "completed_at": "2026-11-07T16:28:00+05:30",
-      "evidence": {
-        "metrics": "ml/runs/metrics.json",
-        "onnx_parity": "ml/runs/onnx_parity.json",
-        "privacy_blur_report": "bench/privacy_blur_report.json",
-        "calibration_spec": "docs/CALIBRATION.md",
-        "ai_evaluation": "docs/AI_EVALUATION.md"
-      },
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 4,
-      "name": "BACKEND, DATABASE, SECURITY",
-      "completed_at": "2026-11-07T16:31:00+05:30",
-      "evidence": "backend/tests/test_security_matrix.py",
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 5,
-      "name": "RESTORE THE MAP AND CORE GIS FEATURES",
-      "completed_at": "2026-11-07T16:35:00+05:30",
-      "evidence": {
-        "map_route": "web/src/pages/MapPage.tsx",
-        "screenshot": "docs/screenshots/map_restored.png"
-      },
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 6,
-      "name": "FRONTEND CODE QUALITY",
-      "completed_at": "2026-11-07T16:39:00+05:30",
-      "evidence": {
-        "tsc": "passed",
-        "eslint": "web/eslint.config.js",
-        "vitest": "8 passed",
-        "i18n": "scripts/check_i18n_keys.py"
-      },
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 7,
-      "name": "UI/UX REDESIGN (VISUAL OVERHAUL & MOTION)",
-      "completed_at": "2026-11-07T16:44:00+05:30",
-      "evidence": {
-        "contrast_verification": "scripts/capture_ui_matrix.py",
-        "screenshots_captured": 17,
-        "screenshot_dir": "docs/screenshots/"
-      },
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": 8,
-      "name": "TESTS, CI, DOCS, DEPLOY",
-      "completed_at": "2026-11-07T16:53:00+05:30",
-      "evidence": {
-        "ci_workflow": ".github/workflows/ci.yml",
-        "docker_compose": "docker-compose.yml",
-        "backup_drill": "scripts/backup_restore_drill.py",
-        "ui_guide": "docs/UI_GUIDE.md",
-        "changelog": "docs/CHANGELOG.md",
-        "demo_script": "docs/DEMO_SCRIPT.md",
-        "python_tests": "144/144 passed",
-        "frontend_tests": "8/8 passed"
-      },
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": "PASS 2",
-      "name": "HOSTILE RE-AUDIT & BACKLOG FIX",
-      "completed_at": "2026-11-07T16:56:00+05:30",
-      "evidence": "docs/PASS2_AUDIT.md",
-      "gate_status": "PASSED"
-    },
-    {
-      "phase": "PASS 3",
-      "name": "CLEAN-CLONE REPRODUCTION & FREEZE",
-      "completed_at": "2026-11-07T16:57:00+05:30",
-      "evidence": "scripts/reproduce_clean_clone.py",
-      "gate_status": "PASSED"
-    }
-  ],
+  "project_version": "v7",
+  "branch": "v7/polish",
+  "current_phase": 2,
+  "phase_name": "EVIDENCE: REAL MODEL NUMBERS & /EVALUATION PAGE",
+  "status": "IN_PROGRESS",
+  "budget": {
+    "max_gpu_hours": 2,
+    "max_wall_clock_days": 1,
+    "max_spend_usd": 0
+  },
+  "started_at": "2026-11-07T17:38:00+05:30",
+  "completed_phases": [1],
   "evidence_paths": {
-    "status_audit": "docs/STATUS_AUDIT.md",
-    "check_claims": "scripts/check_claims.py",
-    "rate_card": "config/rate_card.json",
-    "metrics": "ml/runs/metrics.json",
-    "onnx_parity": "ml/runs/onnx_parity.json",
-    "privacy_blur": "bench/privacy_blur_report.json",
-    "calibration": "docs/CALIBRATION.md",
-    "map_screenshot": "docs/screenshots/map_restored.png",
-    "i18n_check": "scripts/check_i18n_keys.py",
-    "ui_matrix": "docs/screenshots/",
-    "pass2_audit": "docs/PASS2_AUDIT.md",
-    "pass3_reproduction": "scripts/reproduce_clean_clone.py"
+    "phase_1": {
+      "leaflet_grep": "0 occurrences in web/",
+      "bundle_reduction": "Reduced from 972 kB to 830.80 kB (-141.2 kB)",
+      "banned_claims_check": "scripts/check_claims.py PASSED (0 violations)",
+      "i18n_parity": "scripts/check_i18n_keys.py PASSED (135/135 across 6 languages)",
+      "web_tests": "web Vitest 8/8 PASSED",
+      "backend_tests": "pytest 144/144 PASSED",
+      "live_browser_suite": "19/19 PASSED in scripts/live_test_suite.py"
+    }
   },
   "open_issues": [],
-  "next_action": "Freeze repository at tag v1.1.0"
+  "next_action": "Execute Phase 2: run evaluation on clean test split, output ml/runs/metrics.json, generate docs/AI_EVALUATION.md, and create /evaluation in-app route"
 }

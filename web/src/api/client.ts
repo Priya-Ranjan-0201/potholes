@@ -229,15 +229,6 @@ export const api = {
   getContractorsStats: () => request<ContractorStat[]>("/stats/contractors"),
   getTrends: (days = 14) => request<TrendsResponse>(`/stats/trends?days=${days}`),
 
-  // Maps & GeoJSON
-  getMapGeoJson: (severity?: string, status?: string) => {
-    const params = new URLSearchParams();
-    if (severity) params.set("severity", severity);
-    if (status) params.set("status", status);
-    const qs = params.toString() ? `?${params.toString()}` : "";
-    return request<GeoJSON.FeatureCollection>(`/map/geojson${qs}`);
-  },
-
   // Defects
   listDefects: (params?: { limit?: number; offset?: number; status?: string; class_code?: string }) => {
     const qs = new URLSearchParams();

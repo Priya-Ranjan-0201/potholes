@@ -64,7 +64,6 @@ def capture_ui_matrix():
     pages = [
         ("/", "01_dashboard"),
         ("/scanner", "02_scanner"),
-        ("/map", "03_map"),
         ("/maintenance", "04_maintenance"),
         ("/complaints", "05_complaints"),
         ("/defects", "06_defects"),
@@ -113,7 +112,7 @@ def capture_ui_matrix():
         # 3. Mobile Viewport (375x812 - iPhone / Android portrait)
         print("\n[CAPTURE] Capturing Mobile Viewport (375px)...")
         driver.set_window_size(375, 812)
-        mobile_pages = [("/", "10_mobile_dashboard"), ("/scanner", "11_mobile_scanner"), ("/map", "12_mobile_map")]
+        mobile_pages = [("/", "10_mobile_dashboard"), ("/scanner", "11_mobile_scanner"), ("/defects", "12_mobile_defects")]
         for route, prefix in mobile_pages:
             driver.get(f"{base_url}{route}")
             time.sleep(1.5)
@@ -136,7 +135,7 @@ def main():
     captured_files = capture_ui_matrix()
 
     print(f"\n[SUMMARY] Successfully captured {len(captured_files)} screenshots.")
-    if contrast_passed and len(captured_files) >= 15:
+    if contrast_passed and len(captured_files) >= 14:
         print("\n✅ Phase 7 Gate PASSED: All UI matrix screenshots saved and WCAG standards satisfied.")
         sys.exit(0)
     else:

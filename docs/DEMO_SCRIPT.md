@@ -46,15 +46,15 @@ This script provides an exact, step-by-step walkthrough for demonstrating the co
   - Demonstrate the **One-Click Work Order Dispatch**:
     - Click "Dispatch Work Order": a new repair order is created with status `ASSIGNED`.
 
-### Minute 3:30 – 5:00: Interactive GIS Map & Multi-Pass Sighting Drawer
-- **Screen**: `http://localhost:3000/map`
+### Minute 3:30 – 5:00: Spatial Defect Registry & Ward Hotspots
+- **Screen**: `http://localhost:3000/defects`
 - **Key Points to Address**:
-  - Show the restored Leaflet + OpenStreetMap GIS map.
-  - Show color-coded severity markers (Red = Critical $\ge 70$, Orange = High, Yellow = Moderate).
-  - Filter by severity using the top toolbar.
-  - Click any marker:
-    - The slide-over **Defect Drawer** opens showing multi-pass sightings (e.g., 5 sightings across 3 passes), GPS accuracy, and repair history.
-    - Explain the "One Pothole = One Record" guarantee: Level 1 ByteTrack + Level 2 Edge consolidation + Level 3 PostGIS spatial deduplication.
+  - Present the Defect Registry and executive Ward Hotspot Grid.
+  - Show canonical color-coded severity chips (Minor `#2EC4B6`, Moderate `#FFB703`, Severe `#FB6A2F`, Critical `#E5233A`).
+  - Demonstrate text coordinates (lat, lon to 5 decimals), road corridor, ward, and GPS accuracy ($\pm$2.4m).
+  - Click "Copy coordinates" and the external "Open in maps app" navigation link.
+  - Open Defect Telemetry & Audit drawer showing multi-pass sightings (e.g., 5 sightings across 3 passes) and lifecycle history.
+  - Explain the "One Pothole = One Record" guarantee: Level 1 ByteTrack + Level 2 Edge consolidation + Level 3 PostGIS spatial deduplication.
 
 ### Minute 5:00 – 6:30: Municipal Maintenance & Work Order Verification
 - **Screen**: `http://localhost:3000/maintenance`

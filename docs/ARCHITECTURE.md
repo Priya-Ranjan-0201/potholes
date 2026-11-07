@@ -59,7 +59,7 @@ flowchart TD
     end
 
     subgraph ClientsTier["Client Presentation Tier"]
-        WEB["React 18 + TS Web Dashboard\n(Leaflet, Recharts, i18n)"]
+        WEB["React 18 + TS Web Dashboard\n(Spatial Registry, Recharts, i18n)"]
         MOBILE["Expo Mobile App\n(Citizen & Inspector Modes)"]
     end
 
@@ -108,7 +108,7 @@ flowchart TD
 - **`shared/json-schemas/`**: Pydantic and JSON Schema contracts for `detection`, `defect`, `observation`, and `sync-batch`.
 
 ### 3.5 Web & Mobile (`web/` & `mobile/`)
-- **Web**: React 18, TypeScript, Tailwind CSS, TanStack Query, Leaflet mapping with DBSCAN clustering and heatmaps.
+- **Web**: React 18, TypeScript, Tailwind CSS, TanStack Query, Ward Hotspot Grid, ranked corridor analytics, and external navigation links.
 - **Mobile**: Expo SDK with Citizen mode (GPS manual pin, reports, upvoting) and Inspector Drive mode.
 
 ---

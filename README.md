@@ -43,7 +43,7 @@ ScamRoad investigates high-efficiency Edge Computer Vision methods to detect phy
 - **Real Edge AI (Rule R2):** Runs an audited **YOLO11n ONNX INT8** quantized model directly on edge devices and inside the browser via WebAssembly / ONNX Runtime. All detections and confidence scores are derived from real ONNX model inference.
 - **Privacy by Design (Rule R6):** Automatically redacts faces and vehicle license plates on-device before storage or cloud upload (100% recall verified in `bench/privacy_blur_report.json`).
 - **Strict Human Oversight (Rule R5):** AI identifies damage and suggests priorities, but **AI never closes or approves a work order**. Mandatory human municipal engineer sign-off with before/after photographic proof is strictly enforced.
-- **Restored Interactive GIS Mapping:** High-performance Leaflet + OpenStreetMap engine at `/map` with marker clustering, severity filters, and click-to-open multi-pass defect drawers.
+- **Spatial Defect Registry & Ward Grid:** Non-geographic Ward Hotspot Grid, ranked corridor damage density, and comprehensive tabular defect registry with external maps navigation links.
 - **Full 6-Language Localization:** 100% zero-reload translation across English, Hindi, Punjabi, Tamil, Telugu, and Bengali (136/136 keys verified by `scripts/check_i18n_keys.py`).
 - **Configurable Rate Card (Rule R9):** Repair estimates are computed from an explicit JSON rate card (`config/rate_card.json`), clearly labeled as illustrative planning estimates rather than official government rates.
 
@@ -77,7 +77,7 @@ flowchart TD
     subgraph WebPortal["4. React 18 Civic Web Portal (web/)"]
         DB --> Dashboard["Executive Overview (/) [DEMO DATA BADGED]"]
         Detections --> Scanner["AI Scanner (/scanner)\n• Real-Time Telemetry\n• Rate Card Est."]
-        DB --> GISMap["Interactive GIS Map (/map)\n• Severity Markers & Drawer"]
+        DB --> DefectReg["Defect Registry (/defects)\n• Ward Grid & Corridor Rankings\n• External Maps Navigation"]
         DB --> Kanban["Maintenance Kanban (/maintenance)\n• Human Engineer Sign-Off (R5)"]
         DB --> Grievance["Citizen Grievances (/complaints)\n• Full State Machine"]
         YOLO --> Models["AI Telemetry (/models)\n• Verified Benchmarks"]
@@ -127,12 +127,11 @@ Instantaneous zero-reload switching across 6 languages with 100% dictionary cove
 - Computes illustrative repair budgets from `config/rate_card.json`.
 - Dispatches draft work orders into the maintenance queue with one click.
 
-### 3. Interactive GIS Map (`/map`)
-- Full Leaflet + OpenStreetMap spatial map of road distresses.
-- Severity color markers (Red: Critical $\ge 70$, Orange: Severe, Yellow: Moderate).
-- Multi-pass sighting indicators showing observation counts across repeat patrols.
-- Interactive slide-over **Defect Drawer** displaying GPS coordinates, road corridor names, and lifecycle history.
-- Real-time toolbar filters for severity levels and repair status.
+### 3. Spatial Defect Registry & Ward Hotspots (`/defects` & `/`)
+- Non-geographic **Ward Hotspot Grid** on the executive dashboard displaying damage density and repair metrics.
+- Ranked **Top Corridors** leaderboard identifying high-risk transit segments with sparklines.
+- Comprehensive defect table and card views with canonical severity chips (Minor `#2EC4B6`, Moderate `#FFB703`, Severe `#FB6A2F`, Critical `#E5233A`).
+- Precise text location indicators (coordinates to 5 decimals, road segment ID, ward, GPS accuracy $\pm$2.4m) with one-click "Copy coordinates" and external "Open in maps app" deep links.
 
 ### 4. Municipal Maintenance & Work Orders (`/maintenance`)
 - 4-stage municipal workflow: `ASSIGNED` $\to$ `IN_PROGRESS` $\to$ `REPAIRED` $\to$ `CLOSED`.
@@ -163,7 +162,7 @@ ScamRoad v1.1.0 was hardened through an 8-phase autonomous verification loop, fo
 | **Phase 2: Honesty & Claims** | Zero ungrounded institutional claims; rate card config created | `scripts/check_claims.py` | **PASSED** |
 | **Phase 3: ML Correctness** | PyTorch serialization fix; ONNX INT8 parity (0.999757 sim); privacy recall (100%) | `ml/runs/onnx_parity.json` | **PASSED** |
 | **Phase 4: Backend & Security** | `is_demo` boolean added; Alembic migration created; RBAC least privilege verified | `backend/tests/test_security_matrix.py` | **PASSED** |
-| **Phase 5: Restored GIS Map** | Leaflet + OpenStreetMap at `/map` with drawer, filters, and multi-pass scale | `docs/screenshots/map_restored.png` | **PASSED** |
+| **Phase 5: Spatial Registry** | Ward Hotspot Grid, ranked corridors, and external navigation links | `docs/screenshots/02_defects_dark.png` | **PASSED** |
 | **Phase 6: Frontend Quality** | ESLint 9 Flat Config; strict TypeScript; 100% 6-language parity (136/136 keys) | `scripts/check_i18n_keys.py` | **PASSED** |
 | **Phase 7: UI/UX Redesign** | WCAG AAA contrast; road motion animations; 17 full-page screenshot matrix | `docs/screenshots/` | **PASSED** |
 | **Phase 8: Tests, CI & Deploy** | GitHub Actions CI matrix; multi-container Docker Compose; disaster recovery drill | `scripts/backup_restore_drill.py` | **PASSED** |

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -7,7 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ScannerPage } from "./pages/ScannerPage";
-import { MapPage } from "./pages/MapPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { DefectsPage } from "./pages/DefectsPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ComplaintsPage } from "./pages/ComplaintsPage";
@@ -38,8 +38,6 @@ function App() {
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/scanner" element={<ScannerPage />} />
-                    {/* Phase 5: Map restored as a first-class feature */}
-                    <Route path="/map" element={<MapPage />} />
                     <Route path="/defects" element={<DefectsPage />} />
                     <Route path="/maintenance" element={<MaintenancePage />} />
                     <Route path="/complaints" element={<ComplaintsPage />} />
@@ -47,7 +45,7 @@ function App() {
                     <Route path="/inspection" element={<InspectionPage />} />
                     <Route path="/models" element={<ModelsPage />} />
                     <Route path="/forecasts" element={<ForecastsPage />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </main>
                 <Footer />

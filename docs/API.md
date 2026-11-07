@@ -71,9 +71,7 @@ All error responses strictly return the standard error envelope:
 - `POST /api/v1/work-orders/{work_order_id}/repair` — Contractor submits post-repair photographic evidence.
 - `POST /api/v1/work-orders/{work_order_id}/verify` — **Authoritative Engineer Sign-Off**. Mandatory human verification with before/after evidence to transition to `CLOSED` (Rule R5: AI is strictly prohibited from closing work orders).
 
-### 5. GIS & Interactive Map (`/map`, `/health-index`, `/forecasts`)
-- `GET /api/v1/map/geojson` — Returns GeoJSON `FeatureCollection` of road defect clusters with multi-pass sighting counts.
-- `GET /api/v1/map/roads` — Returns road network geometry and road hierarchy classifications.
+### 5. Spatial Telemetry & Pavement Health (`/health-index`, `/forecasts`)
 - `GET /api/v1/health-index/{segment_id}` — Computes live Road Health Index ($0 \le \text{RHI} \le 100$).
 - `GET /api/v1/forecasts/{segment_id}` — Structural deterioration forecast for pavement maintenance scheduling.
 
