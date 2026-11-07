@@ -1,0 +1,33 @@
+{
+  "evaluation_timestamp": "2026-11-07T10:56:14.536777+00:00",
+  "target_spec": "Rule R6 (Privacy blur on faces and license plates)",
+  "sample_counts": {
+    "plates": 50,
+    "faces": 50,
+    "total_targets": 100
+  },
+  "plates": {
+    "tp": 50,
+    "fn": 0,
+    "fp": 50,
+    "recall": 1.0,
+    "precision": 0.5,
+    "f1": 0.6667
+  },
+  "faces": {
+    "tp": 50,
+    "fn": 0,
+    "fp": 0,
+    "recall": 1.0,
+    "precision": 1.0,
+    "f1": 1.0
+  },
+  "overall": {
+    "tp": 100,
+    "fn": 0,
+    "fp": 50,
+    "recall": 1.0,
+    "precision": 0.6667,
+    "f1": 0.8
+  }
+}

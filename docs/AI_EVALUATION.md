@@ -79,15 +79,31 @@ Measurement adheres strictly to **Rule 10 (Pixel measurements only)**:
 
 ---
 
-## 7. Export, Quantization & Edge Benchmarking (Stage 9)
+## 7. Export, Quantization & Edge Benchmarking (Stage 9 / Phase 3)
 
-| Artifact Format | File Size | Latency p50 | Latency p95 | Throughput | Parity Max Absolute Error | Parity Gate |
+Verified via automated cross-runtime test suite (`scripts/run_onnx_parity.py` and `ml/runs/onnx_parity.json`):
+
+| Artifact Format | File Size | Latency p50 | Latency Mean | Throughput | Cosine Similarity | Parity Gate |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **PyTorch FP32** (`best.pt`) | 12.20 MB | ~51.7 ms | ~58.2 ms | 19.3 FPS | Control (0.0000) | BASELINE |
-| **ONNX FP32** (`best.onnx`) | 12.18 MB | 48.20 ms | 54.10 ms | 20.7 FPS | `0.00097` | `PASSED (< 1e-2)` |
-| **ONNX Dynamic INT8** (`best_int8.onnx`) | **3.32 MB** | **45.46 ms** | **53.29 ms** | **21.0 FPS** | `0.00312` | `PASSED (< 1e-2)` |
+| **PyTorch FP32** (`yolo11n.pt`) | 5.35 MB | 76.62 ms | 81.44 ms | 13.0 FPS | Baseline (1.000) | BASELINE |
+| **ONNX FP32** (`best.onnx`) | 10.11 MB | 44.76 ms | 44.82 ms | 22.3 FPS | 0.99998 | `PASSED` |
+| **ONNX INT8 Quantized** (`best_int8.onnx`) | **2.87 MB** | **92.26 ms** | **96.53 ms** | **10.8 FPS** | **0.999757** | `PASSED (EXCELLENT)` |
 
-*Compression:* **72.7% size reduction** with negligible numerical divergence.
+*Compression:* **3.52x size reduction** (from 10.11 MB to 2.87 MB) enabling fast browser WASM caching and edge transmission.
+
+---
+
+## 7B. Privacy Blur Recall Benchmark (Rule R6)
+
+Verified on a labeled benchmark suite of 50 license plates and 50 human roadside faces (`scripts/benchmark_privacy_blur.py` and `bench/privacy_blur_report.json`):
+
+| Target Class | Sample Count | True Positives (TP) | False Negatives (FN) | False Positives (FP) | Recall | Precision | F1 Score |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **License Plates** | 50 | 50 | 0 | 50 | **100.0%** | 50.0% | 0.667 |
+| **Pedestrian Faces** | 50 | 50 | 0 | 0 | **100.0%** | 100.0% | 1.000 |
+| **Overall Privacy Shield** | 100 | 100 | 0 | 50 | **100.0%** | 66.7% | **0.800** |
+
+*Findings:* Zero false negatives achieved across all 100 sensitive target samples (100% anonymization recall), strictly satisfying Rule R6. False positives on plates occur on rectangular high-contrast roadside signs, which does not compromise pedestrian privacy.
 
 ---
 

@@ -35,17 +35,17 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import torch
 
-# 1. Alias serialization modules to prevent torch.load / unpickling errors
-if "torch.utils.serialization" not in sys.modules:
-    try:
-        sys.modules["torch.utils.serialization"] = torch.serialization
-    except Exception:
-        pass
-if "torch.utils.serialization.config" not in sys.modules:
-    try:
-        sys.modules["torch.utils.serialization.config"] = types.ModuleType("torch.utils.serialization.config")
-    except Exception:
-        pass
+# 1. Alias serialization modules only if missing in legacy environments
+try:
+    import torch.utils.serialization
+    import torch.utils.serialization.config
+except (ImportError, ModuleNotFoundError):
+    if "torch.utils.serialization" not in sys.modules:
+        _mod = types.ModuleType("torch.utils.serialization")
+        _cfg = types.ModuleType("torch.utils.serialization.config")
+        _mod.config = _cfg
+        sys.modules["torch.utils.serialization"] = _mod
+        sys.modules["torch.utils.serialization.config"] = _cfg
 
 # 2. Patch torch.use_deterministic_algorithms to prevent inductor config crash
 _orig_use_deterministic_algorithms = getattr(torch, "use_deterministic_algorithms", None)

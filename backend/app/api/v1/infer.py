@@ -21,6 +21,9 @@ class DetectionBox(BaseModel):
     score: int
     areaPx: int
     action: str
+    is_calibrated: bool = False
+    measurement_method: str = "uncalibrated_pixel_area"
+    unit: str = "px_relative_pct"
 
 class InferenceResponse(BaseModel):
     status: str
@@ -120,19 +123,33 @@ async def infer_road_defects(
             cf = round(float(d.confidence), 3)
             lbl = d.class_name.upper()
 
+            # Physical severity calculation (Rule R4):
+            # Model detection confidence (cf) is strictly decoupled from physical severity.
+            # Severity is a function of defect class, relative surface damage area, and aspect ratio.
             if "POTHOLE" in lbl:
                 pothole_cnt += 1
-                action = "Immediate 24-hr cold mix asphalt compaction"
+                base_weight = 45
+                action = "Immediate 24-hr cold mix asphalt compaction (indicative IRC:82)"
+            elif "ALLIGATOR" in lbl:
+                crack_cnt += 1
+                base_weight = 35
+                action = "Full-depth patch repair (indicative IRC:82)"
+            elif "TRANS" in lbl:
+                crack_cnt += 1
+                base_weight = 25
+                action = "Bituminous crack sealing (transverse)"
             else:
                 crack_cnt += 1
-                action = "48-hr bituminous sealing to prevent water penetration"
+                base_weight = 20
+                action = "Bituminous crack sealing to prevent water penetration"
 
-            severity = (
-                "Critical" if (cf > 0.80 or area_px > 15000)
-                else ("Severe" if (cf > 0.50 or area_px > 3000) else "Moderate")
-            )
-            score = int(cf * 60 + min(40, (area_px / max(1, w * h * 0.15)) * 40))
-            score = min(100, max(25, score))
+            area_ratio = area_px / max(1, w * h)
+            area_component = min(45, int(area_ratio * 400))
+            aspect = max(bw / max(1.0, bh), bh / max(1.0, bw))
+            aspect_bonus = min(10, int(aspect * 1.5)) if "CRACK" in lbl else 0
+
+            score = min(100, max(15, base_weight + area_component + aspect_bonus))
+            severity = "Critical" if score >= 70 else ("Severe" if score >= 50 else "Moderate")
 
             detections.append(
                 DetectionBox(
@@ -143,7 +160,10 @@ async def infer_road_defects(
                     severity=severity,
                     score=score,
                     areaPx=area_px,
-                    action=action
+                    action=action,
+                    is_calibrated=False,
+                    measurement_method="uncalibrated_pixel_area",
+                    unit="px_relative_pct"
                 )
             )
 

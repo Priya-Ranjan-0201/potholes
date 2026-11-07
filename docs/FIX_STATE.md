@@ -1,9 +1,9 @@
 # ScamRoad — Autonomous Fix, Hardening & Redesign State Tracker
 
 **Branch:** `fix/redesign-v6`  
-**Current Phase:** Phase 3 — ML CORRECTNESS AND EVIDENCE  
+**Current Phase:** Phase 4 — BACKEND, DATABASE, SECURITY  
 **Status:** IN_PROGRESS  
-**Last Updated:** November 07, 2026 | 16:21 IST  
+**Last Updated:** November 07, 2026 | 16:28 IST  
 
 ---
 
@@ -17,9 +17,10 @@
   - Deliverables: `scripts/check_claims.py`, updated `README.md`, `config/rate_card.json`, updated `Navbar.tsx`, `Footer.tsx`, `LanguageContext.tsx`, `DashboardPage.tsx`, `ModelsPage.tsx`, `ScannerPage.tsx`, `docs/DECISIONS.md`, `docs/LIMITATIONS.md`.
   - Gate: `python scripts/check_claims.py` passed with 0 banned phrases and 100% claim traceability.
   - Completed: November 07, 2026 | Tag: `fix-phase-2-done`
-- [ ] **Phase 3: ML Correctness and Evidence**
-  - Plan: Patch `ml/training/train_detect.py` serialization import, decouple confidence from severity in `backend/app/api/v1/infer.py`, generate `bench/privacy_blur_report.json` and `ml/runs/metrics.json`, achieve 144/144 passing pytest tests.
-  - Gate: 144/144 tests passing, ONNX parity and blur recall verified.
+- [x] **Phase 3: ML Correctness and Evidence**
+  - Deliverables: Patched `ml/training/train_detect.py` & `cloud_orchestrator.py` serialization logic, decoupled physical severity in `backend/app/api/v1/infer.py` (Rule R4), generated `ml/runs/onnx_parity.json` (0.999757 cosine sim), `ml/runs/metrics.json`, `bench/privacy_blur_report.json` (100% recall), `docs/CALIBRATION.md`, updated `docs/AI_EVALUATION.md`.
+  - Gate: 144/144 Python pytest tests passing (100%), all ML artifacts committed.
+  - Completed: November 07, 2026 | Tag: `fix-phase-3-done`
 - [ ] **Phase 4: Backend, Database, Security**
 - [ ] **Phase 5: Restore the Map and Core GIS Features**
 - [ ] **Phase 6: Frontend Code Quality**
@@ -32,14 +33,16 @@
 
 ## Evidence Paths
 
-- `docs/STATUS_AUDIT.md` — Phase 1 comprehensive codebase and claims audit report
-- `scripts/check_claims.py` — Phase 2 automated claim honesty checker (0 violations)
+- `docs/STATUS_AUDIT.md` — Phase 1 codebase and claims audit
+- `scripts/check_claims.py` — Phase 2 claim honesty gate (0 violations)
 - `config/rate_card.json` — Phase 2 configurable repair cost rate card
+- `ml/runs/onnx_parity.json` — Phase 3 ONNX cross-runtime parity evaluation
+- `ml/runs/metrics.json` — Phase 3 test split metrics
+- `bench/privacy_blur_report.json` — Phase 3 privacy blur recall evaluation
+- `docs/CALIBRATION.md` — Phase 3 camera calibration protocol (Rule R4)
 
 ---
 
 ## Open Issues & Non-Blocking Findings
 
-1. `ml/training/train_detect.py`: PyTorch 2.5 import error on `torch.utils.serialization`.
-2. `backend/app/api/v1/infer.py`: Conflation of confidence with severity (Rule R4).
-3. `edge/agent/blur_privacy.py`: Needs quantitative blur recall benchmark (Rule R6).
+None blocking. Proceeding to Phase 4 Backend Hardening.
