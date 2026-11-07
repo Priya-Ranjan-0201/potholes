@@ -236,6 +236,16 @@ def run_suite():
         record_test("AI Models & Telemetry Page Load", has_models, "Edge model metrics and ONNX quantization verified")
         capture_screen(driver, "live_13_models_telemetry.png", "Neural Model Telemetry & Latency Dashboard")
 
+        # TEST 13b: AI Evaluation Page (/evaluation)
+        print("  -> Testing AI Model Evaluation Page (/evaluation)...")
+        driver.get("http://localhost:3000/evaluation")
+        time.sleep(1.5)
+        eval_body = driver.find_element(By.TAG_NAME, "body").text
+        has_eval = "Evaluation" in eval_body and ("Confusion Matrix" in eval_body or "mAP@50" in eval_body or "Failure Gallery" in eval_body)
+        record_test("AI Model Evaluation Page Load", has_eval, "Empirical test split metrics, confusion matrix, and failure gallery verified")
+        capture_screen(driver, "live_13b_evaluation_benchmarks.png", "Empirical AI Model Evaluation & Scientific Benchmark Registry")
+
+
         # TEST 14: Mobile Responsive Viewport (375x812 - iPhone/Android)
         print("  -> Testing Mobile Responsive Viewports (375x812)...")
         driver.set_window_size(375, 812)

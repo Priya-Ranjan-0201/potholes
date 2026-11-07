@@ -1,7 +1,7 @@
 # ScamRoad v7 — Semester-Scope Polish, Evidence and Redesign State Tracker
 
 **Branch:** `v7/polish`  
-**Current Phase:** Phase 2 — EVIDENCE: REAL MODEL NUMBERS & /EVALUATION PAGE  
+**Current Phase:** Phase 3 — HARD-NEGATIVE ROUND & ABLATION  
 **Status:** IN_PROGRESS  
 **Budget:** Max GPU hours: 2 | Max wall-clock days: 1 | Max spend: $0  
 **Started At:** November 07, 2026 | 17:38 IST  
@@ -11,7 +11,7 @@
 ## Phase Progression (MUST > SHOULD > COULD)
 
 - [x] **Phase 1 (MUST): Remove the Map Completely (Clean, No Leftovers)** — Tag: `v7-phase-1-done`
-- [ ] **Phase 2 (MUST): Evidence: Real Model Numbers & /evaluation Page**
+- [x] **Phase 2 (MUST): Evidence: Real Model Numbers & /evaluation Page** — Tag: `v7-phase-2-done`
 - [ ] **Phase 3 (MUST): Hard-Negative Round & Ablation**
 - [ ] **Phase 4 (SHOULD): Local Test Set Pipeline**
 - [ ] **Phase 5 (SHOULD): Capture App as a PWA**
@@ -25,19 +25,10 @@
 
 ---
 
-## Phase 1 Verification Evidence & Gate Summary
-- **Leaflet & OSM Purge:** `git grep -iE 'leaflet|react-leaflet' web/` returned 0 matches.
-- **Bundle Reduction:** Production JS bundle dropped from ~972 kB to 830.80 kB (reduction of >141 kB).
-- **Replacements Implemented:**
-  - **Ward Hotspot Grid:** Non-geographic heat-grid on `/` with color-coded risk tiles and repair progress.
-  - **Top 10 Worst Corridors:** Ranked distress leaderboard on `/` with damage density and 7-day sparklines.
-  - **Defect Registry Enhancements:** On `/defects`, added sortable table & card grid view, coordinates to 5 decimals, road segment, ward, GPS accuracy (±2.4m), one-click "Copy coordinates" with feedback, and external "Open in maps app" deep links.
-  - **Severity Canonical Config:** Standardized on `config/severity_thresholds.json` (Minor `#2EC4B6`, Moderate `#FFB703`, Severe `#FB6A2F`, Critical `#E5233A`).
-- **Clean 404:** Created `NotFoundPage.tsx` handling `/map` and unknown routes gracefully.
-- **Banned Phrase Gate:** `python scripts/check_claims.py` passed with 0 violations.
-- **i18n Parity:** `python scripts/check_i18n_keys.py` verified 100% dictionary parity (135/135 keys).
-- **Test Matrix:**
-  - 8/8 Vitest tests passed.
-  - 144/144 Pytest tests passed.
-  - 19/19 Live Chrome Selenium tests passed.
-  - 15 UI matrix screenshots captured.
+## Phase 2 Verification Evidence & Gate Summary
+- **Metrics JSON Generated:** `ml/runs/metrics.json` verified with real ONNX Runtime CPU latency benchmark (p50: 73.57ms, 13.6 FPS), mAP@50: 85.75%, mAP@50-95: 62.12%, macro precision: 86.58%, macro recall: 83.95%, ECE: 1.91%.
+- **AI Evaluation Report Generated:** `docs/AI_EVALUATION.md` matches metrics JSON exactly, citing RDD2022-India test split, SHA-256 hash, and host CPU specs.
+- **In-App Evaluation Page:** `web/src/pages/EvaluationPage.tsx` built with KPI summary cards, per-class breakdown table, interactive 5x5 confusion matrix with cell hover inspect, 10-bin reliability diagram, and 6-case failure gallery (3 FP, 3 FN).
+- **Backend API Endpoint:** Added `GET /api/v1/models/evaluation` in `backend/app/api/v1/infer.py`.
+- **Multilingual Support:** Added `navEvaluation` across all 6 Indian languages (136/136 keys verified 100% parity).
+- **Selenium Browser Suite:** 20/20 tests passed including live `/evaluation` page verification.

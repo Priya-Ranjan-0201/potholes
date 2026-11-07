@@ -112,6 +112,76 @@ export interface DefectDetailResponse {
   }>;
 }
 
+export interface ModelEvaluationResponse {
+  timestamp_utc: string;
+  model_version: string;
+  checkpoint: string;
+  sha256: string;
+  file_size_mb: number;
+  dataset_name: string;
+  test_images_count: number;
+  test_instances_total: number;
+  test_instances_by_class: Record<string, number>;
+  overall: {
+    mAP50: number;
+    mAP50_95: number;
+    precision: number;
+    recall: number;
+    f1: number;
+    ece: number;
+  };
+  per_class: Record<
+    string,
+    {
+      instances: number;
+      precision: number;
+      recall: number;
+      f1: number;
+      mAP50: number;
+      mAP50_95: number;
+    }
+  >;
+  confusion_matrix: {
+    classes: string[];
+    counts: number[][];
+    normalized: number[][];
+  };
+  inference_latency: {
+    host_os: string;
+    host_processor: string;
+    device: string;
+    execution_provider: string;
+    imgsz: number;
+    p50_ms: number;
+    p95_ms: number;
+    p99_ms: number;
+    throughput_fps: number;
+    test_iterations: number;
+  };
+  confidence_calibration: {
+    ece: number;
+    num_bins: number;
+    bins: Array<{
+      bin_idx: number;
+      bin_range: [number, number];
+      count: number;
+      mean_conf: number;
+      accuracy: number;
+      error: number;
+    }>;
+  };
+  failure_gallery: Array<{
+    id: string;
+    type: string;
+    predicted_class: string;
+    ground_truth: string;
+    confidence: number;
+    image_id: string;
+    root_cause: string;
+    mitigation: string;
+  }>;
+}
+
 export interface WorkOrder {
   id: string;
   defect_id: string;
@@ -329,4 +399,7 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
+
+  // AI Model Evaluation Metrics (Rule R1)
+  getModelEvaluation: () => request<ModelEvaluationResponse>("/models/evaluation"),
 };

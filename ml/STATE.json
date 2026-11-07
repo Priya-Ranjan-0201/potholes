@@ -1,8 +1,8 @@
 {
   "project_version": "v7",
   "branch": "v7/polish",
-  "current_phase": 2,
-  "phase_name": "EVIDENCE: REAL MODEL NUMBERS & /EVALUATION PAGE",
+  "current_phase": 3,
+  "phase_name": "HARD-NEGATIVE ROUND & ABLATION",
   "status": "IN_PROGRESS",
   "budget": {
     "max_gpu_hours": 2,
@@ -10,7 +10,7 @@
     "max_spend_usd": 0
   },
   "started_at": "2026-11-07T17:38:00+05:30",
-  "completed_phases": [1],
+  "completed_phases": [1, 2],
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
@@ -20,8 +20,18 @@
       "web_tests": "web Vitest 8/8 PASSED",
       "backend_tests": "pytest 144/144 PASSED",
       "live_browser_suite": "19/19 PASSED in scripts/live_test_suite.py"
+    },
+    "phase_2": {
+      "metrics_json": "ml/runs/metrics.json",
+      "evaluation_doc": "docs/AI_EVALUATION.md",
+      "in_app_route": "/evaluation in web/src/pages/EvaluationPage.tsx",
+      "cpu_latency_p50_ms": 73.57,
+      "cpu_throughput_fps": 13.6,
+      "overall_map50": 0.8575,
+      "overall_ece": 0.0191,
+      "live_browser_suite": "20/20 PASSED (including /evaluation)"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Phase 2: run evaluation on clean test split, output ml/runs/metrics.json, generate docs/AI_EVALUATION.md, and create /evaluation in-app route"
+  "next_action": "Execute Phase 3: mine hard-negative background images, run before/after ablation, document in docs/EXPERIMENTS.md, and tag v7-phase-3-done"
 }

@@ -14,6 +14,7 @@ import { ComplaintsPage } from "./pages/ComplaintsPage";
 import { FleetPage } from "./pages/FleetPage";
 import { InspectionPage } from "./pages/InspectionPage";
 import { ModelsPage } from "./pages/ModelsPage";
+import { EvaluationPage } from "./pages/EvaluationPage";
 import { ForecastsPage } from "./pages/ForecastsPage";
 
 const queryClient = new QueryClient({
@@ -44,6 +45,7 @@ function App() {
                     <Route path="/fleet" element={<FleetPage />} />
                     <Route path="/inspection" element={<InspectionPage />} />
                     <Route path="/models" element={<ModelsPage />} />
+                    <Route path="/evaluation" element={<EvaluationPage />} />
                     <Route path="/forecasts" element={<ForecastsPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>

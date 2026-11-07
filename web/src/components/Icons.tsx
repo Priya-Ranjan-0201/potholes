@@ -389,6 +389,15 @@ export const LayoutGrid: React.FC<IconProps> = ({ className = "w-4 h-4", ...prop
   </svg>
 );
 
+export const BarChart3: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M3 3v18h18" />
+    <path d="M18 17V9" />
+    <path d="M13 17V5" />
+    <path d="M8 17v-3" />
+  </svg>
+);
+
 export const Table: React.FC<IconProps> = ({ className = "w-4 h-4", ...props }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M12 3v18" />

@@ -193,3 +193,18 @@ async def infer_road_defects(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+
+
+@router.get("/models/evaluation", summary="Get Model Evaluation Metrics")
+async def get_model_evaluation():
+    """Retrieve full AI model evaluation metrics, confusion matrix, calibration, and failure cases."""
+    import json
+    metrics_path = "ml/runs/metrics.json"
+    if not os.path.exists(metrics_path):
+        raise HTTPException(status_code=404, detail="Model evaluation metrics not yet generated")
+    try:
+        with open(metrics_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed reading metrics: {str(e)}")
+

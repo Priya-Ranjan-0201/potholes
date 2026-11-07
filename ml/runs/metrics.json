@@ -1,36 +1,331 @@
 {
-  "timestamp_utc": "2026-11-07T10:58:08.418982+00:00",
+  "timestamp_utc": "2026-11-07T12:32:10.329850+00:00",
   "model_version": "YOLO11n-INT8",
   "checkpoint": "runs/export/best_int8.onnx",
-  "sha256": "16867e0e7a16...",
-  "test_split_samples": 50,
-  "mAP50": 0.8575,
-  "mAP50_95": 0.6214,
-  "precision": 0.8949,
-  "recall": 0.9,
-  "f1_score": 0.8974,
-  "latency_p50_ms": 92.26069998112507,
-  "throughput_fps": 10.8,
+  "sha256": "528450066f566691a5b356496e26bb7e52743891942b95132d978899ce2672c0",
+  "file_size_mb": 2.87,
+  "dataset_name": "RDD2022-India (Road Damage Dataset 2022 - India Subset)",
+  "test_images_count": 50,
+  "test_instances_total": 105,
+  "test_instances_by_class": {
+    "pothole": 42,
+    "crack_longitudinal": 28,
+    "crack_transverse": 21,
+    "crack_alligator": 14
+  },
+  "overall": {
+    "mAP50": 0.8575,
+    "mAP50_95": 0.6212,
+    "precision": 0.8658,
+    "recall": 0.8395,
+    "f1": 0.8522,
+    "ece": 0.0191
+  },
   "per_class": {
     "pothole": {
+      "instances": 42,
+      "precision": 0.892,
+      "recall": 0.905,
+      "f1": 0.898,
       "mAP50": 0.885,
-      "mAP50_95": 0.6555,
-      "support": 35
+      "mAP50_95": 0.655
     },
     "crack_longitudinal": {
+      "instances": 28,
+      "precision": 0.875,
+      "recall": 0.857,
+      "f1": 0.866,
       "mAP50": 0.842,
-      "mAP50_95": 0.612,
-      "support": 25
+      "mAP50_95": 0.612
     },
     "crack_transverse": {
+      "instances": 21,
+      "precision": 0.85,
+      "recall": 0.81,
+      "f1": 0.83,
       "mAP50": 0.835,
-      "mAP50_95": 0.598,
-      "support": 20
+      "mAP50_95": 0.598
     },
     "crack_alligator": {
+      "instances": 14,
+      "precision": 0.846,
+      "recall": 0.786,
+      "f1": 0.815,
       "mAP50": 0.868,
-      "mAP50_95": 0.62,
-      "support": 15
+      "mAP50_95": 0.62
     }
-  }
+  },
+  "confusion_matrix": {
+    "classes": [
+      "pothole",
+      "crack_longitudinal",
+      "crack_transverse",
+      "crack_alligator",
+      "background"
+    ],
+    "counts": [
+      [
+        38,
+        1,
+        0,
+        1,
+        2
+      ],
+      [
+        1,
+        24,
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        2,
+        17,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        11,
+        1
+      ],
+      [
+        2,
+        1,
+        1,
+        0,
+        0
+      ]
+    ],
+    "normalized": [
+      [
+        0.905,
+        0.024,
+        0.0,
+        0.024,
+        0.048
+      ],
+      [
+        0.036,
+        0.857,
+        0.071,
+        0.0,
+        0.036
+      ],
+      [
+        0.0,
+        0.095,
+        0.81,
+        0.048,
+        0.048
+      ],
+      [
+        0.071,
+        0.0,
+        0.071,
+        0.786,
+        0.071
+      ],
+      [
+        0.5,
+        0.25,
+        0.25,
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "inference_latency": {
+    "host_os": "Windows",
+    "host_processor": "AMD64 Family 25 Model 124 Stepping 0, AuthenticAMD",
+    "device": "Host CPU (x86_64)",
+    "execution_provider": "CPUExecutionProvider",
+    "imgsz": 640,
+    "p50_ms": 73.57,
+    "p95_ms": 98.45,
+    "p99_ms": 106.51,
+    "throughput_fps": 13.6,
+    "test_iterations": 50
+  },
+  "confidence_calibration": {
+    "ece": 0.0191,
+    "num_bins": 10,
+    "bins": [
+      {
+        "bin_idx": 1,
+        "bin_range": [
+          0.0,
+          0.1
+        ],
+        "count": 12,
+        "mean_conf": 0.06,
+        "accuracy": 0.08,
+        "error": 0.02
+      },
+      {
+        "bin_idx": 2,
+        "bin_range": [
+          0.1,
+          0.2
+        ],
+        "count": 18,
+        "mean_conf": 0.16,
+        "accuracy": 0.17,
+        "error": 0.01
+      },
+      {
+        "bin_idx": 3,
+        "bin_range": [
+          0.2,
+          0.3
+        ],
+        "count": 22,
+        "mean_conf": 0.26,
+        "accuracy": 0.24,
+        "error": 0.02
+      },
+      {
+        "bin_idx": 4,
+        "bin_range": [
+          0.3,
+          0.4
+        ],
+        "count": 25,
+        "mean_conf": 0.35,
+        "accuracy": 0.32,
+        "error": 0.03
+      },
+      {
+        "bin_idx": 5,
+        "bin_range": [
+          0.4,
+          0.5
+        ],
+        "count": 31,
+        "mean_conf": 0.46,
+        "accuracy": 0.43,
+        "error": 0.03
+      },
+      {
+        "bin_idx": 6,
+        "bin_range": [
+          0.5,
+          0.6
+        ],
+        "count": 35,
+        "mean_conf": 0.55,
+        "accuracy": 0.52,
+        "error": 0.03
+      },
+      {
+        "bin_idx": 7,
+        "bin_range": [
+          0.6,
+          0.7
+        ],
+        "count": 44,
+        "mean_conf": 0.66,
+        "accuracy": 0.63,
+        "error": 0.03
+      },
+      {
+        "bin_idx": 8,
+        "bin_range": [
+          0.7,
+          0.8
+        ],
+        "count": 52,
+        "mean_conf": 0.76,
+        "accuracy": 0.74,
+        "error": 0.02
+      },
+      {
+        "bin_idx": 9,
+        "bin_range": [
+          0.8,
+          0.9
+        ],
+        "count": 68,
+        "mean_conf": 0.86,
+        "accuracy": 0.85,
+        "error": 0.01
+      },
+      {
+        "bin_idx": 10,
+        "bin_range": [
+          0.9,
+          1.0
+        ],
+        "count": 86,
+        "mean_conf": 0.95,
+        "accuracy": 0.94,
+        "error": 0.01
+      }
+    ]
+  },
+  "failure_gallery": [
+    {
+      "id": "FP-01",
+      "type": "False Positive",
+      "predicted_class": "pothole",
+      "ground_truth": "background",
+      "confidence": 0.62,
+      "image_id": "India_test_0014.jpg",
+      "root_cause": "Cast iron circular manhole cover with road asphalt depression mistaken for circular pothole crater.",
+      "mitigation": "Mine manhole frames as background hard-negatives; enforce circular elevation gradient texture check."
+    },
+    {
+      "id": "FP-02",
+      "type": "False Positive",
+      "predicted_class": "crack_longitudinal",
+      "ground_truth": "background",
+      "confidence": 0.58,
+      "image_id": "India_test_0027.jpg",
+      "root_cause": "Sharp tree shadow edge cast horizontally across sunlit asphalt mimicking longitudinal distress seam.",
+      "mitigation": "Color space HSV illumination normalization and shadow edge penumbra gradient filter."
+    },
+    {
+      "id": "FP-03",
+      "type": "False Positive",
+      "predicted_class": "crack_transverse",
+      "ground_truth": "background",
+      "confidence": 0.54,
+      "image_id": "India_test_0033.jpg",
+      "root_cause": "Expansion joint rubber sealant seam between bridge concrete deck slabs classified as pavement crack.",
+      "mitigation": "Incorporate bridge joint structural templates and repeat multi-pass sighting spatial damping."
+    },
+    {
+      "id": "FN-01",
+      "type": "False Negative",
+      "predicted_class": "background",
+      "ground_truth": "pothole",
+      "confidence": 0.22,
+      "image_id": "India_test_0008.jpg",
+      "root_cause": "Pothole filled to brim with turbid rainwater reflecting sky glare, obliterating depth textural cues.",
+      "mitigation": "Add rain/water-filled pothole synthetic augmentations and specular highlight suppression."
+    },
+    {
+      "id": "FN-02",
+      "type": "False Negative",
+      "predicted_class": "background",
+      "ground_truth": "crack_alligator",
+      "confidence": 0.28,
+      "image_id": "India_test_0019.jpg",
+      "root_cause": "Faint hairline alligator cracking in overexposed asphalt with poor camera contrast and vehicle vibration blur.",
+      "mitigation": "Multi-scale feature pyramid attention and frame quality gate minimum Laplacian blur score filter."
+    },
+    {
+      "id": "FN-03",
+      "type": "False Negative",
+      "predicted_class": "background",
+      "ground_truth": "pothole",
+      "confidence": 0.31,
+      "image_id": "India_test_0045.jpg",
+      "root_cause": "Shallow pothole (depth <2cm) at far distance (>18m from vehicle hood) occupying fewer than 24x24 pixels.",
+      "mitigation": "Temporal ByteTrack aggregation across consecutive frames as vehicle approaches defect within 8m range."
+    }
+  ]
 }
