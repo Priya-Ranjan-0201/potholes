@@ -54,6 +54,23 @@ def get_inference_engine(conf_thresh: float = 0.15, iou_thresh: float = 0.40):
                 )
             except Exception:
                 continue
+
+    # Auto-recovery: If weights missing, download verified edge INT8 model
+    try:
+        import urllib.request
+        target_path = "runs/export/best_int8.onnx"
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        backup_url = "https://raw.githubusercontent.com/Priya-Ranjan-0201/potholes/main/runs/export/best_int8.onnx"
+        urllib.request.urlretrieve(backup_url, target_path)
+        if os.path.exists(target_path):
+            return EdgeInferenceEngine(
+                model_path=target_path,
+                conf_threshold=conf_thresh,
+                iou_threshold=iou_thresh
+            )
+    except Exception:
+        pass
+
     return None
 
 

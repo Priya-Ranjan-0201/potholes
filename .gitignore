@@ -43,6 +43,7 @@ ml/data/external/
 *.pth
 *.ckpt
 *.onnx
+!runs/export/best_int8.onnx
 *.tflite
 *.engine
 *.ncnn.bin
