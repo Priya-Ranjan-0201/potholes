@@ -33,7 +33,10 @@
   - Deliverables: Fixed ESLint 9 configuration with `typescript-eslint` in `web/eslint.config.js`, added `scripts/check_i18n_keys.py` (100% coverage across 136 keys x 6 languages), expanded Vitest suite to 8 tests across 3 test files (`api.test.ts`, `language.test.ts`, `rate_card.test.ts`), verified `tsc --noEmit` clean.
   - Gate: `tsc --noEmit` passes (0 errors), `eslint .` passes (0 errors), `npm test` passes (8/8), `check_i18n_keys.py` passes (100% parity).
   - Completed: November 07, 2026 | Tag: `fix-phase-6-done`
-- [ ] **Phase 7: UI/UX Redesign (Visual Overhaul & Motion)**
+- [x] **Phase 7: UI/UX Redesign (Visual Overhaul & Motion)**
+  - Deliverables: Enhanced `web/src/index.css` with road-perspective motion animations, WCAG AAA (16.5:1 / 18.9:1) & AA (5.48:1 / 4.83:1) tokens, mobile responsive navbar and layouts, `scripts/capture_ui_matrix.py` test suite.
+  - Gate: 17 live screenshots captured across light mode, dark mode, and mobile (375px) in `docs/screenshots/`, WCAG 2.1 AA/AAA contrast checks passing.
+  - Completed: November 07, 2026 | Tag: `fix-phase-7-done`
 - [ ] **Phase 8: Tests, CI, Docs, Deploy**
 - [ ] **Pass 2: Hostile Re-Audit & Backlog Fix**
 - [ ] **Pass 3: Clean-Clone Reproduction & Freeze (v1.1.0)**
@@ -52,9 +55,10 @@
 - `backend/tests/test_security_matrix.py` — Phase 4 security & RBAC matrix (100% passing)
 - `docs/screenshots/map_restored.png` — Phase 5 live browser screenshot of restored GIS map
 - `scripts/check_i18n_keys.py` — Phase 6 100% 6-language dictionary parity verification
+- `docs/screenshots/` — Phase 7 full 17-screenshot UI matrix and contrast validation
 
 ---
 
 ## Open Issues & Non-Blocking Findings
 
-None blocking. Proceeding to Phase 7 UI/UX Redesign.
+None blocking. Proceeding to Phase 8 Tests, CI, Docs, Deploy.

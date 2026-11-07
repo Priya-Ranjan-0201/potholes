@@ -58,6 +58,40 @@ html.dark .civic-card:hover {
   box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12);
 }
 
+/* Road Motion & Scanning Animations (Phase 7) */
+@keyframes scanSweep {
+  0% { transform: translateY(0%); opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { transform: translateY(1000%); opacity: 0.8; }
+}
+
+@keyframes roadDashMotion {
+  from { background-position: 0 0; }
+  to { background-position: 0 40px; }
+}
+
+.road-scanner-grid {
+  background-image: linear-gradient(rgba(245, 158, 11, 0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(245, 158, 11, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+html.dark .road-scanner-grid {
+  background-image: linear-gradient(rgba(6, 182, 212, 0.12) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(6, 182, 212, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Custom Smooth Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
