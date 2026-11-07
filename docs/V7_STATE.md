@@ -1,7 +1,7 @@
 # ScamRoad v7 — Semester-Scope Polish, Evidence and Redesign State Tracker
 
 **Branch:** `v7/polish`  
-**Current Phase:** Phase 5 — CAPTURE APP AS A PWA  
+**Current Phase:** Phase 6/7 — SENSOR FUSION LITE & SEVERITY CALIBRATION  
 **Status:** IN_PROGRESS  
 **Budget:** Max GPU hours: 2 | Max wall-clock days: 1 | Max spend: $0  
 **Started At:** November 07, 2026 | 17:38 IST  
@@ -14,7 +14,7 @@
 - [x] **Phase 2 (MUST): Evidence: Real Model Numbers & /evaluation Page** — Tag: `v7-phase-2-done`
 - [x] **Phase 3 (MUST): Hard-Negative Round & Ablation** — Tag: `v7-phase-3-done`
 - [x] **Phase 4 (SHOULD): Local Test Set Pipeline** — Tag: `v7-phase-4-done`
-- [ ] **Phase 5 (SHOULD): Capture App as a PWA**
+- [x] **Phase 5 (SHOULD): Capture App as a PWA** — Tag: `v7-phase-5-done`
 - [ ] **Phase 6 (COULD): Sensor Fusion Lite (Experimental)**
 - [ ] **Phase 7 (SHOULD): Severity Calibration & Workflow Hardening**
 - [ ] **Phase 8 (MUST): Beautiful, Attractive UI/UX (Command Center, Road Scene Hero, 17 Views)**
@@ -25,10 +25,11 @@
 
 ---
 
-## Phase 4 Verification Evidence & Gate Summary
-- **Collection Protocol Documented:** `docs/DATA_COLLECTION.md` details smartphone mounting, 1.2–1.5m height, 10–15° pitch, 1080p@30 FPS, 10:00–16:00 solar lighting, dry asphalt, and Rule R6 privacy redaction.
-- **Labeling Guide Documented:** `docs/LABELING_GUIDE.md` details single-source taxonomy mapping (`shared/taxonomy.yaml`), 20x20px minimum bounding box, and rigorous edge-case disambiguation (bitumen patch, cast iron manholes, bridge joints, tree shadows).
-- **Intake Pipeline Created:** `scripts/ingest_local_sample.py` extracts frames, runs privacy blurring (`PrivacyRedactor`), and generates draft YOLO annotations.
-- **Local Sample Dataset:** 10 verified campus/city road frames created in `data/local_sample/` with YOLO ground-truth annotations (including clean road, shadow, and manhole background negative controls).
-- **Evaluation Benchmark:** `scripts/eval_local.py` runs in 4.17s (< 30s SLA) and outputs `bench/local_eval.json`.
-- **Claims Check:** `python scripts/check_claims.py` passed with 0 violations.
+## Phase 5 Verification Evidence & Gate Summary
+- **Installable PWA Manifest:** `web/public/manifest.json` configured with standalone display, theme color `#070a14`, and SVG app icons (`icon-192.svg`, `icon-512.svg`).
+- **Service Worker Shell Caching:** `web/public/sw.js` implements cache-first offline shell fallback.
+- **Drive Mode HUD (/capture):** Created `web/src/pages/CapturePage.tsx` with high-contrast speedometer HUD (km/h), NavIC/GPS accuracy ($\pm 2.1\text{m}$), defect counters, Web Audio API acoustic chime on defect detection with mute toggle, camera stream with realistic fallback, and IndexedDB offline outbox queue.
+- **Offline Outbox & Idempotency:** Implemented IndexedDB outbox queue (`scamroad-capture-outbox`) with idempotency keys, pending status counts, and explicit "Sync Outbox Now" capability.
+- **Architectural Decision Recorded:** `docs/DECISIONS.md` records ADR-006 explaining why PWA was selected over native Expo to prevent dual-codebase maintenance and guarantee web parity.
+- **Multilingual Support:** Added `navCapture` across all 6 languages in `LanguageContext.tsx` (137/137 keys, 100% parity).
+- **Automated Live Test:** TEST 15 added to `scripts/live_test_suite.py` passing with 21/21 tests in Chrome browser.

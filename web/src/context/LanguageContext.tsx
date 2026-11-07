@@ -36,6 +36,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "Defects",
     navModels: "AI Telemetry",
     navEvaluation: "AI Evaluation",
+    navCapture: "Drive Capture",
     reportPotholeBtn: "🚨 Report Defect",
     scanPhotoBtn: "⚡ Scan Road",
     
@@ -194,6 +195,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "सड़क दोष",
     navModels: "एआई टेलीमेट्री",
     navEvaluation: "एआई मूल्यांकन",
+    navCapture: "ड्राइव कैप्चर",
     reportPotholeBtn: "🚨 दोष दर्ज करें",
     scanPhotoBtn: "⚡ सड़क स्कैन करें",
 
@@ -352,6 +354,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "ਸੜਕੀ ਨੁਕਸ",
     navModels: "ਏਆਈ ਮਾਡਲ",
     navEvaluation: "ਏਆਈ ਮੁਲਾਂਕਣ",
+    navCapture: "ਡਰਾਈਵ ਕੈਪਚਰ",
     reportPotholeBtn: "🚨 ਸ਼ਿਕਾਇਤ ਦਰਜ ਕਰੋ",
     scanPhotoBtn: "⚡ ਸੜਕ ਸਕੈਨ ਕਰੋ",
 
@@ -510,6 +513,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "சாலை குறைபாடுகள்",
     navModels: "AI டெலிமெட்ரி",
     navEvaluation: "AI மதிப்பீடு",
+    navCapture: "டிரைவ் பிடிப்பு",
     reportPotholeBtn: "🚨 புகார் பதிவு செய்",
     scanPhotoBtn: "⚡ சாலையை ஸ்கேன் செய்",
 
@@ -668,6 +672,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "రోడ్డు లోపాలు",
     navModels: "AI టెలిమెట్రీ",
     navEvaluation: "AI మూల్యాంకనం",
+    navCapture: "డ్రైవ్ క్యాప్చర్",
     reportPotholeBtn: "🚨 ఫిర్యాదు చేయండి",
     scanPhotoBtn: "⚡ రోడ్డును స్కాన్ చేయండి",
 
@@ -826,6 +831,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navDefects: "সড়ক ত্রুটি",
     navModels: "এআই টেলিমেট্রি",
     navEvaluation: "এআই মূল্যায়ন",
+    navCapture: "ড্রাইভ ক্যাপচার",
     reportPotholeBtn: "🚨 অভিযোগ দাখিল করুন",
     scanPhotoBtn: "⚡ সড়ক স্ক্যান করুন",
 

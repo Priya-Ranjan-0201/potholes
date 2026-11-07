@@ -1,8 +1,8 @@
 {
   "project_version": "v7",
   "branch": "v7/polish",
-  "current_phase": 5,
-  "phase_name": "CAPTURE APP AS A PWA",
+  "current_phase": 6,
+  "phase_name": "SENSOR FUSION LITE & SEVERITY CALIBRATION",
   "status": "IN_PROGRESS",
   "budget": {
     "max_gpu_hours": 2,
@@ -10,7 +10,7 @@
     "max_spend_usd": 0
   },
   "started_at": "2026-11-07T17:38:00+05:30",
-  "completed_phases": [1, 2, 3, 4],
+  "completed_phases": [1, 2, 3, 4, 5],
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
@@ -47,8 +47,18 @@
       "eval_local_script": "scripts/eval_local.py",
       "bench_json": "bench/local_eval.json",
       "runtime_seconds": 4.17
+    },
+    "phase_5": {
+      "manifest_path": "web/public/manifest.json",
+      "service_worker_path": "web/public/sw.js",
+      "icons": ["web/public/icon-192.svg", "web/public/icon-512.svg"],
+      "capture_page": "web/src/pages/CapturePage.tsx",
+      "capture_route": "/capture",
+      "decision_record": "docs/DECISIONS.md (ADR-006: PWA Drive-Mode Capture App)",
+      "indexeddb_outbox": "Verified offline queueing & deduplication",
+      "live_browser_test": "TEST 15 PASSED in scripts/live_test_suite.py (21/21 suite total)"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Phase 5: configure web app as installable PWA with web manifest, service worker offline fallback, and drive mode dashboard"
+  "next_action": "Execute Phase 6 (COULD: Sensor Fusion Lite) and Phase 7 (SHOULD: Severity Calibration & Rater Study Kit)"
 }

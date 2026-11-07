@@ -154,3 +154,29 @@ target Raspberry Pi or Jetson Nano in the initial phases.
 3. **Standards Honesty (Rule R8):** Remove all compliance claims. Reference Indian Road Congress specifications strictly as: "Severity rubric inspired by IRC:82-2023 Clause 4.2 and IRC:SP:84-2019".
 4. **Configurable Illustrative Rate Card (Rule R9):** Move repair costs from hardcoded static formulas to a structured JSON rate card (`config/rate_card.json`), accompanied by a clear disclosure: "Illustrative estimate, not an official Schedule of Rates".
 5. **Hardware Benchmark Honesty (Rule R10):** Disclose that physical on-device benchmarks are currently verified on AMD64 development hardware (`generic_best_bench.json`), while mobile (OPPO K13 Snapdragon NPU) and SBC targets (Raspberry Pi 5, Jetson Orin Nano) are categorized as `UNTESTED (Hardware Benchmark Pending)` until physical runs are executed.
+
+---
+
+## ADR-006: PWA Drive-Mode Capture App Chosen Over Standalone Expo Mobile App
+
+**Date:** 2026-11-07  
+**Status:** Accepted  
+**Phase:** 5 (Semester Scope & Architecture Consolidation)
+
+### Context
+Maintaining two separate frontend codebases (React 18 + TypeScript web app and React Native / Expo mobile app) doubled the maintenance burden, broke CI synchronization across multiple dependency managers, and created feature parity drift. The primary requirement for field demonstrations is an installable, mobile-responsive patrol mode accessible directly on any smartphone with rear camera streaming, offline queueing, and audio alerts.
+
+### Decision
+PWA chosen over Expo to halve maintenance burden and guarantee 100% feature parity on a student budget.
+1. Implement a dedicated mobile-first Drive Mode at `/capture` inside the React 18 single-page application.
+2. Configure standard Progressive Web App capabilities via `web/public/manifest.json` and a lightweight service worker `web/public/sw.js` for offline shell caching.
+3. Access camera hardware directly through standard W3C `navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } })`.
+4. Provide high-visibility glanceable HUD (speedometer, NavIC/GPS accuracy, distress counter, audio chirp, and IndexedDB outbox queue).
+5. Retain `mobile/` as an archived reference prototype.
+
+### Consequences
+- **Positive:** Zero dependency fragmentation between Expo and Vite/React.
+- **Positive:** Works instantly on Android Chrome and iOS Safari via "Add to Home Screen" without App Store or APK sideloading.
+- **Positive:** 100% code sharing for taxonomy, localization, styles, and API clients.
+- **Neutral:** Background processing while phone screen is locked requires PWA to remain foregrounded during vehicle patrol.
+

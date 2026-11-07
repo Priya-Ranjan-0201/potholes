@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070a14" />
+    <link rel="manifest" href="/manifest.json" />
     <title>ScamRoad | Edge AI Road Defect Detection Portal (Student Research Project)</title>
     <meta name="description" content="Student research project demonstrating edge AI road distress detection, tracking, and municipal workflow management. Severity rubric inspired by IRC:82-2023." />
     <!-- Preconnect Google Fonts -->
@@ -13,6 +15,13 @@
   </head>
   <body class="bg-slate-100/70 text-slate-900 font-sans">
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

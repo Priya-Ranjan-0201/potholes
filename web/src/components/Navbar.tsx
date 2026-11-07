@@ -12,6 +12,7 @@ import {
   X,
   AlertTriangle,
   BarChart3,
+  Radio,
   Sun,
   Moon,
   Globe,
@@ -47,6 +48,7 @@ export const Navbar: React.FC = () => {
     { to: "/defects", label: t("navDefects"), icon: Layers },
     { to: "/models", label: t("navModels"), icon: Cpu },
     { to: "/evaluation", label: t("navEvaluation"), icon: BarChart3 },
+    { to: "/capture", label: t("navCapture"), icon: Radio },
   ];
 
   return (

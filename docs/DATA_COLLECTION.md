@@ -73,3 +73,4 @@ This protocol establishes a standardized, repeatable methodology for acquiring h
    - Raw GNSS readings pass through a 2D constant-velocity Kalman filter with horizontal accuracy rejection threshold set to $\le 5.0\text{ m}$.
 3. **Frame-to-Coordinate Mapping:**
    - Each frame timestamp (UTC millisecond precision) is interpolated along the vehicle trajectory vector.
+

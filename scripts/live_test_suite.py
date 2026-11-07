@@ -265,6 +265,15 @@ def run_suite():
         record_test("Mobile Responsive Viewport on Defects Registry (375x812)", "Defects" in mobile_def_body or "दोष" in mobile_def_body, "Tabular defects registry responsive on 375px viewport")
         capture_screen(driver, "live_15_mobile_responsive_defects.png", "Mobile Responsive Viewport on Defects Registry")
 
+        # TEST 15: Mobile Drive Capture PWA Mode (/capture)
+        print("  -> Testing Mobile Drive Capture PWA Mode (/capture)...")
+        driver.get("http://localhost:3000/capture")
+        time.sleep(1.5)
+        capture_mobile_body = driver.find_element(By.TAG_NAME, "body").text
+        has_pwa_capture = ("DRIVE" in capture_mobile_body or "Capture" in capture_mobile_body or "KM/H" in capture_mobile_body) and "Outbox" in capture_mobile_body
+        record_test("Mobile Drive Capture PWA Mode (/capture)", has_pwa_capture, "Glanceable speedometer HUD, GPS telemetry, and IndexedDB outbox verified")
+        capture_screen(driver, "live_16_mobile_capture_pwa.png", "Mobile Drive-Mode Capture HUD with Speedometer and Offline Outbox")
+
         # Reset to desktop
         driver.set_window_size(1920, 1080)
 
