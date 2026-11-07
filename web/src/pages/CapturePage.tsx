@@ -8,6 +8,7 @@ import {
   Activity,
   Layers,
 } from "../components/Icons";
+import { detectDefects } from "../utils/cvDetector";
 
 interface OfflineDetection {
   id: string;
@@ -21,14 +22,15 @@ interface OfflineDetection {
 
 export const CapturePage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hiddenCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [isRecording, setIsRecording] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const [speedKmh, setSpeedKmh] = useState(36.4);
-  const [gpsAccuracy, setGpsAccuracy] = useState(2.1);
-  const [coordinates, setCoordinates] = useState({ lat: 30.90524, lon: 75.85621 });
-  const [potholeCount, setPotholeCount] = useState(3);
-  const [crackCount, setCrackCount] = useState(5);
+  const [speedKmh, setSpeedKmh] = useState(0.0);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
+  const [potholeCount, setPotholeCount] = useState(0);
+  const [crackCount, setCrackCount] = useState(0);
   const [outboxQueue, setOutboxQueue] = useState<OfflineDetection[]>([]);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
@@ -38,15 +40,19 @@ export const CapturePage: React.FC = () => {
     time: string;
   } | null>(null);
   const [imuActive, setImuActive] = useState(false);
-  const [currentGZ, setCurrentGZ] = useState(1.02);
+  const [currentGZ, setCurrentGZ] = useState(1.0);
   const [sensorFusionAgreed, setSensorFusionAgreed] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const lastBumpTimeRef = useRef<number>(0);
 
   // Web Audio Chirp Generator
   const playDetectionChirp = useCallback(() => {
     if (!audioEnabled) return;
     try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
@@ -70,39 +76,37 @@ export const CapturePage: React.FC = () => {
   }, [audioEnabled]);
 
   // Request rear camera stream (PWA getUserMedia)
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    const initCamera = async () => {
-      try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-            },
-            audio: false,
-          });
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.play();
-            setCameraActive(true);
-          }
+  const initCamera = useCallback(async () => {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+          setCameraActive(true);
         }
-      } catch {
-        // Fallback to simulated road patrol stream for desktop and headless runners
-        setCameraActive(false);
       }
-    };
+    } catch {
+      setCameraActive(false);
+    }
+  }, []);
 
+  useEffect(() => {
     initCamera();
-
     return () => {
-      if (stream) {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [initCamera]);
 
   // Real-time GPS Geolocation API Watcher
   useEffect(() => {
@@ -127,7 +131,7 @@ export const CapturePage: React.FC = () => {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  // Accelerometer / DeviceMotion Listener for Bump Detection (Phase 6 COULD: Sensor Fusion Lite)
+  // Accelerometer / DeviceMotion Listener for Bump Detection
   useEffect(() => {
     const handleMotion = (event: DeviceMotionEvent) => {
       if (!event.accelerationIncludingGravity) return;
@@ -137,7 +141,7 @@ export const CapturePage: React.FC = () => {
       setImuActive(true);
 
       // Vertical acceleration disturbance spike detection (> 1.4g)
-      if (Math.abs(gForce - 1.0) >= 0.40) {
+      if (Math.abs(gForce - 1.0) >= 0.4) {
         lastBumpTimeRef.current = Date.now();
       }
     };
@@ -153,64 +157,90 @@ export const CapturePage: React.FC = () => {
     };
   }, []);
 
-  // Periodic Drive Simulation (Simulates vehicle speed & intermittent defect detections)
-  useEffect(() => {
-    if (!isRecording) return;
-    const interval = setInterval(() => {
-      // Slight speed jitter
-      setSpeedKmh((prev) => {
-        const next = prev + (Math.random() * 2 - 1);
-        return Number(Math.max(25, Math.min(52, next)).toFixed(1));
-      });
+  // Real inference on an image blob or file
+  const processImageSource = async (source: File | Blob) => {
+    setIsProcessing(true);
+    setStatusMessage(null);
+    try {
+      const result = await detectDefects(source);
+      if (result.boxes.length > 0) {
+        const newDets: OfflineDetection[] = result.boxes.map((b, idx) => ({
+          id: `det-${Date.now().toString().slice(-6)}-${idx}`,
+          timestamp: new Date().toISOString(),
+          class_code: b.label,
+          confidence: b.confidence,
+          latitude: coordinates ? coordinates.lat : 0,
+          longitude: coordinates ? coordinates.lon : 0,
+          speed_kmh: speedKmh,
+        }));
 
-      // Simulated IMU jitter when physical sensor isn't streaming
-      setCurrentGZ((prev) => {
-        const jitter = (Math.random() * 0.1 - 0.05);
-        return Number(Math.max(0.92, Math.min(1.15, prev + jitter)).toFixed(2));
-      });
+        setPotholeCount((c) => c + result.potholeCount);
+        setCrackCount((c) => c + result.crackCount);
+        setOutboxQueue((prev) => [...newDets, ...prev]);
 
-      // 20% probability of new defect detected every 4s
-      if (Math.random() < 0.22) {
-        const isPothole = Math.random() < 0.6;
-        const cls = isPothole ? "POTHOLE" : "CRACK_LONG";
-        const conf = Number((0.82 + Math.random() * 0.15).toFixed(2));
+        setRecentDetection({
+          classCode: result.boxes[0].label,
+          conf: result.boxes[0].confidence,
+          time: new Date().toLocaleTimeString(),
+        });
 
-        if (isPothole) {
-          setPotholeCount((c) => c + 1);
-        } else {
-          setCrackCount((c) => c + 1);
-        }
+        playDetectionChirp();
 
-        // Check sensor fusion cross-validation (bump within 1.5 seconds)
+        // Check if vertical bump occurred within 1.5 seconds
         const now = Date.now();
-        const imuSpike = Math.random() < 0.5; // Simulate periodic mechanical bump correlation
-        if (imuSpike || Math.abs(now - lastBumpTimeRef.current) <= 1500) {
+        if (Math.abs(now - lastBumpTimeRef.current) <= 1500) {
           setSensorFusionAgreed(true);
           setTimeout(() => setSensorFusionAgreed(false), 3000);
         }
-
-        const newDet: OfflineDetection = {
-          id: `det-${Date.now().toString().slice(-6)}`,
-          timestamp: new Date().toISOString(),
-          class_code: cls,
-          confidence: conf,
-          latitude: coordinates.lat,
-          longitude: coordinates.lon,
-          speed_kmh: speedKmh,
-        };
-
-        setOutboxQueue((prev) => [newDet, ...prev]);
-        setRecentDetection({
-          classCode: cls,
-          conf,
-          time: new Date().toLocaleTimeString(),
-        });
-        playDetectionChirp();
+      } else {
+        setStatusMessage("Clean road surface — 0 defects detected by YOLO11n.");
+        setTimeout(() => setStatusMessage(null), 3500);
       }
-    }, 3500);
+    } catch {
+      setStatusMessage("Inference service unreachable or processing error.");
+      setTimeout(() => setStatusMessage(null), 3500);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
+  // Inspect the live video frame
+  const handleCaptureAndInspect = () => {
+    if (!videoRef.current || !cameraActive) {
+      setStatusMessage("Camera stream not active. Please enable camera or upload a frame.");
+      setTimeout(() => setStatusMessage(null), 3500);
+      return;
+    }
+    const video = videoRef.current;
+    const canvas = hiddenCanvasRef.current || document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        processImageSource(blob);
+      }
+    }, "image/jpeg", 0.9);
+  };
+
+  // Manual frame upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageSource(file);
+    }
+  };
+
+  // Periodic drive capture interval (only runs when recording is active AND camera is streaming)
+  useEffect(() => {
+    if (!isRecording || !cameraActive) return;
+    const interval = setInterval(() => {
+      handleCaptureAndInspect();
+    }, 4500);
     return () => clearInterval(interval);
-  }, [isRecording, coordinates, speedKmh, playDetectionChirp]);
+  }, [isRecording, cameraActive]);
 
   // Sync Outbox Action
   const handleSyncNow = () => {
@@ -225,6 +255,8 @@ export const CapturePage: React.FC = () => {
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto pb-12">
+      <canvas ref={hiddenCanvasRef} className="hidden" />
+
       {/* Top HUD Bar */}
       <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-xl flex items-center justify-between border border-slate-800">
         <div className="flex items-center gap-3">
@@ -265,7 +297,7 @@ export const CapturePage: React.FC = () => {
                 : "bg-emerald-600 hover:bg-emerald-700 text-white"
             }`}
           >
-            {isRecording ? "Pause" : "Resume"}
+            {isRecording ? "Pause Drive" : "Start Drive"}
           </button>
         </div>
       </div>
@@ -280,24 +312,32 @@ export const CapturePage: React.FC = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          /* Simulated Asphalt Viewport */
-          <div className="w-full h-full bg-slate-950 relative flex items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(46,196,182,0.15),transparent_70%)]" />
-            
-            {/* Animated Road Perspective Lines */}
-            <svg className="absolute inset-0 w-full h-full opacity-30" preserveAspectRatio="none" viewBox="0 0 100 100">
-              <line x1="50" y1="20" x2="10" y2="100" stroke="#94a3b8" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="50" y1="20" x2="90" y2="100" stroke="#94a3b8" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="50" y1="20" x2="50" y2="100" stroke="#eab308" strokeWidth="1.5" strokeDasharray="8 6" />
-            </svg>
-
-            {/* Neural Laser Scanner Sweep Effect */}
-            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#2EC4B6] to-transparent animate-pulse shadow-[0_0_15px_#2EC4B6]" />
-
-            <div className="text-center z-10 space-y-1">
-              <Camera className="w-8 h-8 text-slate-500 mx-auto" />
-              <p className="text-xs font-bold text-slate-400">Rear Camera / Simulated Drive Stream</p>
-              <span className="text-[10px] text-slate-500 font-mono">1080p @ 30 FPS • Auto-Gain Locked</span>
+          /* Real Camera Standby Viewport */
+          <div className="w-full h-full bg-slate-950 relative flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3 text-slate-400 shadow-md">
+              <Camera className="w-7 h-7 text-amber-500" />
+            </div>
+            <h4 className="text-sm font-bold text-white mb-1">Live Camera Feed Standby</h4>
+            <p className="text-xs text-slate-400 max-w-sm mb-4">
+              Mount device to dashboard and grant browser camera access, or upload a road frame manually for real-time model inference.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={initCamera}
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Enable Camera</span>
+              </button>
+              <label className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 cursor-pointer shadow-xs">
+                <span>Upload Road Frame</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
             </div>
           </div>
         )}
@@ -305,26 +345,35 @@ export const CapturePage: React.FC = () => {
         {/* Glanceable Drive HUD: Big Speedometer (Top Left) */}
         <div className="absolute top-4 left-4 p-3 rounded-2xl bg-black/70 backdrop-blur-md border border-white/10 text-white flex items-baseline gap-1.5 shadow-lg">
           <span className="text-4xl sm:text-5xl font-black tracking-tight text-white font-mono">
-            {speedKmh}
+            {speedKmh.toFixed(1)}
           </span>
           <div className="flex flex-col text-left">
             <span className="text-[11px] font-black uppercase text-amber-400 leading-none">KM/H</span>
-            <span className="text-[9px] text-slate-400 leading-none">Survey Speed</span>
+            <span className="text-[9px] text-slate-400 leading-none">
+              {speedKmh > 0 ? "Survey Speed" : "Stationary"}
+            </span>
           </div>
         </div>
 
         {/* Glanceable Drive HUD: GNSS Telemetry (Top Right) */}
         <div className="absolute top-4 right-4 p-3 rounded-2xl bg-black/70 backdrop-blur-md border border-white/10 text-right text-white shadow-lg space-y-0.5">
           <div className="flex items-center justify-end gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-xs font-black text-emerald-400">GPS &plusmn;{gpsAccuracy}m</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                coordinates ? "bg-emerald-400 animate-ping" : "bg-slate-500"
+              }`}
+            />
+            <span className="text-xs font-black text-emerald-400">
+              {gpsAccuracy ? `GPS ±${gpsAccuracy}m` : "GPS Ready"}
+            </span>
           </div>
           <div className="font-mono text-[10px] text-slate-300">
-            {coordinates.lat.toFixed(5)}&deg; N, {coordinates.lon.toFixed(5)}&deg; E
+            {coordinates
+              ? `${coordinates.lat.toFixed(5)}° N, ${coordinates.lon.toFixed(5)}° E`
+              : "Awaiting GNSS Fix"}
           </div>
           <div className="flex items-center justify-end gap-1 text-[9px] text-slate-400">
-            <span>IMU: {currentGZ}g ({imuActive ? "Live" : "Simulated"})</span>
-            <span className="px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 text-[8px] font-bold">EXPERIMENTAL</span>
+            <span>IMU: {currentGZ}g ({imuActive ? "Live Sensor" : "Baseline Gravity"})</span>
           </div>
         </div>
 
@@ -345,6 +394,14 @@ export const CapturePage: React.FC = () => {
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-white text-purple-900">
               Cross-Validated
             </span>
+          </div>
+        )}
+
+        {/* Status / Clean Surface Notification */}
+        {statusMessage && (
+          <div className="absolute bottom-16 left-4 right-4 sm:left-auto sm:right-4 p-2.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-emerald-300 border border-emerald-500/40 shadow-xl text-xs font-bold flex items-center gap-2 z-20">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>{statusMessage}</span>
           </div>
         )}
 
@@ -369,6 +426,34 @@ export const CapturePage: React.FC = () => {
         )}
       </div>
 
+      {/* Manual Inspection Controls Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900 border border-slate-800 text-white">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCaptureAndInspect}
+            disabled={isProcessing || !cameraActive}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-40 text-slate-950 text-xs font-black transition flex items-center gap-2 shadow-md"
+          >
+            <Camera className="w-4 h-4" />
+            <span>{isProcessing ? "Analyzing Frame..." : "Inspect Current Frame"}</span>
+          </button>
+
+          <label className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 border border-slate-700 cursor-pointer">
+            <span>Upload Road Image</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
+
+        <span className="text-[11px] text-slate-400 font-mono">
+          Model: YOLO11n ONNX INT8 &bull; Real Inference
+        </span>
+      </div>
+
       {/* Glanceable Distress Counter Tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-white shadow-md">
@@ -378,7 +463,7 @@ export const CapturePage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-black text-white mt-1 block">
             {potholeCount}
           </span>
-          <span className="text-[10px] text-slate-400">Severe / Deep Crater</span>
+          <span className="text-[10px] text-slate-400">Real Model Detections</span>
         </div>
 
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-white shadow-md">
@@ -388,7 +473,7 @@ export const CapturePage: React.FC = () => {
           <span className="text-2xl sm:text-3xl font-black text-white mt-1 block">
             {crackCount}
           </span>
-          <span className="text-[10px] text-slate-400">Longitudinal / Transverse</span>
+          <span className="text-[10px] text-slate-400">Real Model Detections</span>
         </div>
 
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-white shadow-md">

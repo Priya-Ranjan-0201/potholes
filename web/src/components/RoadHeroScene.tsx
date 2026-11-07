@@ -47,18 +47,6 @@ export const RoadHeroScene: React.FC<RoadHeroSceneProps> = ({ onStartDemoTour })
               <stop offset="0%" stopColor="#1e293b" stopOpacity="0.4" />
               <stop offset="100%" stopColor="#0f172a" stopOpacity="0.95" />
             </linearGradient>
-            <linearGradient id="laserBeamGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="transparent" />
-              <stop offset="50%" stopColor="#2EC4B6" />
-              <stop offset="100%" stopColor="transparent" />
-            </linearGradient>
-            <filter id="pingGlow">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
           {/* Distant Horizon Grid */}
@@ -71,7 +59,7 @@ export const RoadHeroScene: React.FC<RoadHeroSceneProps> = ({ onStartDemoTour })
           <line x1="460" y1="120" x2="150" y2="300" stroke="#475569" strokeWidth="2.5" />
           <line x1="540" y1="120" x2="850" y2="300" stroke="#475569" strokeWidth="2.5" />
 
-          {/* Streaming Dashed Center Lane Marking (Simulating Vehicle Ego-Motion) */}
+          {/* Center Lane Marking */}
           <line
             x1="500"
             y1="120"
@@ -80,30 +68,8 @@ export const RoadHeroScene: React.FC<RoadHeroSceneProps> = ({ onStartDemoTour })
             stroke="#FFB703"
             strokeWidth="3.5"
             strokeDasharray="16 14"
-            className="animate-pulse"
+            className="opacity-70"
           />
-
-          {/* Pothole Crater with Glowing Scan Ping */}
-          <g transform="translate(420, 210)">
-            {/* Crater outline */}
-            <ellipse cx="0" cy="0" rx="26" ry="11" fill="#070a14" stroke="#E5233A" strokeWidth="2" />
-            {/* Radar ping rings */}
-            <ellipse cx="0" cy="0" rx="36" ry="16" fill="none" stroke="#2EC4B6" strokeWidth="1" opacity="0.7" className="animate-ping" />
-            <circle cx="0" cy="0" r="4" fill="#2EC4B6" filter="url(#pingGlow)" />
-            {/* Neural Bounding Box Target */}
-            <rect x="-32" y="-16" width="64" height="32" fill="none" stroke="#2EC4B6" strokeWidth="1.5" strokeDasharray="4 2" />
-            <text x="36" y="-8" fill="#2EC4B6" fontSize="11" fontFamily="monospace" fontWeight="bold">D40 POTHOLE 91%</text>
-          </g>
-
-          {/* Secondary Longitudinal Crack Highlight */}
-          <g transform="translate(580, 240)">
-            <path d="M-15,-10 L-5,0 L10,8 L25,18" stroke="#FB6A2F" strokeWidth="2.5" fill="none" />
-            <rect x="-20" y="-14" width="50" height="36" fill="none" stroke="#FB6A2F" strokeWidth="1.2" strokeDasharray="3 3" />
-            <text x="34" y="10" fill="#FB6A2F" fontSize="10" fontFamily="monospace" fontWeight="bold">D00 CRACK</text>
-          </g>
-
-          {/* Neural Sweeper Laser Bar */}
-          <line x1="200" y1="210" x2="800" y2="210" stroke="url(#laserBeamGrad)" strokeWidth="3" opacity="0.85" filter="url(#pingGlow)" />
         </svg>
 
         {/* Hero Overlay Badges & Telemetry */}

@@ -48,3 +48,4 @@ def test_sensor_fusion_matching() -> None:
     assert results[0].temporal_delta_s == 0.45
     assert results[1].agreed is False
     assert results[1].matched_bump is None
+

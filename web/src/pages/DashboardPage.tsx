@@ -40,166 +40,6 @@ const SEVERITY_COLORS: Record<string, string> = {
   Minor: "#2EC4B6",    // 0-25
 };
 
-// 10 Key Municipal Corridors for Damage Density & Sparkline Tracking
-interface CorridorRisk {
-  rank: number;
-  name: string;
-  code: string;
-  ward: string;
-  lengthKm: number;
-  defectsCount: number;
-  criticalCount: number;
-  densityPerKm: number;
-  sparkline: number[];
-  status: "CRITICAL_ACTION" | "HIGH_PRIORITY" | "MONITORING";
-}
-
-const TOP_10_CORRIDORS: CorridorRisk[] = [
-  {
-    rank: 1,
-    name: "NH-48 Urban Express Link",
-    code: "COR-01",
-    ward: "Ward 12 (Central)",
-    lengthKm: 4.2,
-    defectsCount: 62,
-    criticalCount: 14,
-    densityPerKm: 14.8,
-    sparkline: [8, 11, 14, 13, 16, 15, 18],
-    status: "CRITICAL_ACTION",
-  },
-  {
-    rank: 2,
-    name: "Outer Ring Road Sector 7",
-    code: "COR-02",
-    ward: "Ward 07 (North-West)",
-    lengthKm: 5.6,
-    defectsCount: 68,
-    criticalCount: 11,
-    densityPerKm: 12.1,
-    sparkline: [9, 10, 11, 12, 11, 13, 14],
-    status: "CRITICAL_ACTION",
-  },
-  {
-    rank: 3,
-    name: "MG Road Commercial Corridor",
-    code: "COR-03",
-    ward: "Ward 04 (South)",
-    lengthKm: 3.1,
-    defectsCount: 34,
-    criticalCount: 7,
-    densityPerKm: 11.0,
-    sparkline: [5, 6, 7, 7, 8, 9, 9],
-    status: "HIGH_PRIORITY",
-  },
-  {
-    rank: 4,
-    name: "Railway Station Approach Road",
-    code: "COR-04",
-    ward: "Ward 01 (Cantonment)",
-    lengthKm: 2.4,
-    defectsCount: 23,
-    criticalCount: 5,
-    densityPerKm: 9.6,
-    sparkline: [4, 4, 5, 5, 6, 6, 7],
-    status: "HIGH_PRIORITY",
-  },
-  {
-    rank: 5,
-    name: "Industrial Area Phase 2 Spine",
-    code: "COR-05",
-    ward: "Ward 09 (East Zone)",
-    lengthKm: 6.8,
-    defectsCount: 58,
-    criticalCount: 8,
-    densityPerKm: 8.5,
-    sparkline: [6, 7, 7, 8, 8, 9, 9],
-    status: "HIGH_PRIORITY",
-  },
-  {
-    rank: 6,
-    name: "Bus Rapid Transit Corridor B",
-    code: "COR-06",
-    ward: "Ward 03 (Central West)",
-    lengthKm: 4.8,
-    defectsCount: 38,
-    criticalCount: 4,
-    densityPerKm: 7.9,
-    sparkline: [6, 6, 7, 7, 7, 8, 8],
-    status: "MONITORING",
-  },
-  {
-    rank: 7,
-    name: "University South Bypass",
-    code: "COR-07",
-    ward: "Ward 11 (South-East)",
-    lengthKm: 3.9,
-    defectsCount: 28,
-    criticalCount: 3,
-    densityPerKm: 7.2,
-    sparkline: [4, 4, 5, 5, 5, 6, 6],
-    status: "MONITORING",
-  },
-  {
-    rank: 8,
-    name: "District Court Link Boulevard",
-    code: "COR-08",
-    ward: "Ward 02 (Civil Lines)",
-    lengthKm: 2.1,
-    defectsCount: 14,
-    criticalCount: 2,
-    densityPerKm: 6.7,
-    sparkline: [2, 3, 3, 3, 4, 4, 4],
-    status: "MONITORING",
-  },
-  {
-    rank: 9,
-    name: "GIDC Heavy Vehicle Freight Way",
-    code: "COR-09",
-    ward: "Ward 15 (Industrial East)",
-    lengthKm: 7.4,
-    defectsCount: 46,
-    criticalCount: 4,
-    densityPerKm: 6.2,
-    sparkline: [5, 5, 6, 6, 6, 7, 7],
-    status: "MONITORING",
-  },
-  {
-    rank: 10,
-    name: "Old City Heritage Gateway Road",
-    code: "COR-10",
-    ward: "Ward 05 (Walled City)",
-    lengthKm: 1.8,
-    defectsCount: 10,
-    criticalCount: 1,
-    densityPerKm: 5.6,
-    sparkline: [2, 2, 2, 3, 3, 3, 3],
-    status: "MONITORING",
-  },
-];
-
-// Helper to draw clean SVG sparkline
-const Sparkline: React.FC<{ data: number[]; color: string }> = ({ data, color }) => {
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  const width = 80;
-  const height = 24;
-
-  const points = data
-    .map((val, idx) => {
-      const x = (idx / (data.length - 1)) * width;
-      const y = height - ((val - min) / range) * (height - 6) - 3;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-
-  return (
-    <svg width={width} height={height} className="overflow-visible inline-block">
-      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={points} />
-    </svg>
-  );
-};
-
 export const DashboardPage: React.FC = () => {
   const { t } = useLanguage();
   const { data: stats, isLoading: loadingStats } = useQuery({
@@ -253,6 +93,11 @@ export const DashboardPage: React.FC = () => {
       }))
     : [];
 
+  // Ranked wards derived directly from live database records
+  const sortedWards = [...(wards || [])].sort(
+    (a, b) => b.critical_defects - a.critical_defects || b.total_defects - a.total_defects
+  );
+
   return (
     <div className="space-y-6 pb-16">
       {/* Animated Road Perspective Scene Hero & Scientific Evidence Strip */}
@@ -265,9 +110,6 @@ export const DashboardPage: React.FC = () => {
             <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               <span>{t("appName")}</span>
-            </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-              DEMO DATA SEEDED
             </span>
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">
               {t("standardsNotice")}
@@ -491,21 +333,21 @@ export const DashboardPage: React.FC = () => {
         )}
       </div>
 
-      {/* Top 10 Worst Corridors Ranked List with Sparkline Trends */}
+      {/* Municipal Ward Defect Registry Table (100% Real Database Records) */}
       <div className="civic-card rounded-2xl p-6 shadow-md border border-slate-200/80 dark:border-slate-800">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-red-600 dark:text-red-400" />
               <h2 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
-                Top 10 Worst Corridors — Ranked Distress Leaderboard
+                Municipal Ward Damage Leaderboard
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800">
-                Damage Density / Km
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Live DB Records
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Critical highway and municipal arteries ordered by defect density with 7-day deterioration sparkline velocity.
+              Real-time municipal jurisdictions ordered by critical defect severity and repair completion status.
             </p>
           </div>
           <Link
@@ -518,85 +360,93 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
-              <tr>
-                <th className="py-3 px-4 text-center">Rank</th>
-                <th className="py-3 px-4">Corridor Name &amp; ID</th>
-                <th className="py-3 px-4">Jurisdiction Ward</th>
-                <th className="py-3 px-4 text-center">Length (km)</th>
-                <th className="py-3 px-4 text-center">Total Defects</th>
-                <th className="py-3 px-4 text-center">Critical Potholes</th>
-                <th className="py-3 px-4 text-center">Density (Defects/km)</th>
-                <th className="py-3 px-4 text-center">7-Day Trend</th>
-                <th className="py-3 px-4 text-right">Priority Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {TOP_10_CORRIDORS.map((corridor) => {
-                const isCritAction = corridor.status === "CRITICAL_ACTION";
-                const isHighPri = corridor.status === "HIGH_PRIORITY";
-                const sparkColor = isCritAction ? "#E5233A" : isHighPri ? "#FB6A2F" : "#FFB703";
+          {sortedWards.length > 0 ? (
+            <table className="w-full text-left text-sm text-slate-700 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs font-bold uppercase text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                <tr>
+                  <th className="py-3 px-4 text-center">Rank</th>
+                  <th className="py-3 px-4">Ward Name &amp; Code</th>
+                  <th className="py-3 px-4 text-center">Total Defects</th>
+                  <th className="py-3 px-4 text-center">Critical Potholes</th>
+                  <th className="py-3 px-4 text-center">Repaired</th>
+                  <th className="py-3 px-4 text-center">Repair Progress</th>
+                  <th className="py-3 px-4 text-center">Allocated Budget</th>
+                  <th className="py-3 px-4 text-right">Priority Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {sortedWards.map((ward, idx) => {
+                  const isCritAction = ward.critical_defects > 0;
+                  const isHighPri = ward.total_defects > ward.repaired_defects;
+                  const repairPct = ward.total_defects > 0 ? Math.round((ward.repaired_defects / ward.total_defects) * 100) : 0;
 
-                return (
-                  <tr key={corridor.code} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition">
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black ${
-                          corridor.rank <= 3
-                            ? "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                        }`}
-                      >
-                        #{corridor.rank}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                      <div className="flex items-center gap-1.5">
-                        <span>{corridor.name}</span>
-                        <span className="font-mono text-[10px] text-slate-400">({corridor.code})</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-xs text-slate-600 dark:text-slate-300">
-                      {corridor.ward}
-                    </td>
-                    <td className="py-3 px-4 text-center font-mono text-xs">
-                      {corridor.lengthKm.toFixed(1)} km
-                    </td>
-                    <td className="py-3 px-4 text-center font-bold text-slate-800 dark:text-slate-200">
-                      {corridor.defectsCount}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-block px-2.5 py-0.5 rounded text-xs font-black bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
-                        {corridor.criticalCount}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center font-black text-slate-900 dark:text-white">
-                      <span className="text-xs px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                        {corridor.densityPerKm.toFixed(1)} / km
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <Sparkline data={corridor.sparkline} color={sparkColor} />
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
-                          isCritAction
-                            ? "bg-red-600 text-white"
-                            : isHighPri
-                            ? "bg-amber-500 text-white"
-                            : "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200"
-                        }`}
-                      >
-                        {isCritAction ? "Immediate Patch" : isHighPri ? "Repair Queue" : "Routine Scan"}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr key={ward.ward_id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition">
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black ${
+                            idx < 3
+                              ? "bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          #{idx + 1}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">
+                        <div className="flex items-center gap-1.5">
+                          <span>{ward.ward_name}</span>
+                          {ward.ward_code && (
+                            <span className="font-mono text-[10px] text-slate-400">({ward.ward_code})</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-bold text-slate-800 dark:text-slate-200">
+                        {ward.total_defects}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className="inline-block px-2.5 py-0.5 rounded text-xs font-black bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800">
+                          {ward.critical_defects}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center font-bold text-emerald-600 dark:text-emerald-400">
+                        {ward.repaired_defects}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="inline-flex items-center gap-2">
+                          <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-emerald-500 rounded-full"
+                              style={{ width: `${repairPct}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs text-slate-600 dark:text-slate-400">{repairPct}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono text-xs">
+                        ₹{(ward.allocated_budget / 100000).toFixed(1)}L
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                            isCritAction
+                              ? "bg-red-600 text-white"
+                              : isHighPri
+                              ? "bg-amber-500 text-white"
+                              : "bg-emerald-600 text-white"
+                          }`}
+                        >
+                          {isCritAction ? "Immediate Patch" : isHighPri ? "Repair Queue" : "Routine Scan"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className="py-8 text-center text-xs text-slate-400">No municipal ward records found.</div>
+          )}
         </div>
       </div>
 
