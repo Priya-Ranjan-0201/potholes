@@ -18,3 +18,4 @@
 ## 2. Target Design Language
 - **Linear / GitHub / Stripe Dashboard Restraint:** Flat 1px border lines, slate surfaces, compact 40px table rows, high density, JetBrains Mono for numbers/coordinates, Plus Jakarta Sans for UI.
 - Real data only. Demo data flagged with plain DEMO badge.
+

@@ -36,3 +36,4 @@ P6  KEEP what is correct and valuable: honest labels (relative area %, estimated
 P7  Never weaken or delete a test to pass. Fix root causes. Regression test per bug.
 P8  Ask only for licence doubts or destructive actions; otherwise decide, log in docs/UI_DECISIONS.md, continue.
 ```
+

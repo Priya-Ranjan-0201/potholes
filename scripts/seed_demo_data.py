@@ -27,6 +27,7 @@ from backend.app.models.defect import (
 from backend.app.models.device import Device
 from backend.app.models.geo import District, Road, RoadSegment, Ward
 from backend.app.models.maintenance import (
+    BudgetAllocation,
     Contractor,
     RepairRecord,
     RepairVerification,
@@ -144,6 +145,24 @@ def seed_demo_data(reset: bool = False) -> None:
                 session.flush()
             segments.append(seg)
 
+        # Ensure we use ALL road segments across all wards in the database
+        all_segments = session.scalars(select(RoadSegment)).all()
+        if all_segments:
+            segments = all_segments
+
+        # Ensure BudgetAllocations exist for all wards
+        for w in session.scalars(select(Ward)).all():
+            existing_b = session.scalar(select(BudgetAllocation).where(BudgetAllocation.ward_id == w.id))
+            if not existing_b:
+                session.add(
+                    BudgetAllocation(
+                        ward_id=w.id,
+                        fiscal_year="2025-2026",
+                        allocated_amount=5000000.0,
+                        spent_amount=round(random.uniform(1200000.0, 2400000.0), -3),
+                    )
+                )
+
         # 4. Contractors & SLA Policies
         sla_crit = session.scalar(select(SlaPolicy).where(SlaPolicy.severity_level == "Critical"))
         if not sla_crit:
@@ -208,9 +227,9 @@ def seed_demo_data(reset: bool = False) -> None:
             session.add(device)
             session.flush()
 
-        # 6. Generate 90 Realistic Defects spread over the last 45 days
+        # 6. Generate 110 Realistic Defects distributed across ALL road segments in ALL wards
         now = datetime.now(UTC)
-        classes = ["POTHOLE"] * 50 + ["CRACK_ALLIGATOR"] * 20 + ["CRACK_LONG"] * 12 + ["CRACK_TRANS"] * 8
+        classes = ["POTHOLE"] * 60 + ["CRACK_ALLIGATOR"] * 24 + ["CRACK_LONG"] * 16 + ["CRACK_TRANS"] * 10
         random.shuffle(classes)
 
         created_defects: list[Defect] = []
@@ -247,7 +266,7 @@ def seed_demo_data(reset: bool = False) -> None:
                 level = "Minor"
 
             times_seen = random.randint(1, 8)
-            status = random.choice(["ACTIVE", "ACTIVE", "ACTIVE", "IN_REPAIR", "REPAIRED"])
+            status = random.choice(["ACTIVE", "ACTIVE", "IN_REPAIR", "REPAIRED"])
 
             defect = Defect(
                 class_code=code,
