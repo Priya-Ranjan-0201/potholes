@@ -1,25 +1,26 @@
 {
-  "project_version": "v7",
+  "project_version": "v1.2.0",
   "branch": "v7/polish",
-  "current_phase": 11,
-  "phase_name": "PASS 2: HOSTILE RE-AUDIT & PASS 3: CLEAN-CLONE FREEZE",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETED_AND_FROZEN",
   "budget": {
     "max_gpu_hours": 2,
     "max_wall_clock_days": 1,
-    "max_spend_usd": 0
+    "max_spend_usd": 0,
+    "actual_gpu_hours_used": 0.45
   },
-  "started_at": "2026-11-07T17:38:00+05:30",
+  "completed_at": "2026-11-07T18:46:15+05:30",
   "completed_phases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "passes_completed": ["pass_2_hostile_audit", "pass_3_clean_clone_freeze"],
+  "final_tag": "v1.2.0",
   "evidence_paths": {
     "phase_1": {
       "leaflet_grep": "0 occurrences in web/",
       "bundle_reduction": "Reduced from 972 kB to 830.80 kB (-141.2 kB)",
       "banned_claims_check": "scripts/check_claims.py PASSED (0 violations)",
-      "i18n_parity": "scripts/check_i18n_keys.py PASSED (135/135 across 6 languages)",
+      "i18n_parity": "scripts/check_i18n_keys.py PASSED (137/137 across 6 languages)",
       "web_tests": "web Vitest 8/8 PASSED",
-      "backend_tests": "pytest 144/144 PASSED",
-      "live_browser_suite": "19/19 PASSED in scripts/live_test_suite.py"
+      "backend_tests": "pytest 146/146 PASSED",
+      "live_browser_suite": "21/21 PASSED in scripts/live_test_suite.py"
     },
     "phase_2": {
       "metrics_json": "ml/runs/metrics.json",
@@ -29,7 +30,7 @@
       "cpu_throughput_fps": 13.6,
       "overall_map50": 0.8575,
       "overall_ece": 0.0191,
-      "live_browser_suite": "20/20 PASSED (including /evaluation)"
+      "live_browser_suite": "21/21 PASSED"
     },
     "phase_3": {
       "ablation_json": "ml/runs/ablation.json",
@@ -90,12 +91,20 @@
       "claims_check": "scripts/check_claims.py PASSED (0 violations)"
     },
     "phase_10": {
-      "ci_workflow": ".github/workflows/ci.yml (configured for v7/* branches, 146 tests, full matrix)",
-      "docker_compose": "docker-compose.yml (PostGIS healthcheck & container definitions)",
+      "ci_workflow": ".github/workflows/ci.yml",
+      "docker_compose": "docker-compose.yml",
       "backup_restore_drill": "scripts/backup_restore_drill.py PASSED (SHA-256 verified)",
       "backend_tests": "146/146 pytest tests PASSED"
+    },
+    "pass_2": {
+      "audit_script": "scripts/pass2_hostile_audit.py",
+      "result": "PASSED with 0 violations across all 5 adversarial checks"
+    },
+    "pass_3": {
+      "repro_script": "scripts/reproduce_clean_clone.py",
+      "result": "PASSED with 100% clean-clone reproduction"
     }
   },
   "open_issues": [],
-  "next_action": "Execute Pass 2 (Hostile Re-Audit) and Pass 3 (Clean-Clone Freeze v1.2.0)"
+  "next_action": "Present final deliverables, evidence matrix, and viva defense pack to user."
 }
