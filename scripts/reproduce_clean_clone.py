@@ -32,10 +32,9 @@ def main():
     print("ScamRoad PASS 3: Clean-Clone Reproduction Drill (v1.2.0)")
     print("=" * 65)
 
-    temp_dir = Path(tempfile.gettempdir()) / "scamroad-repro"
-    if temp_dir.exists():
-        print(f"Cleaning previous temporary directory: {temp_dir}")
-        shutil.rmtree(temp_dir, ignore_errors=True)
+    temp_root = Path(tempfile.mkdtemp(prefix="scamroad_repro_"))
+    temp_dir = temp_root / "clone"
+    print(f"Created isolated reproduction workspace: {temp_dir}")
 
     curr_branch = "v7/polish"
     print(f"\n[1/5] Cloning {curr_branch} into {temp_dir}...")
