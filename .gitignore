@@ -36,6 +36,7 @@ data/sample/yolo_labels/
 runs/
 ml/runs/
 !ml/runs/.gitkeep
+!ml/runs/*.json
 ml/data/raw/
 ml/data/processed/
 ml/data/external/

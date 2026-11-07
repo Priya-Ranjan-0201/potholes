@@ -1,0 +1,52 @@
+{
+  "timestamp_utc": "2026-11-07T10:58:08.415970+00:00",
+  "iterations": 50,
+  "input_resolution": [
+    640,
+    640
+  ],
+  "hardware": {
+    "platform": "win32",
+    "logical_cpus": 12,
+    "ram_total_gb": 15.23,
+    "process_rss_delta_mb": 47.41
+  },
+  "model_sizes_mb": {
+    "pytorch_yolo11n_pt": 5.35,
+    "onnx_fp32_mb": 10.11,
+    "onnx_int8_mb": 2.87,
+    "compression_ratio": 3.52
+  },
+  "numerical_parity": {
+    "max_absolute_difference_fp32_vs_int8": 126.12436,
+    "mean_absolute_difference_fp32_vs_int8": 93.53163,
+    "mean_cosine_similarity": 0.999757,
+    "min_cosine_similarity": 0.999704,
+    "parity_status": "EXCELLENT"
+  },
+  "latency_metrics_ms": {
+    "pytorch": {
+      "mean": 81.44,
+      "p50": 76.62,
+      "min": 66.76,
+      "max": 209.39
+    },
+    "onnx_fp32": {
+      "mean": 44.82,
+      "p50": 44.76,
+      "min": 38.09,
+      "max": 56.34
+    },
+    "onnx_int8": {
+      "mean": 96.53,
+      "p50": 92.26,
+      "min": 72.76,
+      "max": 146.01
+    }
+  },
+  "speedup_summary": {
+    "int8_speedup_vs_fp32": "0.49x",
+    "int8_speedup_vs_pytorch": "0.83x",
+    "int8_fps": 10.8
+  }
+}

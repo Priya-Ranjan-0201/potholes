@@ -1,0 +1,36 @@
+{
+  "timestamp_utc": "2026-11-07T10:58:08.418982+00:00",
+  "model_version": "YOLO11n-INT8",
+  "checkpoint": "runs/export/best_int8.onnx",
+  "sha256": "16867e0e7a16...",
+  "test_split_samples": 50,
+  "mAP50": 0.8575,
+  "mAP50_95": 0.6214,
+  "precision": 0.8949,
+  "recall": 0.9,
+  "f1_score": 0.8974,
+  "latency_p50_ms": 92.26069998112507,
+  "throughput_fps": 10.8,
+  "per_class": {
+    "pothole": {
+      "mAP50": 0.885,
+      "mAP50_95": 0.6555,
+      "support": 35
+    },
+    "crack_longitudinal": {
+      "mAP50": 0.842,
+      "mAP50_95": 0.612,
+      "support": 25
+    },
+    "crack_transverse": {
+      "mAP50": 0.835,
+      "mAP50_95": 0.598,
+      "support": 20
+    },
+    "crack_alligator": {
+      "mAP50": 0.868,
+      "mAP50_95": 0.62,
+      "support": 15
+    }
+  }
+}
