@@ -126,7 +126,7 @@ export const ComplaintsPage: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="text-xs border border-[#EBD9B8] dark:border-stone-700 rounded-xl px-3 py-2 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 font-bold focus:outline-none"
+            className="text-xs border border-slate-200 dark:border-stone-700 rounded-xl px-3 py-2 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-200 font-bold focus:outline-none"
           >
             <option value="">All Redressal Statuses</option>
             <option value="SUBMITTED">Submitted</option>
@@ -162,7 +162,7 @@ export const ComplaintsPage: React.FC = () => {
                 key={c.id}
                 className="dhaba-card p-5 space-y-3 hover:border-amber-500/40 transition"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200 dark:border-stone-800 pb-3">
                   <div className="flex items-center gap-3">
                     <span
                       className={`px-2.5 py-0.5 rounded text-xs font-black uppercase border font-mono ${getStatusBadge(
@@ -200,7 +200,7 @@ export const ComplaintsPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="space-y-1 bg-stone-50 dark:bg-stone-900/60 p-3 rounded-xl border border-[#EBD9B8] dark:border-stone-800">
+                  <div className="space-y-1 bg-stone-50 dark:bg-stone-900/60 p-3 rounded-xl border border-slate-200 dark:border-stone-800">
                     <span className="font-bold text-stone-700 dark:text-stone-200 block font-mono flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-amber-500" />
                       <span>GPS Coordinates:</span>
@@ -213,7 +213,7 @@ export const ComplaintsPage: React.FC = () => {
 
                 {/* Workflow Transitions (Admin / Engineer Role) */}
                 {(activeRole === "engineer" || activeRole === "admin") && allowedNext.length > 0 && (
-                  <div className="pt-2 border-t border-[#EBD9B8] dark:border-stone-800 flex items-center justify-between">
+                  <div className="pt-2 border-t border-slate-200 dark:border-stone-800 flex items-center justify-between">
                     <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 font-mono">
                       Municipal Redressal Actions:
                     </span>
@@ -247,7 +247,7 @@ export const ComplaintsPage: React.FC = () => {
       {reportModalOpen && (
         <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
               <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
                 Submit Public Road Grievance
               </h3>
@@ -265,7 +265,7 @@ export const ComplaintsPage: React.FC = () => {
                   type="text"
                   value={lat}
                   onChange={(e) => setLat(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
 
@@ -277,7 +277,7 @@ export const ComplaintsPage: React.FC = () => {
                   type="text"
                   value={lon}
                   onChange={(e) => setLon(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
 
@@ -290,7 +290,7 @@ export const ComplaintsPage: React.FC = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Describe crater depth, edge cracking, or nearest milestone..."
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 
@@ -315,7 +315,7 @@ export const ComplaintsPage: React.FC = () => {
       {transitionComplaint && (
         <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
               <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
                 Update Grievance Status &rarr; {targetStatus}
               </h3>
@@ -333,7 +333,7 @@ export const ComplaintsPage: React.FC = () => {
                   value={transitionNotes}
                   onChange={(e) => setTransitionNotes(e.target.value)}
                   rows={2}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 

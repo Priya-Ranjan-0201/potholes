@@ -28,7 +28,7 @@ export const DesignLabPage: React.FC = () => {
     <div className="space-y-8 pb-20 w-full max-w-[1700px] mx-auto">
       {/* Design Lab Control Deck */}
       <div className="dhaba-card p-6 border-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#EBD9B8] dark:border-stone-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-stone-800">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider font-mono bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30">
@@ -97,7 +97,7 @@ export const DesignLabPage: React.FC = () => {
         </div>
 
         {/* Sample Screen Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-[#EBD9B8] dark:border-stone-800">
+        <div className="flex flex-wrap items-center gap-2 mt-6 pt-4 border-t border-slate-200 dark:border-stone-800">
           <span className="text-xs font-mono font-bold text-stone-500 mr-2">Preview Screens:</span>
           {[
             { id: "hero", label: "1. Landing Hero" },

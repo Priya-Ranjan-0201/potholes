@@ -83,13 +83,13 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Regional Folk Art Pattern Band with solid background to prevent scroll bleed */}
-        <div className="bg-[#FFFDF7] dark:bg-[#0D1017] w-full">
-          <PatternBand regional height={6} opacity={0.5} />
+        {/* Regional Pattern Accent Band */}
+        <div className="bg-white/90 dark:bg-slate-950/90 w-full">
+          <PatternBand regional height={4} opacity={0.4} />
         </div>
 
         {/* Main Navbar */}
-        <div className="w-full bg-[#FFFDF7] dark:bg-[#0D1017] border-b border-[#EBD9B8] dark:border-stone-800 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 shadow-xs">
+        <div className="w-full bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 shadow-xs">
           <div className="flex items-center justify-between h-16 gap-4">
             {/* Left: Official ScamRoad Brand Logo */}
             <Link to="/" className="flex items-center gap-2 shrink-0 group py-1">
@@ -101,7 +101,7 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Center: Clean 5 Core Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1 bg-[#FFF0D6]/60 dark:bg-stone-900/60 p-1 rounded-xl border border-[#EBD9B8] dark:border-stone-800">
+            <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
               {navLinks.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.to;
@@ -148,7 +148,7 @@ export const Navbar: React.FC = () => {
                 </button>
 
                 {langDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-700 rounded-xl shadow-xl py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-700 rounded-xl shadow-xl py-1 z-50">
                     {LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
@@ -201,7 +201,7 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-[#EBD9B8] dark:border-stone-800 px-4 py-3 shadow-lg">
+          <div className="md:hidden bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-slate-200 dark:border-stone-800 px-4 py-3 shadow-lg">
             <div className="flex flex-col gap-1">
               {navLinks.map((item) => {
                 const Icon = item.icon;

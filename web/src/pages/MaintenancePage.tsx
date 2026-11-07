@@ -177,7 +177,7 @@ export const MaintenancePage: React.FC = () => {
               key={col.key}
               className={`rounded-2xl border-2 p-4 flex flex-col min-h-[380px] max-h-[720px] ${col.color} dhaba-card shadow-xs`}
             >
-              <div className="flex items-center justify-between pb-3 border-b border-[#EBD9B8] dark:border-stone-800 mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-stone-800 mb-3">
                 <div className="flex items-center gap-1.5">
                   <CatsEye color={col.catseye} size="sm" />
                   <span className="font-black text-xs uppercase tracking-wide text-stone-800 dark:text-stone-200 font-mono">
@@ -200,7 +200,7 @@ export const MaintenancePage: React.FC = () => {
                     return (
                       <div
                         key={wo.id}
-                        className="bg-white dark:bg-stone-900 rounded-xl p-3.5 border-2 border-[#EBD9B8] dark:border-stone-800 shadow-xs space-y-2 text-xs hover:border-amber-500/50 transition"
+                        className="bg-white dark:bg-stone-900 rounded-xl p-3.5 border-2 border-slate-200 dark:border-stone-800 shadow-xs space-y-2 text-xs hover:border-amber-500/50 transition"
                       >
                         <div className="flex items-center justify-between">
                           <span
@@ -243,7 +243,7 @@ export const MaintenancePage: React.FC = () => {
                         )}
 
                         {/* Actions based on state */}
-                        <div className="pt-2 border-t border-[#EBD9B8] dark:border-stone-800 flex items-center justify-between gap-1">
+                        <div className="pt-2 border-t border-slate-200 dark:border-stone-800 flex items-center justify-between gap-1">
                           {col.key === "ASSIGNED" && (
                             <button
                               onClick={() =>
@@ -304,7 +304,7 @@ export const MaintenancePage: React.FC = () => {
       {verifyModalWo && (
         <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dhaba-card max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
               <div className="flex items-center gap-2">
                 <FileCheck2 className="w-5 h-5 text-emerald-600" />
                 <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
@@ -359,7 +359,7 @@ export const MaintenancePage: React.FC = () => {
                   value={decisionReason}
                   onChange={(e) => setDecisionReason(e.target.value)}
                   rows={3}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 
@@ -386,7 +386,7 @@ export const MaintenancePage: React.FC = () => {
       {repairModalWo && (
         <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
               <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
                 Log Contractor Patch Materials
               </h3>
@@ -404,7 +404,7 @@ export const MaintenancePage: React.FC = () => {
                   type="text"
                   value={materialsUsed}
                   onChange={(e) => setMaterialsUsed(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 />
               </div>
 
@@ -416,7 +416,7 @@ export const MaintenancePage: React.FC = () => {
                   type="number"
                   value={actualCost}
                   onChange={(e) => setActualCost(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
 
@@ -441,7 +441,7 @@ export const MaintenancePage: React.FC = () => {
       {createModalOpen && (
         <div className="fixed inset-0 z-50 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="dhaba-card max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
               <h3 className="font-black text-base text-stone-900 dark:text-stone-100 font-signboard">
                 Dispatch New Road Work Order
               </h3>
@@ -460,7 +460,7 @@ export const MaintenancePage: React.FC = () => {
                   placeholder="Enter or paste Defect UUID..."
                   value={newDefectId}
                   onChange={(e) => setNewDefectId(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
 
@@ -471,7 +471,7 @@ export const MaintenancePage: React.FC = () => {
                 <select
                   value={newContractorId}
                   onChange={(e) => setNewContractorId(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none"
                 >
                   <option value="">Select Contractor...</option>
                   {contractors?.map((c) => (
@@ -489,7 +489,7 @@ export const MaintenancePage: React.FC = () => {
                 <select
                   value={newPriority}
                   onChange={(e) => setNewPriority(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 >
                   <option value="CRITICAL">Critical (24-Hr Compaction)</option>
                   <option value="HIGH">High (48-Hr SLA)</option>
@@ -506,7 +506,7 @@ export const MaintenancePage: React.FC = () => {
                   type="number"
                   value={newCost}
                   onChange={(e) => setNewCost(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-[#EBD9B8] dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
+                  className="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 focus:outline-none font-mono"
                 />
               </div>
 

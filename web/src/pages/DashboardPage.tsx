@@ -328,7 +328,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Single Clean Table: Municipal Corridors & Divisions */}
       <div className="dhaba-card p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-[#EBD9B8] dark:border-stone-800">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-stone-800">
           <div>
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-amber-500" />
@@ -356,7 +356,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           ) : sortedWards.length > 0 ? (
             <table className="w-full text-left text-sm text-stone-700 dark:text-stone-300">
-              <thead className="bg-[#FFF0D6]/60 dark:bg-stone-800/80 text-xs font-bold uppercase text-stone-500 dark:text-stone-400 border-b border-[#EBD9B8] dark:border-stone-700 font-mono">
+              <thead className="bg-slate-50 dark:bg-slate-900/80 text-xs font-bold uppercase text-stone-500 dark:text-stone-400 border-b border-slate-200 dark:border-slate-800 font-mono">
                 <tr>
                   <th className="py-2.5 px-3">Corridor / Division</th>
                   <th className="py-2.5 px-3 text-center">Total Defects</th>
@@ -366,7 +366,7 @@ export const DashboardPage: React.FC = () => {
                   <th className="py-2.5 px-3 text-right">Action Priority</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EBD9B8] dark:divide-stone-800 text-xs">
+              <tbody className="divide-y divide-slate-200 dark:divide-stone-800 text-xs">
                 {sortedWards.map((ward) => {
                   const isCritAction = ward.critical_defects > 0;
                   const isHighPri = ward.total_defects > ward.repaired_defects;

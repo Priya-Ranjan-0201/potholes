@@ -474,7 +474,7 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           {/* Active Image Road Details Bar */}
-          <div className="mt-4 pt-3 border-t border-[#EBD9B8] dark:border-stone-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2">
               <Camera className="w-4 h-4 text-amber-500 shrink-0" />
               <span className="font-bold text-stone-800 dark:text-stone-200">{activeRoadName}</span>
@@ -495,7 +495,7 @@ export const ScannerPage: React.FC = () => {
 
         {/* Right (1 Column): Telemetry & Work Order Dispatch Card */}
         <div className="dhaba-card p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#EBD9B8] dark:border-stone-800 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-stone-800 pb-3">
             <div>
               <span className="text-[10px] font-mono uppercase text-stone-400 font-bold block">
                 Edge AI Telemetry
@@ -543,7 +543,7 @@ export const ScannerPage: React.FC = () => {
           {activeDefect ? (
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-800">
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-slate-200 dark:border-stone-800">
                   <span className="text-[10px] font-mono text-stone-400 uppercase block">Model Confidence</span>
                   <span className="text-lg font-black text-stone-900 dark:text-stone-100 font-mono">
                     {Math.round(activeDefect.confidence * 100)}%
@@ -551,7 +551,7 @@ export const ScannerPage: React.FC = () => {
                   <span className="text-[9px] text-stone-400 block font-mono">Probability score (Rule R4)</span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-[#EBD9B8] dark:border-stone-800">
+                <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-slate-200 dark:border-stone-800">
                   <span className="text-[10px] font-mono text-stone-400 uppercase block">Relative Area</span>
                   <span className="text-lg font-black text-amber-500 font-mono">
                     {((activeDefect.box[2] * activeDefect.box[3]) / 100).toFixed(1)}%

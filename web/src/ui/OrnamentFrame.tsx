@@ -35,7 +35,7 @@ export const OrnamentFrame: React.FC<OrnamentFrameProps> = ({
     // Abstract geometric jaali screen lattice pattern divider
     return (
       <div className={`w-full flex items-center gap-3 my-4 ${className}`}>
-        <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-[#EBD9B8] dark:via-amber-400/30 to-transparent" />
+        <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-slate-200 dark:via-amber-400/30 to-transparent" />
         <div className="flex items-center gap-1.5 opacity-80">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <rect x="8" y="1" width="7" height="7" transform="rotate(45 8 1)" stroke={accentColor} strokeWidth="1.5" />
@@ -49,7 +49,7 @@ export const OrnamentFrame: React.FC<OrnamentFrameProps> = ({
             <circle cx="8" cy="8" r="2" fill="#E8452C" />
           </svg>
         </div>
-        <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-[#EBD9B8] dark:via-amber-400/30 to-transparent" />
+        <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-slate-200 dark:via-amber-400/30 to-transparent" />
       </div>
     );
   }
@@ -57,7 +57,7 @@ export const OrnamentFrame: React.FC<OrnamentFrameProps> = ({
   if (variant === "cornerFlourish") {
     // Card with 4 original geometric truck-art corner flourishes
     return (
-      <div className={`relative p-5 rounded-xl border border-[#EBD9B8] dark:border-amber-400/25 bg-white/95 dark:bg-[#141926]/90 shadow-sm ${className}`}>
+      <div className={`relative p-5 rounded-xl border border-slate-200 dark:border-amber-400/25 bg-white/95 dark:bg-[#141926]/90 shadow-sm ${className}`}>
         {/* Top Left Flourish */}
         <svg className="absolute top-1.5 left-1.5 w-4 h-4 text-amber-500 opacity-80" viewBox="0 0 20 20" fill="currentColor">
           <path d="M0,0 L12,0 C6,2 2,6 0,12 Z" />
@@ -81,7 +81,7 @@ export const OrnamentFrame: React.FC<OrnamentFrameProps> = ({
 
   // Scalloped Garland Border
   return (
-    <div className={`relative overflow-hidden rounded-xl border-2 border-[#EBD9B8] dark:border-amber-400/30 ${className}`}>
+    <div className={`relative overflow-hidden rounded-xl border-2 border-slate-200 dark:border-amber-400/30 ${className}`}>
       {/* Top Scalloped Garland Wave */}
       <div className="w-full h-2 bg-repeat-x opacity-90" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0,0 Q4,8 8,0 Q12,8 16,0 Z' fill='%23FFB300' /%3E%3C/svg%3E")`,

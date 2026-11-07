@@ -14,7 +14,7 @@ export const RoadHeroScene: React.FC<RoadHeroSceneProps> = ({ stats }) => {
   const workOrdersCount = stats?.total_work_orders ?? 0;
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-[#EBD9B8] dark:border-stone-800 shadow-md bg-stone-950 text-white relative">
+    <div className="w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-stone-800 shadow-md bg-stone-950 text-white relative">
       <div className="relative w-full p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-[#0e1322] via-[#0a0e1a] to-[#0d1220]">
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-[radial-gradient(ellipse_at_top,rgba(255,179,0,0.12),transparent_70%)] pointer-events-none" />
