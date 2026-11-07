@@ -1,9 +1,9 @@
 # ScamRoad — Autonomous Fix, Hardening & Redesign State Tracker
 
 **Branch:** `fix/redesign-v6`  
-**Current Phase:** Phase 5 — RESTORE THE MAP AND CORE GIS FEATURES  
+**Current Phase:** Phase 6 — FRONTEND CODE QUALITY  
 **Status:** IN_PROGRESS  
-**Last Updated:** November 07, 2026 | 16:31 IST  
+**Last Updated:** November 07, 2026 | 16:35 IST  
 
 ---
 
@@ -25,7 +25,10 @@
   - Deliverables: Added `is_demo` boolean flag to `Complaint`, `CitizenReport`, `WorkOrder`, and seeded demo entities in `scripts/seed/seed_demo_data.py`. Verified Alembic migrations and 13-test security/RBAC matrix.
   - Gate: Migration up/down clean, RBAC least privilege passed 100%, 10x idempotency replay protection verified.
   - Completed: November 07, 2026 | Tag: `fix-phase-4-done`
-- [ ] **Phase 5: Restore the Map and Core GIS Features**
+- [x] **Phase 5: Restore the Map and Core GIS Features**
+  - Deliverables: Restored `/map` route with Leaflet + OpenStreetMap in `web/src/pages/MapPage.tsx`, added severity color markers, multi-pass sighting scale, click-to-open defect drawer, filter bar, dark/light theme support.
+  - Gate: `/map` loads cleanly, interactive drawer opens, screenshot saved to `docs/screenshots/map_restored.png`.
+  - Completed: November 07, 2026 | Tag: `fix-phase-5-done`
 - [ ] **Phase 6: Frontend Code Quality**
 - [ ] **Phase 7: UI/UX Redesign (Visual Overhaul & Motion)**
 - [ ] **Phase 8: Tests, CI, Docs, Deploy**
@@ -44,9 +47,10 @@
 - `bench/privacy_blur_report.json` — Phase 3 privacy blur recall evaluation
 - `docs/CALIBRATION.md` — Phase 3 camera calibration protocol (Rule R4)
 - `backend/tests/test_security_matrix.py` — Phase 4 security & RBAC matrix (100% passing)
+- `docs/screenshots/map_restored.png` — Phase 5 live browser screenshot of restored GIS map
 
 ---
 
 ## Open Issues & Non-Blocking Findings
 
-None blocking. Proceeding to Phase 5 Map Restoration.
+None blocking. Proceeding to Phase 6 Frontend Code Quality.

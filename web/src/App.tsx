@@ -7,6 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ScannerPage } from "./pages/ScannerPage";
+import { MapPage } from "./pages/MapPage";
 import { DefectsPage } from "./pages/DefectsPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ComplaintsPage } from "./pages/ComplaintsPage";
@@ -37,8 +38,8 @@ function App() {
                   <Routes>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/scanner" element={<ScannerPage />} />
-                    {/* Map section removed as requested - redirected to AI Scanner */}
-                    <Route path="/map" element={<Navigate to="/scanner" replace />} />
+                    {/* Phase 5: Map restored as a first-class feature */}
+                    <Route path="/map" element={<MapPage />} />
                     <Route path="/defects" element={<DefectsPage />} />
                     <Route path="/maintenance" element={<MaintenancePage />} />
                     <Route path="/complaints" element={<ComplaintsPage />} />

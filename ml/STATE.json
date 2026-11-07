@@ -1,6 +1,6 @@
 {
-  "current_phase": 5,
-  "phase_name": "RESTORE THE MAP AND CORE GIS FEATURES",
+  "current_phase": 6,
+  "phase_name": "FRONTEND CODE QUALITY",
   "status": "IN_PROGRESS",
   "started_at": "2026-11-07T16:05:00+05:30",
   "completed_phases": [
@@ -37,6 +37,16 @@
       "completed_at": "2026-11-07T16:31:00+05:30",
       "evidence": "backend/tests/test_security_matrix.py",
       "gate_status": "PASSED"
+    },
+    {
+      "phase": 5,
+      "name": "RESTORE THE MAP AND CORE GIS FEATURES",
+      "completed_at": "2026-11-07T16:35:00+05:30",
+      "evidence": {
+        "map_route": "web/src/pages/MapPage.tsx",
+        "screenshot": "docs/screenshots/map_restored.png"
+      },
+      "gate_status": "PASSED"
     }
   ],
   "evidence_paths": {
@@ -46,8 +56,9 @@
     "metrics": "ml/runs/metrics.json",
     "onnx_parity": "ml/runs/onnx_parity.json",
     "privacy_blur": "bench/privacy_blur_report.json",
-    "calibration": "docs/CALIBRATION.md"
+    "calibration": "docs/CALIBRATION.md",
+    "map_screenshot": "docs/screenshots/map_restored.png"
   },
   "open_issues": [],
-  "next_action": "Execute Phase 5: Restore /map route with Leaflet + OpenStreetMap, severity markers, clustering, heatmap, and defect drawer"
+  "next_action": "Execute Phase 6: Frontend code quality, ESLint 9 configuration, TypeScript type safety, Vitest component test coverage"
 }

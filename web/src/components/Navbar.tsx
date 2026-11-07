@@ -8,6 +8,7 @@ import {
   Layers,
   Cpu,
   UploadCloud,
+  MapPin,
   Menu,
   X,
   AlertTriangle,
@@ -38,9 +39,10 @@ export const Navbar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Map is completely removed per user request
+  // Phase 5 Restored GIS Map Feature
   const navLinks = [
     { to: "/", label: t("navOverview"), icon: Compass },
+    { to: "/map", label: t("navMap"), icon: MapPin },
     { to: "/scanner", label: t("navScanner"), icon: Camera },
     { to: "/maintenance", label: t("navWorkOrders"), icon: ClipboardList },
     { to: "/complaints", label: t("navComplaints"), icon: MessageSquareWarning },
