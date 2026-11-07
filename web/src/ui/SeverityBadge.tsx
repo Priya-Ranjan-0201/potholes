@@ -16,12 +16,19 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({
   showScore = true,
   className = "",
 }) => {
+  const normalizeLevel = (lvl?: string): SeverityLevel => {
+    if (!lvl) return "Minor";
+    const lower = lvl.toLowerCase();
+    if (lower === "critical") return "Critical";
+    if (lower === "severe") return "Severe";
+    if (lower === "moderate") return "Moderate";
+    return "Minor";
+  };
+
   const resolvedLevel: SeverityLevel =
     score !== undefined
       ? getSeverityFromScore(score)
-      : (level as SeverityLevel) in SEVERITY_COLORS
-      ? (level as SeverityLevel)
-      : "Minor";
+      : normalizeLevel(level);
 
   const color = SEVERITY_COLORS[resolvedLevel];
 

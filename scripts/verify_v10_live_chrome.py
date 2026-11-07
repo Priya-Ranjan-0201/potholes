@@ -39,7 +39,7 @@ try:
     
     body_text = driver.find_element(By.TAG_NAME, "body").text
     record("Overview Page Header", "Road Network Overview" in body_text, "Found 'Road Network Overview'")
-    record("Demo Data Badge", "DEMO DATA" in body_text, "Found 'DEMO DATA' badge")
+    record("System Status Badge", "LIVE" in body_text, "Found 'LIVE' system badge")
     record("Corridor Health Table", "Corridor Health" in body_text or "Corridor / Sector" in body_text, "Found corridor table")
     record("Student Disclaimer", "Student research project" in body_text, "Found footer disclaimer")
 

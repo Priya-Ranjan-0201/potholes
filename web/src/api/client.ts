@@ -335,6 +335,19 @@ export const api = {
 
   getDefect: (id: string) => request<DefectDetailResponse>(`/defects/${id}`),
 
+  createDefect: (payload: {
+    class_code: string;
+    latitude?: number;
+    longitude?: number;
+    confidence?: number;
+    severity_level?: string;
+    normalized_score?: number;
+  }) =>
+    request<DefectItem>("/defects", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   overrideSeverity: (id: string, payload: { override_level: string; reason: string }) =>
     request<any>(`/defects/${id}/override-severity`, {
       method: "POST",

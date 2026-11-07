@@ -53,9 +53,25 @@ async def get_stats_overview(
     defect_class_res = (await db.execute(defect_class_stmt)).all()
     defects_by_class = dict(defect_class_res)
 
-    # Defect severity counts
-    severity_stmt = select(SeverityAssessment.level, func.count(SeverityAssessment.id)).group_by(
-        SeverityAssessment.level
+    # Defect severity counts (latest per defect)
+    subq = (
+        select(
+            SeverityAssessment.defect_id,
+            SeverityAssessment.level,
+            func.row_number()
+            .over(
+                partition_by=SeverityAssessment.defect_id,
+                order_by=SeverityAssessment.created_at.desc(),
+            )
+            .label("rn"),
+        )
+        .join(Defect, Defect.id == SeverityAssessment.defect_id)
+        .subquery()
+    )
+    severity_stmt = (
+        select(subq.c.level, func.count(subq.c.defect_id))
+        .where(subq.c.rn == 1)
+        .group_by(subq.c.level)
     )
     severity_res = (await db.execute(severity_stmt)).all()
     defects_by_severity = dict(severity_res)

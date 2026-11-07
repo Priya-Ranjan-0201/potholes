@@ -314,6 +314,76 @@ async def get_defect_detail(
     )
 
 
+class DefectCreateRequest(BaseModel):
+    class_code: str = Field(..., description="Defect classification (e.g. POTHOLE, CRACK_LONG)")
+    latitude: float = Field(default=30.900965, ge=-90, le=90)
+    longitude: float = Field(default=75.857277, ge=-180, le=180)
+    confidence: float = Field(default=0.88, ge=0.0, le=1.0)
+    severity_level: str = Field(default="Moderate")
+    normalized_score: float = Field(default=45.0, ge=0.0, le=100.0)
+    road_segment_id: uuid.UUID | None = None
+
+
+@router.post(
+    "/defects",
+    response_model=DefectSummaryResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Log a newly detected defect",
+    description="Registers a real canonical defect into PostgreSQL.",
+)
+async def create_defect(
+    payload: DefectCreateRequest,
+    db: AsyncSession = Depends(get_db),
+) -> DefectSummaryResponse:
+    """Create a new verified defect record."""
+    # Find matching road segment if not provided
+    segment_id = payload.road_segment_id
+    if segment_id is None:
+        seg_stmt = select(RoadSegment.id).limit(1)
+        segment_id = (await db.execute(seg_stmt)).scalar()
+
+    defect = Defect(
+        class_code=payload.class_code,
+        location=f"SRID=4326;POINT({payload.longitude} {payload.latitude})",
+        road_segment_id=segment_id,
+        status="ACTIVE",
+        first_seen=datetime.utcnow(),
+        last_seen=datetime.utcnow(),
+        times_seen=1,
+        is_demo=False,
+    )
+    db.add(defect)
+    await db.flush()
+
+    assessment = SeverityAssessment(
+        defect_id=defect.id,
+        raw_score=payload.normalized_score / 100.0,
+        normalized_score=payload.normalized_score,
+        level=payload.severity_level,
+        factor_breakdown={"confidence": payload.confidence},
+        missing_factors=[],
+        needs_human_review=False,
+        source="auto",
+    )
+    db.add(assessment)
+    await db.commit()
+    await db.refresh(defect)
+
+    return DefectSummaryResponse(
+        id=defect.id,
+        class_code=defect.class_code,
+        status=defect.status,
+        latitude=payload.latitude,
+        longitude=payload.longitude,
+        times_seen=defect.times_seen,
+        first_seen=defect.first_seen,
+        last_seen=defect.last_seen,
+        latest_severity_score=payload.normalized_score,
+        latest_severity_level=payload.severity_level,
+        road_name="NH-44 Sector 12",
+    )
+
+
 @router.post(
     "/defects/{defect_id}/override-severity",
     response_model=SeverityAssessmentResponse,

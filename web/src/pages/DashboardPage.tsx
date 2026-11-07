@@ -21,7 +21,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { StatCard, SeverityBadge, StatusChip, DemoBadge } from "../ui";
+import { StatCard, SeverityBadge, StatusChip, DemoBadge, EmptyState } from "../ui";
 
 export const DashboardPage: React.FC = () => {
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
@@ -102,9 +102,9 @@ export const DashboardPage: React.FC = () => {
   const totalDefects = stats?.total_defects ?? 0;
   const criticalDefects = stats?.defects_by_severity?.["Critical"] ?? 0;
   const severeDefects = stats?.defects_by_severity?.["Severe"] ?? 0;
-  const highPriorityTotal = criticalDefects + severeDefects;
+  const highPriorityTotal = Math.min(totalDefects, criticalDefects + severeDefects);
   const highPriorityPct =
-    totalDefects > 0 ? Math.round((highPriorityTotal / totalDefects) * 100) : 0;
+    totalDefects > 0 ? Math.min(100, Math.round((highPriorityTotal / totalDefects) * 100)) : 0;
 
   const openWorkOrders =
     (stats?.work_orders_by_status?.["CREATED"] ?? 0) +
@@ -128,9 +128,9 @@ export const DashboardPage: React.FC = () => {
   // Filter trends: only distinct dates with detections or activity
   const rawTrends = trendsData?.trends || [];
   const activeTrends = rawTrends.filter(
-    (t) => t.observations_count > 0 || t.repairs_count > 0
+    (t) => t.observations_count > 0 || t.complaints_count > 0 || t.repairs_count > 0
   );
-  const hasEnoughHistory = activeTrends.length >= 7;
+  const hasEnoughHistory = activeTrends.length >= 3;
 
   // Filter corridors
   const sortedWards = [...(wards || [])].sort(
@@ -295,10 +295,10 @@ export const DashboardPage: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
-            ) : (
+            ) : activeTrends.length > 0 ? (
               <div>
-                <p className="text-xs text-slate-500 mb-3 italic">
-                  Not enough history yet ({activeTrends.length} records over 14 days). Showing raw detections table:
+                <p className="text-xs text-slate-500 mb-3">
+                  Chronological activity log across surveyed road corridors:
                 </p>
                 <div className="overflow-x-auto">
                   <table className="data-table">
@@ -311,18 +311,24 @@ export const DashboardPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {rawTrends.slice(-5).map((row) => (
+                      {activeTrends.map((row) => (
                         <tr key={row.date}>
                           <td className="font-mono text-xs">{row.date}</td>
-                          <td className="text-right font-mono">{row.observations_count}</td>
-                          <td className="text-right font-mono">{row.complaints_count}</td>
-                          <td className="text-right font-mono">{row.repairs_count}</td>
+                          <td className="text-right font-mono font-medium">{row.observations_count}</td>
+                          <td className="text-right font-mono text-slate-600 dark:text-slate-400">{row.complaints_count}</td>
+                          <td className="text-right font-mono text-emerald-600 dark:text-emerald-400">{row.repairs_count}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               </div>
+            ) : (
+              <EmptyState
+                title="Awaiting Observation History"
+                description="Chronological trendlines will render automatically as camera patrols and citizen reports log defects."
+                className="py-8"
+              />
             )}
           </div>
 

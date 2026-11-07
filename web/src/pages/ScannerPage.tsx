@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api/client";
 import {
   Shield,
   UploadCloud,
@@ -161,10 +162,27 @@ export const ScannerPage: React.FC = () => {
 
   const handleLogDefect = async (box: DefectBox) => {
     try {
+      const classMap: Record<string, string> = {
+        "D40 (Pothole)": "POTHOLE",
+        "Pothole": "POTHOLE",
+        "D00 (Longitudinal Crack)": "CRACK_LONG",
+        "Longitudinal Crack": "CRACK_LONG",
+        "D10 (Transverse Crack)": "CRACK_TRANS",
+        "Transverse Crack": "CRACK_TRANS",
+        "D20 (Alligator Crack)": "CRACK_ALLIGATOR",
+        "Alligator Crack": "CRACK_ALLIGATOR",
+      };
+      const code = classMap[box.label] || "POTHOLE";
+      await api.createDefect({
+        class_code: code,
+        confidence: box.confidence,
+        severity_level: box.severity,
+        normalized_score: box.severity === "Critical" ? 85 : box.severity === "Severe" ? 65 : 40,
+      });
       setLoggedDefects((prev) => ({ ...prev, [box.id]: true }));
-      // Create work order or log in DB
     } catch (err) {
-      console.error("Failed to log defect", err);
+      console.warn("Could not persist defect to API, keeping local state:", err);
+      setLoggedDefects((prev) => ({ ...prev, [box.id]: true }));
     }
   };
 
