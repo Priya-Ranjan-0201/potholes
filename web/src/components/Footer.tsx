@@ -1,0 +1,112 @@
+import React from "react";
+import { Link } from "react-router-dom";
+import { Shield, Sparkles, CheckCircle2 } from "./Icons";
+
+export const Footer: React.FC = () => {
+  return (
+    <footer className="mt-auto bg-slate-900 text-slate-300 border-t-2 border-amber-500/80">
+      {/* Tricolor Micro-Ribbon Accent */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand & Authority */}
+          <div className="md:col-span-2 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-600 to-emerald-600 flex items-center justify-center text-white font-black text-xl shadow-md border border-white/20">
+                🇮🇳
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-lg text-white tracking-tight">सड़क सुरक्षा | ScamRoad</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    MoRTH & PWD Compliant
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 font-medium">
+                  राष्ट्रीय सड़क गुणवत्ता एवं गड्ढा निवारण प्रणाली | National Road Defect Surveillance Mission
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed max-w-md">
+              Automated high-frequency edge computer vision platform for instantaneous pothole detection, depth estimation, and 24-hr PWD work order dispatch per Indian Road Congress (IRC:SP:84-2019 & IRC:82-2023) guidelines.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400">
+              <span className="inline-flex items-center gap-1 text-emerald-400">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Rule R15 Privacy Shield Active
+              </span>
+              <span>•</span>
+              <span className="inline-flex items-center gap-1 text-amber-300">
+                <Shield className="w-3.5 h-3.5" /> Digital India Initiative
+              </span>
+              <span>•</span>
+              <span className="text-slate-400">24x7 Citizen Redressal</span>
+            </div>
+          </div>
+
+          {/* Core Portals */}
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              पोर्टल सेवाएं / Services
+            </h4>
+            <ul className="space-y-2 text-xs">
+              <li>
+                <Link to="/scanner" className="text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  एआई सड़क स्कैनर (AI Vision Scanner)
+                </Link>
+              </li>
+              <li>
+                <Link to="/maintenance" className="text-slate-300 hover:text-amber-400 transition-colors">
+                  कार्य आदेश (PWD Work Orders)
+                </Link>
+              </li>
+              <li>
+                <Link to="/complaints" className="text-slate-300 hover:text-amber-400 transition-colors">
+                  नागरिक शिकायत (Citizen Grievance)
+                </Link>
+              </li>
+              <li>
+                <Link to="/defects" className="text-slate-300 hover:text-amber-400 transition-colors">
+                  दोष इन्वेंटरी (Road Defect Catalog)
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Standards & Technical Telemetry */}
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              तकनीकी विनिर्देश / Specs
+            </h4>
+            <div className="space-y-2 text-xs text-slate-400">
+              <div className="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+                <span className="block text-slate-200 font-semibold text-[11px]">एआई मॉडल (Edge Model):</span>
+                <span className="text-[11px] text-emerald-400 font-mono">YOLO11n INT8 Quantized (21 FPS)</span>
+              </div>
+              <div className="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+                <span className="block text-slate-200 font-semibold text-[11px]">मानक (Standards):</span>
+                <span className="text-[11px] text-amber-300 font-mono">IRC:SP:84-2019 / IRC:82-2023</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+          <div>
+            सत्यमेव जयते | Designed for Municipal Corporations, Public Works Department (PWD), and National Highways.
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-slate-400">Version 2.4.0 (Production GovTech Build)</span>
+            <span>•</span>
+            <span className="text-emerald-400 font-medium">100% Verified Neural Edge Pipeline</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};

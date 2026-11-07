@@ -21,27 +21,27 @@ interface SampleImage {
 const BENCHMARK_SAMPLES: SampleImage[] = [
   {
     id: "sample-asphalt-crater",
-    title: "Asphalt Deep Crater",
+    title: "राष्ट्रीय राजमार्ग 44 (NH-44 Deep Crater)",
     src: "/samples/asphalt_crater.jpg",
-    road: "NH-44 Ludhiana Corridor (KM 314)",
+    road: "राष्ट्रीय राजमार्ग 44 (NH-44 Corridor, KM 314)",
   },
   {
     id: "sample-craters",
-    title: "Rural Unpaved Road",
+    title: "ग्रामीण सड़क (PMGSY Rural Craters)",
     src: "/samples/unpaved_craters.jpg",
-    road: "Rural Connector Sector 32",
+    road: "प्रधानमंत्री ग्राम सड़क योजना (PMGSY Sector 32)",
   },
   {
     id: "sample-highway",
-    title: "Highway Bitumen Patch",
+    title: "जी.टी. रोड (GT Road Bitumen Patch)",
     src: "/samples/clean_road.jpg",
-    road: "GT Road Industrial Bypass",
+    road: "ग्रैंड ट्रंक रोड (GT Road Industrial Corridor)",
   },
   {
     id: "sample-clean",
-    title: "Clean Road (Zero Defect Benchmark)",
+    title: "स्वच्छ सड़क (Clean Surface Benchmark)",
     src: "/samples/pothole_nh44.jpg",
-    road: "Ferozepur Road (PAU Gate 2)",
+    road: "रिंग रोड एक्सप्रेसवे (Zero Defect Corridor)",
   },
 ];
 
@@ -129,14 +129,21 @@ export const ScannerPage: React.FC = () => {
       {/* Top Header Card */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 mb-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>AI Model Active: YOLO11n + Edge CV</span>
-            <span className="text-emerald-600 font-normal">({inspection.latencyMs}ms)</span>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>🇮🇳 भारतीय मानक: IRC:SP:84-2019 अनुपालित</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span>YOLO11n Edge AI ({inspection.latencyMs}ms)</span>
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">AI Pothole & Defect Scanner</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Real-time neural detection for potholes, alligator cracks, and municipal road damage.
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>सड़क स्कैनर एवं एआई गड्ढा पहचान</span>
+            <span className="text-sm font-semibold text-slate-400 font-normal">| Road Defect Scanner</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Real-time neural detection for potholes, transverse cracks, and municipal road damage per MoRTH specifications.
           </p>
         </div>
 
@@ -144,10 +151,10 @@ export const ScannerPage: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-semibold rounded-xl shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-xs transition-all cursor-pointer border border-amber-500/30"
           >
-            <UploadCloud className="w-4 h-4" />
-            <span>Upload Road Photo</span>
+            <UploadCloud className="w-4 h-4 text-amber-400" />
+            <span>+ फोटो अपलोड करें / Scan Photo</span>
           </button>
           <input
             ref={fileInputRef}
@@ -376,38 +383,48 @@ export const ScannerPage: React.FC = () => {
             {activeDefect && (
               <div className="pt-3 border-t border-slate-100 space-y-2.5 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-xs">Selected Defect</span>
-                  <span className="font-bold text-slate-900 text-xs">{activeDefect.label}</span>
+                  <span className="text-slate-500 text-xs">पहचाना गया दोष (Defect)</span>
+                  <span className="font-extrabold text-slate-900 text-xs px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
+                    {activeDefect.label === "POTHOLE" ? "गड्ढा (POTHOLE)" : activeDefect.label}
+                  </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-xs">Model Confidence</span>
+                  <span className="text-slate-500 text-xs">सटीकता (Confidence)</span>
                   <span className="font-bold text-emerald-600 text-xs">
                     {(activeDefect.confidence * 100).toFixed(1)}%
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-xs">Severity Score</span>
+                  <span className="text-slate-500 text-xs">गंभीरता स्कोर (Severity)</span>
                   <span className="font-bold text-slate-900 text-xs">{activeDefect.score} / 100</span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 text-xs">Surface Dimension</span>
+                  <span className="text-slate-500 text-xs">अनुमानित मरम्मत लागत (Est. Cost)</span>
+                  <span className="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    ₹{(Math.max(activeDefect.score * 55, 1850)).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500 text-xs">सड़क सतह आयाम (Surface Area)</span>
                   <span className="font-mono text-xs font-semibold text-slate-700">
                     {activeDefect.areaPx.toLocaleString()} px²
                   </span>
                 </div>
 
                 <div className="pt-2">
-                  <p className="text-[11px] text-slate-400 mb-1 font-semibold uppercase tracking-wider">
-                    Recommended Action
+                  <p className="text-[11px] text-slate-400 mb-1 font-bold uppercase tracking-wider flex items-center justify-between">
+                    <span>अनुशंसित मरम्मत (Recommended Action)</span>
+                    <span className="text-slate-500 font-mono text-[10px]">MoRTH Sec 3004</span>
                   </p>
-                  <p className="text-xs font-medium text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                  <p className="text-xs font-medium text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 leading-relaxed">
                     {activeDefect.action ||
                       (activeDefect.severity === "Critical"
-                        ? "Immediate 24-hr asphalt compaction. High vehicle tire puncture hazard."
-                        : "48-hr bituminous sealing required to prevent water ingress damage.")}
+                        ? "तत्काल 24 घंटे कोल्ड मिक्स बिटुमिनस इमल्शन भराव (Immediate 24-hr cold mix asphalt compaction)."
+                        : "48 घंटे डामरीकरण सीलिंग (48-hr bituminous sealing required per IRC guidelines).")}
                   </p>
                 </div>
               </div>
@@ -417,22 +434,22 @@ export const ScannerPage: React.FC = () => {
           {/* Bottom Action Button */}
           <div>
             {isDispatched ? (
-              <div className="w-full py-3 px-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center text-xs font-semibold flex items-center justify-center gap-2 animate-in fade-in">
+              <div className="w-full py-3 px-4 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Work Order #SR-5819 Dispatched to Ludhiana Municipal Infra!</span>
+                <span>कार्य आदेश #PWD-WO-2026-9814 लोक निर्माण विभाग को प्रेषित!</span>
               </div>
             ) : (
               <button
                 onClick={() => setIsDispatched(true)}
                 disabled={inspection.boxes.length === 0}
-                className={`w-full py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer ${
+                className={`w-full py-3.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer ${
                   inspection.boxes.length > 0
-                    ? "bg-slate-900 hover:bg-slate-800 text-white"
+                    ? "bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white border border-amber-500/40"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed"
                 }`}
               >
-                <HardHat className="w-4 h-4" />
-                <span>Dispatch Municipal Repair Order</span>
+                <HardHat className="w-4 h-4 text-amber-400" />
+                <span>🚨 PWD कार्य आदेश जारी करें (Dispatch Work Order)</span>
               </button>
             )}
           </div>

@@ -89,89 +89,99 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-8 pb-16">
       {/* Page Title & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            City Road Condition & Maintenance Overview
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>🇮🇳 राष्ट्रीय सड़क सुरक्षा मिशन</span>
+            </span>
+            <span className="text-xs font-bold text-slate-500 font-mono">
+              IRC:SP:84-2019 / IRC:82-2023 अनुपालित
+            </span>
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span>सड़क स्थिति एवं रखरखाव अवलोकन</span>
+            <span className="text-sm font-semibold text-slate-400 font-normal">| Municipal Road Health</span>
           </h1>
-          <p className="text-sm text-slate-500">
-            Real-time automated edge detection telemetry and municipal repair tracking (Rule R1).
+          <p className="text-xs sm:text-sm text-slate-500">
+            Real-time automated edge detection telemetry, PWD contractor SLAs, and citizen grievance redressal.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            Telemetry Online
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>लाइव टेलीमेट्री सक्रिय (Live Online)</span>
           </span>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Total Road Defects
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+              कुल सड़क दोष (Total Defects)
             </span>
             <span className="text-3xl font-black text-slate-900 mt-1 block">
               {stats?.total_defects ?? 0}
             </span>
-            <span className="text-xs text-slate-500 mt-1 block">
-              {stats?.open_defects ?? 0} active | {stats?.repaired_defects ?? 0} repaired
+            <span className="text-xs text-slate-500 mt-1 block font-medium">
+              <strong className="text-amber-600">{stats?.open_defects ?? 0} सक्रिय</strong> | {stats?.repaired_defects ?? 0} मरम्मत पूर्ण
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200">
             <Layers className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-red-200/90 shadow-xs hover:border-red-300 transition-all flex items-center justify-between bg-gradient-to-br from-white via-white to-red-50/30">
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Critical Hazards
+            <span className="text-xs font-bold text-red-600 uppercase tracking-wider block">
+              गंभीर गड्ढे (Critical Potholes)
             </span>
             <span className="text-3xl font-black text-red-600 mt-1 block">
               {stats?.critical_defects ?? 0}
             </span>
-            <span className="text-xs text-red-600 font-medium mt-1 block">
-              Immediate remediation priority
+            <span className="text-xs text-red-700 font-bold mt-1 block">
+              24-hr तत्काल डामरीकरण प्राथमिकता
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-600">
+          <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center text-red-600 border border-red-200">
             <AlertOctagon className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Citizen Complaints
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+              नागरिक शिकायतें (Grievances)
             </span>
             <span className="text-3xl font-black text-slate-900 mt-1 block">
               {stats?.total_complaints ?? 0}
             </span>
-            <span className="text-xs text-slate-500 mt-1 block">
-              {stats?.complaints_by_status?.["SUBMITTED"] ?? 0} pending review
+            <span className="text-xs text-slate-500 mt-1 block font-medium">
+              <strong className="text-blue-600">{stats?.complaints_by_status?.["SUBMITTED"] ?? 0} जांच हेतु लंबित</strong>
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-200">
             <Clock className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Work Orders Dispatched
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+              PWD कार्य आदेश (Work Orders)
             </span>
             <span className="text-3xl font-black text-slate-900 mt-1 block">
               {stats?.total_work_orders ?? 0}
             </span>
-            <span className="text-xs text-slate-500 mt-1 block">
-              {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} verified & completed
+            <span className="text-xs text-emerald-700 font-bold mt-1 block">
+              {stats?.work_orders_by_status?.["VERIFIED"] ?? 0} सत्यापित एवं पूर्ण
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-200">
             <CheckCircle2 className="w-6 h-6" />
           </div>
         </div>
