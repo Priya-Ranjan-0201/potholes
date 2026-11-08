@@ -16,6 +16,7 @@ export const motionTokens = {
     base: 0.20, // 200 ms
     slow: 0.32, // 320 ms
     chart: 0.60, // 600 ms (once)
+    ambient: 60, // 60 s ambient drift
   },
   easing: {
     standard: [0.2, 0, 0, 1] as const, // cubic-bezier(.2,0,0,1)
