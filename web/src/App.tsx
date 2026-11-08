@@ -16,6 +16,7 @@ import { ScannerPage } from "./pages/ScannerPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ModelBenchmarksPage } from "./pages/ModelBenchmarksPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { NightRoadCanvas } from "./ui/atmosphere";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,7 +96,10 @@ const AppShell: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="relative min-h-screen flex flex-col font-sans antialiased text-text bg-bg transition-colors">
+      {/* Background Engine (SPEC v12 B1/B2/B5): Night Highway / Morning India */}
+      <NightRoadCanvas intensity={0.35} showBokeh={true} />
+
       <CommandPalette />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
 

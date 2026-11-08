@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Compass,
   Camera,
@@ -7,21 +8,23 @@ import {
   BarChart3,
   Menu,
   X,
-  Sun,
-  Moon,
   Globe,
   Search,
   Zap,
   ZapOff,
 } from "./Icons";
-import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
+import { useTheme } from "../context/ThemeContext";
+import { useReducedMotion } from "../motion/motion";
+import { ThemeToggleWipe } from "../ui/atmosphere/ThemeToggleWipe";
+import { JaaliLattice } from "../ui/atmosphere/JaaliLattice";
 import { Logo } from "./Logo";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { theme, toggleTheme, reducedMotion, setReducedMotion } = useTheme();
+  const { reducedMotion, setReducedMotion } = useTheme();
   const { language, setLanguage, currentOption } = useLanguage();
+  const isReduced = useReducedMotion();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -43,7 +46,7 @@ export const Navbar: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Primary navigation items
+  // Exactly 4 Primary Navigation Items (SPEC v12 Rule V3)
   const navLinks = [
     { to: "/", label: "Overview", icon: Compass },
     { to: "/scanner", label: "Scanner", icon: Camera },
@@ -52,176 +55,207 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border-b border-slate-200 dark:border-slate-800">
-      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-        <div className="flex items-center justify-between h-14 gap-4">
-          {/* Brand Logo & Name */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 select-none">
-            <Logo showWordmark={false} size="sm" />
-            <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-slate-100 hidden sm:inline">
-              ScamRoad
-            </span>
-          </Link>
+    <>
+      <header className="sticky top-0 z-40 w-full bg-surface/85 backdrop-blur-md border-b border-border shadow-xs">
+        <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.03} />
+        <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+          <div className="flex items-center justify-between h-14 gap-4">
+            {/* Brand Logo & Name */}
+            <Link to="/" className="flex items-center gap-2.5 shrink-0 select-none">
+              <Logo showWordmark={false} size="sm" />
+              <div className="flex flex-col">
+                <span className="font-heading font-bold text-sm tracking-tight text-text leading-none">
+                  ScamRoad
+                </span>
+                <span className="text-[10px] text-muted tracking-tight">
+                  Road defect management
+                </span>
+              </div>
+            </Link>
 
-          {/* Center: Exactly 4 Primary Navigation Items */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((item) => {
-              const Icon = item.icon;
+            {/* Desktop Navigation Links (with Sliding Active Indicator) */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive =
+                  link.to === "/"
+                    ? location.pathname === "/"
+                    : location.pathname.startsWith(link.to);
+
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`relative px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-2 ${
+                      isActive
+                        ? "text-primary font-semibold"
+                        : "text-muted hover:text-text hover:bg-bg-raised/60"
+                    }`}
+                  >
+                    {isActive && !isReduced && (
+                      <motion.div
+                        layoutId="nav-indicator-pill"
+                        className="absolute inset-0 bg-primary/10 rounded-md border border-primary/25 -z-10"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    {isActive && isReduced && (
+                      <div className="absolute inset-0 bg-primary/10 rounded-md border border-primary/25 -z-10" />
+                    )}
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right actions: Telemetry, Search, Language, Theme, Reduced Motion */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Live Telemetry Status Pill */}
+              <div
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-500 text-xs font-mono font-medium"
+                title="PostgreSQL & YOLO11n INT8 Inference Engine Online"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>LIVE</span>
+                <span className="text-border">|</span>
+                <span className="text-muted text-[11px]">74ms</span>
+              </div>
+
+              {/* Command Palette Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("scamroad:open-palette"));
+                }}
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-surface-solid border border-border text-muted hover:text-text hover:border-border-strong transition-colors cursor-pointer"
+                title="Search & Command Palette (Ctrl+K)"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span className="font-mono text-[10px] text-muted">Ctrl+K</span>
+              </button>
+
+              {/* Language Selector Dropdown */}
+              <div className="relative" ref={langDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-surface-solid border border-border text-text hover:border-border-strong transition-colors cursor-pointer"
+                  title="Switch language"
+                >
+                  <Globe className="w-3.5 h-3.5 text-primary" />
+                  <span className="font-medium hidden sm:inline">{currentOption.nativeName}</span>
+                </button>
+
+                {langDropdownOpen && (
+                  <div className="absolute right-0 mt-1.5 w-44 bg-surface-solid border border-border rounded-md shadow-lg py-1 z-50 text-xs">
+                    {LANGUAGES.map((opt) => (
+                      <button
+                        key={opt.code}
+                        type="button"
+                        onClick={() => {
+                          setLanguage(opt.code);
+                          setLangDropdownOpen(false);
+                        }}
+                        className={`w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-bg-raised transition-colors cursor-pointer ${
+                          language === opt.code
+                            ? "text-primary font-semibold"
+                            : "text-text"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{opt.flag}</span>
+                          <span>{opt.nativeName}</span>
+                        </span>
+                        <span className="text-[10px] text-muted font-mono uppercase">{opt.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Reduced motion toggle */}
+              <button
+                type="button"
+                onClick={() => setReducedMotion(!reducedMotion)}
+                className={`p-1.5 rounded-md border text-xs transition-colors cursor-pointer ${
+                  reducedMotion
+                    ? "bg-primary/10 border-primary/40 text-primary"
+                    : "bg-surface-solid hover:bg-bg-raised text-muted hover:text-text border-border"
+                }`}
+                title={reducedMotion ? "Reduce motion active" : "Full motion active"}
+                aria-label="Toggle reduced motion"
+              >
+                {reducedMotion ? <ZapOff className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
+              </button>
+
+              {/* Sunrise/Sunset Wipe Theme Toggle (A10) */}
+              <ThemeToggleWipe />
+
+              {/* Mobile menu button */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-1.5 rounded-md bg-surface-solid border border-border text-muted hover:text-text cursor-pointer"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-surface-solid px-4 py-3 space-y-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
               const isActive =
-                item.to === "/"
+                link.to === "/"
                   ? location.pathname === "/"
-                  : location.pathname.startsWith(item.to);
-
+                  : location.pathname.startsWith(link.to);
               return (
                 <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium ${
                     isActive
-                      ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      ? "bg-primary/10 text-primary font-semibold"
+                      : "text-muted hover:text-text hover:bg-bg-raised"
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
+                  <Icon className="w-4 h-4" />
+                  <span>{link.label}</span>
                 </Link>
               );
             })}
-          </nav>
-
-          {/* Right: Status, Search, Language, Theme, Mobile toggle */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Live Telemetry Status Pill */}
-            <div
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-medium"
-              title="PostgreSQL 16 & YOLO11n INT8 Inference Engine Online"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>LIVE</span>
-              <span className="text-slate-300 dark:text-slate-700">|</span>
-              <span className="text-slate-500 dark:text-slate-400 text-[11px]">74ms</span>
-            </div>
-
-            {/* Search shortcut */}
-            <button
-              onClick={() => {
-                window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
-              }}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-xs transition-colors"
-              title="Search (Ctrl+K)"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span className="font-mono text-[10px] text-slate-400">Ctrl+K</span>
-            </button>
-
-            {/* Language Dropdown */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors"
-                aria-label="Select Language"
-              >
-                <Globe className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-xs">{currentOption.nativeName}</span>
-              </button>
-
-              {langDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg py-1 z-50">
-                  {LANGUAGES.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => {
-                        setLanguage(lang.code);
-                        setLangDropdownOpen(false);
-                      }}
-                      className={`w-full px-3 py-1.5 text-left text-xs flex items-center justify-between transition-colors ${
-                        language === lang.code
-                          ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span>{lang.flag}</span>
-                        <span>{lang.nativeName}</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono uppercase">{lang.code}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Theme Toggle (Light / Dark) */}
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-colors"
-              aria-label="Toggle Theme"
-              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {theme === "dark" ? (
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
-              ) : (
-                <Moon className="w-3.5 h-3.5 text-slate-600" />
-              )}
-            </button>
-
-            {/* Reduce Motion Toggle */}
-            <button
-              onClick={() => setReducedMotion(!reducedMotion)}
-              className={`p-1.5 rounded-md border text-xs transition-colors ${
-                reducedMotion
-                  ? "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400"
-                  : "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
-              }`}
-              aria-label="Toggle Reduced Motion"
-              title={
-                reducedMotion
-                  ? "Reduced motion active (instant transitions)"
-                  : "Functional animations active (toggle to reduce)"
-              }
-            >
-              {reducedMotion ? <ZapOff className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
-            </button>
-
-            {/* Mobile Hamburger Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 rounded-md bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-              aria-label="Toggle Menu"
-            >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
           </div>
-        </div>
-      </div>
+        )}
+      </header>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 space-y-1">
-          {navLinks.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              item.to === "/"
-                ? location.pathname === "/"
-                : location.pathname.startsWith(item.to);
+      {/* Mobile Bottom Tab Bar (SPEC v12 Section 5) */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/90 backdrop-blur-md border-t border-border flex items-center justify-around h-14">
+        {navLinks.map((link) => {
+          const Icon = link.icon;
+          const isActive =
+            link.to === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(link.to);
 
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                  isActive
-                    ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
-              >
-                <Icon className="w-4 h-4 text-slate-500" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </header>
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium transition-colors ${
+                isActive ? "text-primary font-semibold" : "text-muted"
+              }`}
+            >
+              <Icon className="w-4 h-4 mb-0.5" />
+              <span>{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
+import { JaaliLattice } from "../ui/atmosphere/JaaliLattice";
 
 export const Footer: React.FC = () => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
@@ -20,36 +21,38 @@ export const Footer: React.FC = () => {
   }, []);
 
   return (
-    <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-xs">
-      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5">
+    <footer className="relative mt-auto border-t border-border bg-surface-solid text-muted text-xs overflow-hidden">
+      <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.025} />
+      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Left: Version + API status */}
           <div className="flex items-center gap-2">
             <span
               className={`w-2 h-2 rounded-full ${
-                isOnline ? "bg-emerald-500" : "bg-rose-500"
+                isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
               }`}
               title={isOnline ? "API connected" : "API offline"}
             />
-            <span className="font-medium text-slate-700 dark:text-slate-300">
-              ScamRoad v1.1
+            <span className="font-medium text-text">
+              ScamRoad
             </span>
+            <span className="text-[10px] font-mono text-faint">v1.2</span>
           </div>
 
-          {/* Center: Student Disclaimer */}
+          {/* Center: Student Disclaimer (Mandatory Rule V8) */}
           <div className="text-center">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-muted">
               Student research project. Not an official government system. Not safety-certified.
             </p>
           </div>
 
           {/* Right: Technical Links */}
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-4 text-xs font-medium">
             <a
               href="https://github.com"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              className="hover:text-text transition-colors"
             >
               GitHub
             </a>
@@ -57,13 +60,13 @@ export const Footer: React.FC = () => {
               href="http://localhost:8000/docs"
               target="_blank"
               rel="noreferrer"
-              className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              className="hover:text-text transition-colors"
             >
               API Docs
             </a>
             <Link
               to="/benchmarks"
-              className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+              className="hover:text-text transition-colors"
             >
               Benchmarks
             </Link>
