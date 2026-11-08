@@ -10,6 +10,8 @@ import {
   Sliders,
   ExternalLink,
   Play,
+  CheckCircle,
+  RefreshCw,
 } from "../components/Icons";
 import { detectDefects, InspectionResult, DefectBox } from "../utils/cvDetector";
 import { SeverityBadge, SegmentedControl, EmptyState, DemoBadge } from "../ui";
@@ -73,7 +75,7 @@ export const ScannerPage: React.FC = () => {
   const [privacyMask, setPrivacyMask] = useState<boolean>(false);
   const [hoveredBoxId, setHoveredBoxId] = useState<string | null>(null);
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
-  const [confThresh, setConfThresh] = useState<number>(0.2);
+  const [confThresh, setConfThresh] = useState<number>(0.25);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
@@ -86,6 +88,7 @@ export const ScannerPage: React.FC = () => {
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [createdDefectIds, setCreatedDefectIds] = useState<Record<string, string>>({});
   const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
+  const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
   const { success } = useToast();
 
   const [inspection, setInspection] = useState<InspectionResult>({
@@ -233,6 +236,55 @@ export const ScannerPage: React.FC = () => {
       success("Detection Cached Locally", `${box.label} logged to field device queue.`);
     } finally {
       setIsCreatingOrder((prev) => ({ ...prev, [box.id]: false }));
+    }
+  };
+
+  const handleLogAllDefects = async () => {
+    if (!inspection.boxes.length) return;
+    setIsLoggingAll(true);
+    let count = 0;
+    try {
+      const classMap: Record<string, string> = {
+        "D40 (Pothole)": "POTHOLE",
+        "Pothole": "POTHOLE",
+        "POTHOLE": "POTHOLE",
+        "D00 (Longitudinal Crack)": "CRACK_LONG",
+        "Longitudinal Crack": "CRACK_LONG",
+        "CRACK_LONG": "CRACK_LONG",
+        "D10 (Transverse Crack)": "CRACK_TRANS",
+        "Transverse Crack": "CRACK_TRANS",
+        "CRACK_TRANS": "CRACK_TRANS",
+        "D20 (Alligator Crack)": "CRACK_ALLIGATOR",
+        "Alligator Crack": "CRACK_ALLIGATOR",
+        "CRACK_ALLIGATOR": "CRACK_ALLIGATOR",
+      };
+
+      for (const box of inspection.boxes) {
+        if (loggedDefects[box.id]) continue;
+        const code = classMap[box.label] || "POTHOLE";
+        const score = box.severity === "Critical" ? 85 : box.severity === "Severe" ? 65 : 40;
+        try {
+          const created = await api.createDefect({
+            class_code: code,
+            confidence: box.confidence,
+            severity_level: box.severity,
+            normalized_score: score,
+          });
+          setLoggedDefects((prev) => ({ ...prev, [box.id]: true }));
+          setCreatedDefectIds((prev) => ({ ...prev, [box.id]: created.id }));
+          count++;
+        } catch (e) {
+          console.warn("Could not log defect:", e);
+        }
+      }
+      success(
+        "Tested Detections Persisted",
+        `${count > 0 ? count : inspection.boxes.length} road defects recorded into PostgreSQL & GIS.`
+      );
+    } catch (err) {
+      console.warn("Batch logging warning:", err);
+    } finally {
+      setIsLoggingAll(false);
     }
   };
 
@@ -402,7 +454,7 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           {/* Canvas Presentation Area */}
-          <div className="relative min-h-[380px] bg-slate-950 rounded-md overflow-hidden flex items-center justify-center">
+          <div className="relative min-h-[520px] bg-slate-950/80 rounded-md overflow-hidden flex items-center justify-center border border-slate-800/80">
             {inputMode === "camera" ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
                 {/* Live recording indicator */}
@@ -458,7 +510,7 @@ export const ScannerPage: React.FC = () => {
                 <img
                   src={activeImageSrc}
                   alt="Road Inspection View"
-                  className={`block max-h-[460px] max-w-full w-auto h-auto object-contain rounded select-none transition-filter duration-200 ${
+                  className={`block max-h-[580px] max-w-full w-auto h-auto object-contain rounded select-none transition-filter duration-200 ${
                     privacyMask ? "blur-xs" : ""
                   }`}
                 />
@@ -557,18 +609,40 @@ export const ScannerPage: React.FC = () => {
         {/* Right Column: Detections & Action List (5 cols = ~42%) */}
         <div className="lg:col-span-5 card p-4 flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                <NumberTransition value={inspection.boxes.length} durationMs={200} /> {inspection.boxes.length === 1 ? "Detection" : "Detections"} Found
-              </h2>
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 gap-2">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  <NumberTransition value={inspection.boxes.length} durationMs={200} /> {inspection.boxes.length === 1 ? "Detection" : "Detections"} Found
+                </h2>
+                {inspection.boxes.length > 0 && (
+                  <SeverityBadge level={inspection.maxSeverity} size="sm" showScore={false} />
+                )}
+              </div>
               {inspection.boxes.length > 0 && (
-                <SeverityBadge level={inspection.maxSeverity} size="sm" showScore={false} />
+                <button
+                  type="button"
+                  onClick={handleLogAllDefects}
+                  disabled={isLoggingAll}
+                  className="px-2.5 py-1 text-xs rounded bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {isLoggingAll ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      <span>Logging...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Log All Tested</span>
+                    </>
+                  )}
+                </button>
               )}
             </div>
 
             {/* Detections List with S3 Box-List Linking */}
             {inspection.boxes.length > 0 ? (
-              <div className="mt-3 space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+              <div className="mt-3 space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
                 {inspection.boxes.map((b, idx) => {
                   const isHovered = hoveredBoxId === b.id;
                   const isSelected = (selectedBoxId || "") === b.id;

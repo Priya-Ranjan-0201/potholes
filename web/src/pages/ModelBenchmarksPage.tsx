@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, ModelEvaluationResponse } from "../api/client";
 import {
@@ -263,10 +263,6 @@ const pct = (v: number | undefined | null, decimals = 1): string =>
   `${((typeof v === "number" && !isNaN(v) ? v : 0) * 100).toFixed(decimals)}%`;
 
 export const ModelBenchmarksPage: React.FC = () => {
-  const [hoveredCell, setHoveredCell] = useState<{ r: number; c: number } | null>(null);
-  const [selectedCell, setSelectedCell] = useState<{ r: number; c: number } | null>(null);
-  const [prThreshold, setPrThreshold] = useState<number>(0.50);
-
   const { data: apiEval } = useQuery({
     queryKey: ["modelEvaluationReport"],
     queryFn: api.getModelEvaluation,
@@ -279,33 +275,6 @@ export const ModelBenchmarksPage: React.FC = () => {
   const cm = evaluation.confusion_matrix || BENCHMARK_DATA.confusion_matrix;
   const devices = evaluation.device_matrix || BENCHMARK_DATA.device_matrix || [];
   const comparisons = evaluation.model_comparisons || BENCHMARK_DATA.model_comparisons || [];
-
-  const interpolatedPR = useMemo(() => {
-    // Exact piecewise linear interpolation between stored Measured points
-    const points = [
-      { t: 0.10, p: 0.680, r: 0.960 },
-      { t: 0.25, p: 0.780, r: 0.930 },
-      { t: 0.50, p: 0.866, r: 0.840 },
-      { t: 0.70, p: 0.915, r: 0.742 },
-      { t: 0.85, p: 0.972, r: 0.520 },
-    ];
-    if (prThreshold <= points[0].t) return { p: points[0].p, r: points[0].r };
-    if (prThreshold >= points[points.length - 1].t) {
-      const last = points[points.length - 1];
-      return { p: last.p, r: last.r };
-    }
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      if (prThreshold >= p1.t && prThreshold <= p2.t) {
-        const factor = (prThreshold - p1.t) / (p2.t - p1.t);
-        const p = p1.p + factor * (p2.p - p1.p);
-        const r = p1.r + factor * (p2.r - p1.r);
-        return { p, r };
-      }
-    }
-    return { p: 0.866, r: 0.840 };
-  }, [prThreshold]);
 
   return (
     <div className="space-y-6">
@@ -381,18 +350,13 @@ export const ModelBenchmarksPage: React.FC = () => {
                   <th className="text-left text-[11px] text-slate-400 font-normal pb-2 pr-2">
                     True \ Pred
                   </th>
-                  {cm.classes.map((cls, cIdx) => {
+                  {cm.classes.map((cls) => {
                     const formatted = formatClassName(cls);
                     const fullName = getFullClassName(cls);
-                    const isHoveredCol = hoveredCell?.c === cIdx;
                     return (
                       <th
                         key={cls}
-                        className={`text-[11px] font-mono font-medium pb-2 px-1 text-center whitespace-nowrap transition-colors ${
-                          isHoveredCol
-                            ? "text-blue-600 dark:text-blue-400 font-bold"
-                            : "text-slate-700 dark:text-slate-300"
-                        }`}
+                        className="text-[11px] font-mono font-medium text-slate-700 dark:text-slate-300 pb-2 px-1 text-center whitespace-nowrap"
                         title={fullName}
                       >
                         {formatted}
@@ -406,16 +370,11 @@ export const ModelBenchmarksPage: React.FC = () => {
                   const rawRowName = cm.classes[rIdx];
                   const formattedRowName = formatClassName(rawRowName);
                   const fullRowName = getFullClassName(rawRowName);
-                  const isHoveredRow = hoveredCell?.r === rIdx;
 
                   return (
                     <tr key={rawRowName}>
                       <td
-                        className={`text-left font-mono text-[11px] pr-2 py-1.5 font-medium whitespace-nowrap transition-colors ${
-                          isHoveredRow
-                            ? "text-blue-600 dark:text-blue-400 font-bold"
-                            : "text-slate-700 dark:text-slate-300"
-                        }`}
+                        className="text-left font-mono text-[11px] text-slate-700 dark:text-slate-300 pr-2 py-1.5 font-medium whitespace-nowrap"
                         title={fullRowName}
                       >
                         {formattedRowName}
@@ -423,30 +382,13 @@ export const ModelBenchmarksPage: React.FC = () => {
                       {row.map((val, cIdx) => {
                         const count = cm.counts[rIdx]?.[cIdx] ?? 0;
                         const isDiag = rIdx === cIdx;
-                        const isCellHovered = hoveredCell?.r === rIdx && hoveredCell?.c === cIdx;
-                        const isCellSelected = selectedCell?.r === rIdx && selectedCell?.c === cIdx;
 
                         return (
                           <td key={cIdx} className="p-1">
                             <div
-                              onMouseEnter={() => setHoveredCell({ r: rIdx, c: cIdx })}
-                              onMouseLeave={() => setHoveredCell(null)}
-                              onClick={() =>
-                                setSelectedCell(
-                                  selectedCell?.r === rIdx && selectedCell?.c === cIdx
-                                    ? null
-                                    : { r: rIdx, c: cIdx }
-                                )
-                              }
-                              className={`py-2 px-1 rounded font-mono text-[11px] cursor-pointer transition-all ${
-                                isCellSelected
-                                  ? "ring-2 ring-blue-500 shadow-md font-bold"
-                                  : isCellHovered
-                                  ? "ring-1 ring-blue-400"
-                                  : ""
-                              } ${
+                              className={`py-2 px-1 rounded font-mono text-[11px] transition-colors ${
                                 isDiag
-                                  ? "bg-blue-600 text-white font-semibold shadow-xs"
+                                  ? "bg-blue-600 text-white font-semibold shadow-sm"
                                   : val > 0.05
                                   ? "bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
                                   : "text-slate-400 dark:text-slate-600"
@@ -454,7 +396,7 @@ export const ModelBenchmarksPage: React.FC = () => {
                               style={{
                                 opacity: isDiag ? Math.max(0.75, val) : 0.85,
                               }}
-                              title={`${fullRowName} → ${getFullClassName(cm.classes[cIdx])}: ${count} (${(val * 100).toFixed(1)}%) — Click to inspect`}
+                              title={`${fullRowName} → ${getFullClassName(cm.classes[cIdx])}: ${count} (${(val * 100).toFixed(1)}%)`}
                             >
                               {(val * 100).toFixed(0)}%
                             </div>
@@ -467,28 +409,6 @@ export const ModelBenchmarksPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-
-          {selectedCell && (
-            <div className="mt-2 p-2.5 rounded bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 text-xs flex items-center justify-between">
-              <div>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  {getFullClassName(cm.classes[selectedCell.r])} &rarr; {getFullClassName(cm.classes[selectedCell.c])}
-                </span>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  {cm.counts[selectedCell.r]?.[selectedCell.c]} instances ({(cm.normalized[selectedCell.r]?.[selectedCell.c] * 100).toFixed(1)}% of true class).{" "}
-                  {selectedCell.r === selectedCell.c
-                    ? "Accurate true positive detections."
-                    : "Confusion failure mode observed in RDD2022 validation."}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedCell(null)}
-                className="text-slate-400 hover:text-slate-600 text-xs"
-              >
-                Clear
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Per-Class Metrics Table (6 cols) */}
@@ -524,129 +444,13 @@ export const ModelBenchmarksPage: React.FC = () => {
                     <td className="text-right font-mono">{(metrics.precision * 100).toFixed(1)}%</td>
                     <td className="text-right font-mono">{(metrics.recall * 100).toFixed(1)}%</td>
                     <td className="text-right font-mono">{(metrics.f1 * 100).toFixed(1)}%</td>
-                    <td className="text-right">
-                      <div className="inline-flex items-center justify-end gap-2">
-                        <div className="w-14 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 rounded-full transition-all duration-600"
-                            style={{ width: `${Math.round(metrics.mAP50 * 100)}%` }}
-                          />
-                        </div>
-                        <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
-                          {(metrics.mAP50 * 100).toFixed(1)}%
-                        </span>
-                      </div>
+                    <td className="text-right font-mono font-semibold text-blue-600 dark:text-blue-400">
+                      {(metrics.mAP50 * 100).toFixed(1)}%
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-
-      {/* 3B. Measured Precision-Recall Curve */}
-      <div className="card p-4 space-y-3">
-        <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Precision-Recall Trade-off Curve
-            </h2>
-            <p className="text-xs text-slate-500">
-              Interactive confidence threshold calibration derived from stored RDD2022 validation observations
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span>
-              Threshold: <strong className="text-blue-600 dark:text-blue-400 font-semibold">{prThreshold.toFixed(2)}</strong>
-            </span>
-            <span>
-              P: <strong className="text-slate-800 dark:text-slate-200">{(interpolatedPR.p * 100).toFixed(1)}%</strong>
-            </span>
-            <span>
-              R: <strong className="text-slate-800 dark:text-slate-200">{(interpolatedPR.r * 100).toFixed(1)}%</strong>
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-          <div className="md:col-span-2 relative bg-slate-950 p-4 rounded border border-slate-800 overflow-hidden">
-            <svg viewBox="0 0 400 160" className="w-full h-36">
-              {/* Axes and grid */}
-              <line x1="40" y1="20" x2="40" y2="140" stroke="#334155" strokeWidth="1" />
-              <line x1="40" y1="140" x2="380" y2="140" stroke="#334155" strokeWidth="1" />
-              <text x="15" y="25" fill="#64748B" fontSize="10" fontFamily="monospace">1.0</text>
-              <text x="15" y="80" fill="#64748B" fontSize="10" fontFamily="monospace">0.8</text>
-              <text x="15" y="140" fill="#64748B" fontSize="10" fontFamily="monospace">0.6</text>
-              <text x="40" y="155" fill="#64748B" fontSize="10" fontFamily="monospace">0.5</text>
-              <text x="200" y="155" fill="#64748B" fontSize="10" fontFamily="monospace">0.75</text>
-              <text x="360" y="155" fill="#64748B" fontSize="10" fontFamily="monospace">1.0 R</text>
-
-              {/* PR Curve Path: mapped from recall [0.5, 1.0] -> [40, 360] and precision [0.6, 1.0] -> [140, 20] */}
-              <path
-                d="M 60 28 Q 120 38 200 55 T 320 85 T 360 115"
-                fill="none"
-                stroke="#3B82F6"
-                strokeWidth="2.5"
-                strokeDasharray="400"
-                strokeDashoffset="0"
-                className="transition-all duration-600"
-              />
-
-              {/* Dynamic point indicator */}
-              <circle
-                cx={40 + ((interpolatedPR.r - 0.5) / 0.5) * 320}
-                cy={140 - ((interpolatedPR.p - 0.6) / 0.4) * 120}
-                r="5"
-                fill="#3B82F6"
-                stroke="#FFFFFF"
-                strokeWidth="2"
-                className="transition-all duration-150 shadow-md"
-              />
-            </svg>
-          </div>
-
-          <div className="space-y-3 text-xs bg-slate-50 dark:bg-slate-900/40 p-3 rounded border border-slate-200 dark:border-slate-800">
-            <div>
-              <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Calibrate Detection Threshold
-              </label>
-              <input
-                type="range"
-                min="0.10"
-                max="0.85"
-                step="0.01"
-                value={prThreshold}
-                onChange={(e) => setPrThreshold(parseFloat(e.target.value))}
-                className="w-full accent-blue-600"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-0.5">
-                <span>0.10 (High Recall)</span>
-                <span>0.50 (Balanced)</span>
-                <span>0.85 (High Precision)</span>
-              </div>
-            </div>
-
-            <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Effective Precision:</span>
-                <strong className="font-mono text-slate-800 dark:text-slate-200">{(interpolatedPR.p * 100).toFixed(1)}%</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Effective Recall:</span>
-                <strong className="font-mono text-slate-800 dark:text-slate-200">{(interpolatedPR.r * 100).toFixed(1)}%</strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Harmonic F1:</span>
-                <strong className="font-mono text-emerald-600 dark:text-emerald-400">
-                  {(((2 * interpolatedPR.p * interpolatedPR.r) / (interpolatedPR.p + interpolatedPR.r)) * 100).toFixed(1)}%
-                </strong>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-slate-400 leading-tight">
-              Calculated via piecewise linear interpolation between verified test observations. Zero synthetic or smoothed values.
-            </p>
           </div>
         </div>
       </div>
@@ -708,19 +512,7 @@ export const ModelBenchmarksPage: React.FC = () => {
                       )}
                     </td>
                     <td className="text-right font-mono font-medium">
-                      {d.latency_p50_ms != null ? (
-                        <div className="inline-flex items-center justify-end gap-2">
-                          <div className="w-16 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                            <div
-                              className="h-full bg-emerald-500 rounded-full transition-all duration-600"
-                              style={{ width: `${Math.min(100, Math.round((d.latency_p50_ms / 100) * 100))}%` }}
-                            />
-                          </div>
-                          <span>{num(d.latency_p50_ms, 1)} ms</span>
-                        </div>
-                      ) : (
-                        "—"
-                      )}
+                      {d.latency_p50_ms != null ? `${num(d.latency_p50_ms, 1)} ms` : "—"}
                     </td>
                     <td className="text-right font-mono font-medium">
                       {d.fps != null ? `${num(d.fps, 1)} FPS` : "—"}

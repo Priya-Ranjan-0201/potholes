@@ -136,3 +136,4 @@ MODEL BENCHMARKS
     curve (no fabricated values; interpolate only between stored points and mark it as such).
  B4 comparison toggles (FP32 <-> INT8, model A <-> B): numbers and bars morph in 300 ms.
  B5 device latency table: bars proportional to measured ms; unmeasured rows show "Not measured" with no bar.
+

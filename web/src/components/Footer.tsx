@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-xs">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Left: Version + API status */}
           <div className="flex items-center gap-2">

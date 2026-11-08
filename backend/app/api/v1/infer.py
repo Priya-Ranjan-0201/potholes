@@ -41,6 +41,7 @@ def get_inference_engine(conf_thresh: float = 0.15, iou_thresh: float = 0.40):
     """Load pure ONNX Runtime engine without AGPL Ultralytics runtime dependency."""
     from edge.agent.infer import EdgeInferenceEngine
     onnx_paths = [
+        "runs/export/best_yolo11_int8.onnx",
         "runs/export/best_int8.onnx",
         "runs/export/best.onnx",
         "ml/runs/pothole_yolov8n/weights/best_int8.onnx",
@@ -113,6 +114,17 @@ async def infer_road_defects(
 
             # Discard boundary artifacts spanning >96% of the entire image
             if (bw / w > 0.96) and (bh / h > 0.96):
+                continue
+
+            # Civil engineering road plane constraint:
+            # Road distress (potholes/cracks) cannot exist in the sky / upper horizon.
+            # Discard detections whose center is located in the upper 18% of the frame (treetop/skyline/overpass).
+            cy = (bx[1] + bx[3]) / 2.0
+            if cy < (h * 0.18) and bx[3] < (h * 0.22):
+                continue
+
+            # Discard horizontal scanner line artifacts
+            if (bw / w > 0.85) and (bh / h < 0.04):
                 continue
 
             x_pct = round((bx[0] / w) * 100, 1)

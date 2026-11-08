@@ -1,5 +1,7 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { NumberTransition } from "../motion/NumberTransition";
+import { useReducedMotion } from "../motion/motion";
 
 export interface StatCardProps {
   label: string;
@@ -26,11 +28,22 @@ export const StatCard: React.FC<StatCardProps> = ({
   className = "",
   onClick,
 }) => {
+  const isReduced = useReducedMotion();
+
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      className={`card p-4 flex flex-col justify-between transition-colors ${onClick ? "cursor-pointer hover:border-slate-400 dark:hover:border-slate-600" : ""
-        } ${className}`}
+      whileHover={
+        isReduced
+          ? undefined
+          : {
+              y: -2,
+              transition: { duration: 0.16, ease: "easeOut" },
+            }
+      }
+      className={`card p-4 flex flex-col justify-between transition-all duration-200 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700/80 ${
+        onClick ? "cursor-pointer" : ""
+      } ${className}`}
     >
       <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
         <span>{label}</span>
@@ -46,12 +59,13 @@ export const StatCard: React.FC<StatCardProps> = ({
         </span>
         {change && (
           <span
-            className={`text-xs font-medium flex items-center gap-0.5 transition-opacity duration-200 ${change.trend === "up"
-              ? "text-emerald-600 dark:text-emerald-400"
-              : change.trend === "down"
+            className={`text-xs font-medium flex items-center gap-0.5 transition-opacity duration-200 ${
+              change.trend === "up"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : change.trend === "down"
                 ? "text-rose-600 dark:text-rose-400"
                 : "text-slate-500 dark:text-slate-400"
-              }`}
+            }`}
           >
             {change.trend === "up" && "↑"}
             {change.trend === "down" && "↓"}
@@ -66,6 +80,6 @@ export const StatCard: React.FC<StatCardProps> = ({
           {subtext}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };

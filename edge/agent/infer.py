@@ -160,6 +160,17 @@ class EdgeInferenceEngine:
         self.input_name = self.session.get_inputs()[0].name
         self.output_names = [o.name for o in self.session.get_outputs()]
 
+        # Parse class names from ONNX model metadata if present
+        meta = self.session.get_modelmeta().custom_metadata_map
+        if "names" in meta:
+            try:
+                import ast
+                parsed_names = ast.literal_eval(meta["names"])
+                if isinstance(parsed_names, dict):
+                    self.class_names = {int(k): str(v).upper() for k, v in parsed_names.items()}
+            except Exception:
+                pass
+
     def _load_taxonomy(self, tax_path: Path) -> None:
         """Load class labels from taxonomy YAML."""
         with open(tax_path, encoding="utf-8") as f:

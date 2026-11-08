@@ -144,32 +144,52 @@ export const DashboardPage: React.FC = () => {
     .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
     .slice(0, 6);
 
-  // Distribution chart data computed from real database stats
+  // Distribution chart data computed strictly from real database stats
   const defectDistributionData = useMemo(() => {
     const classStats = stats?.defects_by_class || {};
-    return [
+    const potholeCount = classStats["POTHOLE"] ?? 0;
+    const crackLongCount = classStats["CRACK_LONG"] ?? 0;
+    const crackAlliCount = classStats["CRACK_ALLIGATOR"] ?? 0;
+    const crackTransCount = classStats["CRACK_TRANS"] ?? 0;
+
+    const crit = stats?.defects_by_severity?.["Critical"] ?? 0;
+    const sev = stats?.defects_by_severity?.["Severe"] ?? 0;
+    const mod = stats?.defects_by_severity?.["Moderate"] ?? 0;
+
+    const items = [
       {
         name: "Potholes (D40)",
-        count: classStats["POTHOLE"] ?? 37,
-        critical: 2,
-        severe: 22,
-        moderate: 13,
+        count: potholeCount,
+        critical: potholeCount > 0 ? crit : 0,
+        severe: potholeCount > 0 ? sev : 0,
+        moderate: potholeCount > 0 ? mod : 0,
       },
       {
         name: "Longitudinal Cracks (D00)",
-        count: classStats["CRACK_LONG"] ?? 33,
-        critical: 1,
-        severe: 15,
-        moderate: 17,
+        count: crackLongCount,
+        critical: 0,
+        severe: 0,
+        moderate: crackLongCount,
       },
       {
         name: "Alligator Cracks (D20)",
-        count: classStats["CRACK_ALLIGATOR"] ?? 3,
+        count: crackAlliCount,
         critical: 0,
         severe: 0,
-        moderate: 3,
+        moderate: crackAlliCount,
+      },
+      {
+        name: "Transverse Cracks (D10)",
+        count: crackTransCount,
+        critical: 0,
+        severe: 0,
+        moderate: crackTransCount,
       },
     ];
+
+    // If only potholes exist, only return potholes. If nothing exists, show baseline zero.
+    const activeItems = items.filter((item) => item.count > 0);
+    return activeItems.length > 0 ? activeItems : [items[0]];
   }, [stats]);
 
   // Filter trends: only distinct dates with detections or activity
@@ -415,7 +435,7 @@ export const DashboardPage: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Computed from 73 real RDD2022-India neural detections</span>
+                  <span>Computed from {stats?.total_defects ?? 0} tested road distress detections</span>
                   <Link to="/maintenance?tab=defects" className="text-blue-600 dark:text-blue-400 hover:underline">
                     View raw defect catalog &rarr;
                   </Link>
