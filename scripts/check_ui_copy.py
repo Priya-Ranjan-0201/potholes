@@ -60,7 +60,13 @@ def scan_files(root_dir="web/src"):
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
                 
+            is_data_zone = "ui/data" in path.replace("\\", "/") or "ui\\data" in path
+
             for idx, line in enumerate(lines, 1):
+                # Lint rule: components under web/src/ui/data cannot import from web/src/ui/atmosphere
+                if is_data_zone and "ui/atmosphere" in line:
+                    violations.append((path, idx, line.strip(), "Data zone cannot import from Atmosphere zone"))
+
                 # Check banned strings
                 for pattern in BANNED_STRINGS:
                     if re.search(pattern, line, re.IGNORECASE):

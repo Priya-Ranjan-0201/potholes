@@ -1,20 +1,19 @@
-# ScamRoad Asset Credits & Licensing (v8)
+# Asset Credits & Licences (SPEC v12)
 
-In strict accordance with Rule F4 of the frontend specification:
-- All artwork, illustrations, and icons in the "Truck Art Meets Night Highway" design system are original hand-crafted SVG code created specifically for ScamRoad or open-licensed assets.
-- No religious symbols, deities, copyrighted characters, or real people are depicted.
-- No government emblems, logos, or seals are utilized.
+All visual assets, typography, icons, and illustrations used in ScamRoad are strictly open-licensed (MIT / Apache 2.0 / SIL Open Font License) or custom hand-crafted SVG. Zero copyrighted, trademarked, or proprietary brand elements.
 
 ## 1. Typography
-- **Plus Jakarta Sans:** Open Font License (OFL) by Tokotype.
-- **Inter:** Open Font License (OFL) by Rasmus Andersson.
-- **JetBrains Mono:** Open Font License (OFL) by JetBrains.
-- **Noto Sans Indic Fonts (Devanagari, Gurmukhi, Tamil, Telugu, Bengali):** Open Font License (OFL) by Google.
+* **Plus Jakarta Sans**: Designed by Tokotype (SIL Open Font License 1.1)
+* **Inter**: Designed by Rasmus Andersson (SIL Open Font License 1.1)
+* **JetBrains Mono**: Designed by JetBrains (SIL Open Font License 1.1)
+* **Noto Sans Indic** (Devanagari, Gurmukhi, Tamil, Telugu, Bengali): Designed by Google Fonts (SIL Open Font License 1.1)
 
-## 2. Iconography & Illustrations
-- **Road Sign System (`web/src/ui/Sign.tsx`):** Original geometric SVG vector signs following standard international and highway traffic sign shapes (Circle, Triangle, Diamond, Octagon).
-- **Truck & Auto-Rickshaw Silhouettes (`web/src/ui/RoadLoader.tsx`):** Original hand-drawn geometric vector art.
-- **Truck-Art Ornaments (`web/src/ui/OrnamentFrame.tsx`):** Original geometric scalloped garland patterns, chevron reflector bands, and corner flourishes.
-- **"Gaddha" Crater Mascot (`web/src/ui/EmptyState.tsx`):** Original hand-drawn geometric SVG mascot representing a friendly road crater.
-- **System Icons (`web/src/components/Icons.tsx`):** MIT Licensed feather/lucide iconography.
+## 2. Iconography
+* **Lucide Icons**: Community fork of Feather Icons (ISC / MIT License)
+* **Custom SVG Icons**: Road-sign geometric badges (circle, triangle, diamond, octagon), lane marker, asphalt distress icons (custom hand-coded SVG, MIT License).
 
+## 3. Illustrations & Backgrounds
+* **Night Highway Perspective Road Canvas**: Custom lightweight mathematical 2D canvas projection by ScamRoad engineering team (MIT License).
+* **Headlight Bokeh & Horizon Glow**: Custom CSS/Canvas ambient particle field (MIT License).
+* **Faint Jaali Geometric Lattice**: Original mathematical repeating pattern (MIT License).
+* **Road Distress Sample Photography**: RDD2022 dataset under CC BY-SA 4.0 (for research benchmarking).
