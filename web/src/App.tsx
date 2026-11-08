@@ -16,6 +16,8 @@ import { ScannerPage } from "./pages/ScannerPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { ModelBenchmarksPage } from "./pages/ModelBenchmarksPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { LandingPage } from "./pages/LandingPage";
+import { LoginPage } from "./pages/LoginPage";
 import { NightRoadCanvas } from "./ui/atmosphere";
 
 const queryClient = new QueryClient({
@@ -130,6 +132,10 @@ const AppShell: React.FC = () => {
               <Route path="/scanner" element={<ScannerPage />} />
               <Route path="/maintenance" element={<MaintenancePage />} />
               <Route path="/benchmarks" element={<ModelBenchmarksPage />} />
+
+              {/* Public Atmosphere Pages */}
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
 
               {/* Compatibility Redirects */}
               <Route path="/defects" element={<Navigate to="/maintenance?tab=defects" replace />} />
