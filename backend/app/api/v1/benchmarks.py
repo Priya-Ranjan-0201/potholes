@@ -239,3 +239,4 @@ async def get_model_evaluation() -> Dict[str, Any]:
         ],
         "limitations_note": "Student research project evaluated on RDD2022-India dataset subset. Not an official government benchmark. Severity rubric is a project method, not an official standard."
     }
+

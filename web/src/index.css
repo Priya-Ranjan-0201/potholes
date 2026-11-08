@@ -169,6 +169,40 @@
   background-color: var(--bg-subtle);
 }
 
+/* Functional Scanner S1 Scanline Animation */
+@keyframes scanline-sweep {
+  0% {
+    transform: translateY(-2px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Functional S2 Detection Draw */
+@keyframes detection-box-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Accessibility: Honour reduced motion strictly */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

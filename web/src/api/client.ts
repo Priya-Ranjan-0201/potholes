@@ -1,5 +1,5 @@
 /**
- * Typed ScamRoad API Client adhering to Rule A6.
+ * Typed ScamRoad API Client adhering to Specification.
  * Enforces JWT Bearer authentication, UTC timestamps, and standardized error envelopes.
  */
 

@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../api/client";
+import { motion } from "framer-motion";
+import { api, WardStat } from "../api/client";
+import { useReducedMotion } from "../motion/motion";
+import { SidePanel } from "../motion/SidePanel";
 import {
   Activity,
   Layers,
@@ -31,7 +34,9 @@ import { useToast } from "../context/ToastContext";
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { info } = useToast();
+  const isReduced = useReducedMotion();
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
+  const [inspectingWard, setInspectingWard] = useState<WardStat | null>(null);
   const [trendView, setTrendView] = useState<"distribution" | "daily">("distribution");
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
@@ -403,9 +408,9 @@ export const DashboardPage: React.FC = () => {
                         }}
                       />
                       <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="critical" name="Critical" fill="#EF4444" radius={[3, 3, 0, 0]} />
-                      <Bar dataKey="severe" name="Severe" fill="#F59E0B" radius={[3, 3, 0, 0]} />
-                      <Bar dataKey="moderate" name="Moderate" fill="#3B82F6" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="critical" name="Critical" fill="#EF4444" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
+                      <Bar dataKey="severe" name="Severe" fill="#F59E0B" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
+                      <Bar dataKey="moderate" name="Moderate" fill="#3B82F6" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -508,7 +513,10 @@ export const DashboardPage: React.FC = () => {
                               ? "bg-blue-50/50 dark:bg-blue-950/30"
                               : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
                           }`}
-                          onClick={() => setSelectedCorridor(w.ward_id)}
+                          onClick={() => {
+                            setSelectedCorridor(w.ward_id);
+                            setInspectingWard(w);
+                          }}
                         >
                           <td className="font-medium text-slate-900 dark:text-slate-100">
                             <span>{w.ward_name}</span>
@@ -680,8 +688,11 @@ export const DashboardPage: React.FC = () => {
                 recentDefectsData.items.slice(0, 5).map((def) => {
                   const seenDate = new Date(def.last_seen);
                   return (
-                    <div
+                    <motion.div
                       key={def.id}
+                      initial={isReduced ? false : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
                       onClick={() => navigate(`/maintenance?defectId=${def.id}&tab=defects`)}
                       className="flex items-start gap-2.5 text-xs p-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
                     >
@@ -702,7 +713,7 @@ export const DashboardPage: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })
               ) : (
@@ -714,6 +725,72 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Corridor Detail Side Panel (O4) */}
+      <SidePanel
+        isOpen={!!inspectingWard}
+        onClose={() => setInspectingWard(null)}
+        title={inspectingWard?.ward_name || "Corridor Detail"}
+        subtitle={inspectingWard?.ward_code ? `Division Code: ${inspectingWard.ward_code} · Sector Operations` : undefined}
+      >
+        {inspectingWard && (
+          <div className="space-y-5 text-xs">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-400 block mb-1">Total Defects</span>
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100">{inspectingWard.total_defects}</span>
+              </div>
+              <div className="p-3 rounded-md bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50">
+                <span className="text-rose-600 dark:text-rose-400 block mb-1">Critical Hazards</span>
+                <span className="text-xl font-bold font-mono text-rose-700 dark:text-rose-300">{inspectingWard.critical_defects}</span>
+              </div>
+              <div className="p-3 rounded-md bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50">
+                <span className="text-emerald-600 dark:text-emerald-400 block mb-1">Repaired</span>
+                <span className="text-xl font-bold font-mono text-emerald-700 dark:text-emerald-300">{inspectingWard.repaired_defects}</span>
+              </div>
+              <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-400 block mb-1">Resolution Rate</span>
+                <span className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100">
+                  {inspectingWard.total_defects > 0 ? Math.round((inspectingWard.repaired_defects / inspectingWard.total_defects) * 100) : 100}%
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 space-y-2">
+              <div className="flex justify-between items-center text-slate-700 dark:text-slate-300 font-medium">
+                <span>Civil Maintenance Status</span>
+                <span className="font-mono text-[11px] text-slate-500">Ward ID: {inspectingWard.ward_id.slice(0, 8)}</span>
+              </div>
+              <p className="text-slate-500 text-[11px] leading-relaxed">
+                Corridor distress profiles are tracked via automated vision patrols and citizen geo-reports. High-severity potholes and structural cracks in this sector are scheduled according to municipal SLA deadlines.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+              <button
+                onClick={() => {
+                  const code = inspectingWard.ward_code || inspectingWard.ward_id;
+                  setInspectingWard(null);
+                  navigate(`/maintenance?tab=defects&ward=${code}`);
+                }}
+                className="btn btn-primary flex-1 justify-center py-2 text-xs"
+              >
+                Inspect All Defects in Ward
+              </button>
+              <button
+                onClick={() => {
+                  const code = inspectingWard.ward_code || inspectingWard.ward_id;
+                  setInspectingWard(null);
+                  navigate(`/maintenance?tab=work-orders&ward=${code}`);
+                }}
+                className="btn btn-secondary flex-1 justify-center py-2 text-xs"
+              >
+                Work Orders
+              </button>
+            </div>
+          </div>
+        )}
+      </SidePanel>
     </div>
   );
 };

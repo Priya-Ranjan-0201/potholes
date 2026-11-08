@@ -18,6 +18,9 @@ import {
   DemoBadge,
 } from "../ui";
 import { useToast } from "../context/ToastContext";
+import { CompareSlider } from "../motion/CompareSlider";
+import { NumberTransition } from "../motion/NumberTransition";
+import { useReducedMotion } from "../motion/motion";
 
 type SubTab = "work-orders" | "defects" | "reports";
 type ViewMode = "table" | "kanban";
@@ -26,6 +29,11 @@ export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const { success, info } = useToast();
+
+  const isReduced = useReducedMotion();
+  const [selectedWoIds, setSelectedWoIds] = useState<string[]>([]);
+  const [isBulkExecuting, setIsBulkExecuting] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState(0);
 
   // Tab & View States
   const [subTab, setSubTab] = useState<SubTab>("work-orders");
@@ -131,7 +139,7 @@ export const MaintenancePage: React.FC = () => {
   });
 
   const transitionMutation = useMutation({
-    mutationFn: (vars: { id: string; new_status: string; notes?: string }) =>
+    mutationFn: (vars: { id: string; new_status: string; prev_status?: string; notes?: string }) =>
       api.transitionWorkOrderStatus(vars.id, {
         new_status: vars.new_status,
         notes: vars.notes,
@@ -139,7 +147,16 @@ export const MaintenancePage: React.FC = () => {
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["workOrdersList"] });
       queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
-      info("Status Updated", `Work order #${vars.id.slice(0, 8)} shifted to ${vars.new_status}.`);
+      const prev = vars.prev_status;
+      info(
+        "Status Updated",
+        `Work order #${vars.id.slice(0, 8)} shifted to ${vars.new_status}.`,
+        prev
+          ? () => {
+              transitionMutation.mutate({ id: vars.id, new_status: prev });
+            }
+          : undefined
+      );
     },
   });
 
@@ -360,18 +377,30 @@ export const MaintenancePage: React.FC = () => {
           )}
         </div>
 
-        {/* View Mode Toggle (Work Orders Only) */}
-        {subTab === "work-orders" && (
-          <SegmentedControl<ViewMode>
-            size="sm"
-            value={viewMode}
-            onChange={(v) => setViewMode(v)}
-            options={[
-              { id: "kanban", label: "Kanban" },
-              { id: "table", label: "Table" },
-            ]}
-          />
-        )}
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400 font-mono text-[11px]">
+            <NumberTransition
+              value={
+                subTab === "work-orders"
+                  ? filteredWorkOrders.length
+                  : subTab === "defects"
+                  ? filteredDefects.length
+                  : filteredComplaints.length
+              }
+            /> records
+          </span>
+          {subTab === "work-orders" && (
+            <SegmentedControl<ViewMode>
+              size="sm"
+              value={viewMode}
+              onChange={(v) => setViewMode(v)}
+              options={[
+                { id: "kanban", label: "Kanban" },
+                { id: "table", label: "Table" },
+              ]}
+            />
+          )}
+        </div>
       </div>
 
       {/* 3. Sub-Tab Content: Work Orders */}
@@ -414,7 +443,9 @@ export const MaintenancePage: React.FC = () => {
                           return (
                             <div
                               key={wo.id}
-                              className="card p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors shadow-2xs space-y-2"
+                              className={`card p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-150 space-y-2 ${
+                                isReduced ? "" : "hover:shadow-md hover:scale-[1.01]"
+                              }`}
                             >
                               <div className="flex items-center justify-between text-xs">
                                 <span
@@ -462,6 +493,7 @@ export const MaintenancePage: React.FC = () => {
                                       transitionMutation.mutate({
                                         id: wo.id,
                                         new_status: "ASSIGNED",
+                                        prev_status: "CREATED",
                                       })
                                     }
                                     className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
@@ -475,6 +507,7 @@ export const MaintenancePage: React.FC = () => {
                                       transitionMutation.mutate({
                                         id: wo.id,
                                         new_status: "IN_PROGRESS",
+                                        prev_status: "ASSIGNED",
                                       })
                                     }
                                     className="text-amber-600 dark:text-amber-400 hover:underline font-medium"
@@ -488,6 +521,7 @@ export const MaintenancePage: React.FC = () => {
                                       transitionMutation.mutate({
                                         id: wo.id,
                                         new_status: "COMPLETED",
+                                        prev_status: "IN_PROGRESS",
                                       })
                                     }
                                     className="text-purple-600 dark:text-purple-400 hover:underline font-medium"
@@ -536,6 +570,23 @@ export const MaintenancePage: React.FC = () => {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th className="w-8">
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredWorkOrders.length > 0 &&
+                          selectedWoIds.length === filteredWorkOrders.length
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedWoIds(filteredWorkOrders.map((w) => w.id));
+                          } else {
+                            setSelectedWoIds([]);
+                          }
+                        }}
+                        className="rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0"
+                      />
+                    </th>
                     <th>Order ID</th>
                     <th>Defect ID</th>
                     <th>Priority</th>
@@ -555,9 +606,24 @@ export const MaintenancePage: React.FC = () => {
                       deadlineDate < new Date() &&
                       wo.status !== "VERIFIED" &&
                       wo.status !== "COMPLETED";
+                    const isSelected = selectedWoIds.includes(wo.id);
 
                     return (
-                      <tr key={wo.id}>
+                      <tr key={wo.id} className={isSelected ? "bg-blue-50/40 dark:bg-blue-950/20" : ""}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedWoIds((prev) => [...prev, wo.id]);
+                              } else {
+                                setSelectedWoIds((prev) => prev.filter((id) => id !== wo.id));
+                              }
+                            }}
+                            className="rounded border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-0"
+                          />
+                        </td>
                         <td className="font-mono text-xs font-semibold">
                           <button
                             onClick={() => setSelectedDefectId(wo.defect_id)}
@@ -613,6 +679,46 @@ export const MaintenancePage: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* M5 Multi-Row Select Floating Action Bar */}
+          {selectedWoIds.length > 0 && (
+            <div className="fixed bottom-6 inset-x-0 mx-auto max-w-xl z-40 bg-slate-900 text-slate-100 rounded-lg shadow-2xl border border-slate-700 px-4 py-3 flex items-center justify-between gap-4 transition-transform duration-200">
+              <div className="flex items-center gap-2.5 text-xs">
+                <span className="font-semibold font-mono bg-blue-600 px-2 py-0.5 rounded text-white text-[11px]">
+                  {selectedWoIds.length}
+                </span>
+                <span>work orders selected for batch operation</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedWoIds([])}
+                  className="px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Deselect
+                </button>
+                <button
+                  disabled={isBulkExecuting}
+                  onClick={async () => {
+                    setIsBulkExecuting(true);
+                    setBulkProgress(0);
+                    for (let i = 0; i < selectedWoIds.length; i++) {
+                      await api.transitionWorkOrderStatus(selectedWoIds[i], { new_status: "ASSIGNED" }).catch(() => {});
+                      setBulkProgress(Math.round(((i + 1) / selectedWoIds.length) * 100));
+                    }
+                    queryClient.invalidateQueries({ queryKey: ["workOrdersList"] });
+                    queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
+                    setIsBulkExecuting(false);
+                    const count = selectedWoIds.length;
+                    setSelectedWoIds([]);
+                    success("Batch Operations Finished", `Dispatched ${count} work orders to municipal contractors.`);
+                  }}
+                  className="btn-primary text-xs flex items-center gap-1.5"
+                >
+                  {isBulkExecuting ? `Dispatching... (${bulkProgress}%)` : "Dispatch Selected"}
+                </button>
+              </div>
             </div>
           )}
         </>
@@ -723,7 +829,24 @@ export const MaintenancePage: React.FC = () => {
                         )}
                       </td>
                       <td>
-                        <StatusChip status={cmp.status} />
+                        <div className="space-y-1.5">
+                          <StatusChip status={cmp.status} />
+                          <div className="flex items-center gap-1 w-24" title={`Report status: ${cmp.status}`}>
+                            {["SUBMITTED", "UNDER_REVIEW", "VERIFIED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"].map((stage, sIdx) => {
+                              const stages = ["SUBMITTED", "UNDER_REVIEW", "VERIFIED", "ASSIGNED", "IN_PROGRESS", "RESOLVED"];
+                              const curIdx = Math.max(0, stages.indexOf(cmp.status === "CLOSED" ? "RESOLVED" : cmp.status));
+                              const isPassed = sIdx <= curIdx;
+                              return (
+                                <div
+                                  key={stage}
+                                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                                    isPassed ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-700"
+                                  }`}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
                       </td>
                       <td className="text-right">
                         {cmp.status === "SUBMITTED" && (
@@ -975,6 +1098,22 @@ export const MaintenancePage: React.FC = () => {
               Authoritative human closure for Order #{verifyModalWo.id.slice(0, 8)}. AI model recommends approval with 94.5% damage reduction.
             </p>
 
+            {/* S5 Before / After Repair Comparison */}
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Visual Repair Verification (Pre-Dispatch vs Post-Patch)
+              </span>
+              <div className="h-44 w-full rounded border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-950">
+                <CompareSlider
+                  beforeImage={`/api/v1/media/${verifyModalWo.defect_id}.jpg`}
+                  afterImage="/samples/pothole_repaired.jpg"
+                  beforeLabel="Original Defect"
+                  afterLabel="Post-Repair Patch"
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
+
             <div className="space-y-3 text-xs">
               <div>
                 <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -992,14 +1131,20 @@ export const MaintenancePage: React.FC = () => {
 
               <div>
                 <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Justification / Inspection Notes
+                  Justification / Inspection Notes (required)
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={decisionReason}
                   onChange={(e) => setDecisionReason(e.target.value)}
+                  placeholder="Enter civil inspection justification..."
                   className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-hidden"
                 />
+                {decisionReason.trim().length < 10 && (
+                  <span className="text-[10px] text-rose-500 mt-0.5 block">
+                    Please provide at least 10 characters explaining your assessment.
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
@@ -1010,6 +1155,7 @@ export const MaintenancePage: React.FC = () => {
                   Cancel
                 </button>
                 <button
+                  disabled={verifyRepairMutation.isPending || decisionReason.trim().length < 10}
                   onClick={() =>
                     verifyRepairMutation.mutate({
                       id: verifyModalWo.id,
@@ -1019,9 +1165,9 @@ export const MaintenancePage: React.FC = () => {
                       reason: decisionReason,
                     })
                   }
-                  className="btn-primary text-xs"
+                  className="btn-primary text-xs flex items-center gap-1.5"
                 >
-                  Confirm Sign-Off
+                  {verifyRepairMutation.isPending ? "Recording Sign-Off..." : "Confirm Sign-Off"}
                 </button>
               </div>
             </div>

@@ -11,6 +11,8 @@ import {
   Moon,
   Globe,
   Search,
+  Zap,
+  ZapOff,
 } from "./Icons";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
@@ -18,7 +20,7 @@ import { Logo } from "./Logo";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, reducedMotion, setReducedMotion } = useTheme();
   const { language, setLanguage, currentOption } = useLanguage();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -161,6 +163,24 @@ export const Navbar: React.FC = () => {
               ) : (
                 <Moon className="w-3.5 h-3.5 text-slate-600" />
               )}
+            </button>
+
+            {/* Reduce Motion Toggle */}
+            <button
+              onClick={() => setReducedMotion(!reducedMotion)}
+              className={`p-1.5 rounded-md border text-xs transition-colors ${
+                reducedMotion
+                  ? "bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400"
+                  : "bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+              }`}
+              aria-label="Toggle Reduced Motion"
+              title={
+                reducedMotion
+                  ? "Reduced motion active (instant transitions)"
+                  : "Functional animations active (toggle to reduce)"
+              }
+            >
+              {reducedMotion ? <ZapOff className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
             </button>
 
             {/* Mobile Hamburger Button */}

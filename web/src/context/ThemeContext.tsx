@@ -17,13 +17,12 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Single Unified Theme for ScamRoad: "truck-art-neon" (Vibrant Night Highway)
-  const themePreset: ThemePreset = "truck-art-neon";
+  const themePreset: ThemePreset = "default" as any;
 
   const [mode, setModeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem("scamroad_theme");
     if (saved === "light" || saved === "dark") return saved;
-    return "dark"; // Default to dark mode for cinematic night highway
+    return "dark"; // Default to dark mode for civil engineering portal
   });
 
   const [reducedMotion, setReducedMotionState] = useState<boolean>(() => {
@@ -33,9 +32,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const root = document.documentElement;
 
-    // Apply single signature theme preset
-    root.setAttribute("data-theme", "truck-art-neon");
-    localStorage.setItem("scamroad_theme_preset", "truck-art-neon");
+    root.setAttribute("data-theme", "professional");
+    localStorage.setItem("scamroad_theme_preset", "professional");
 
     // Apply dark/light class
     if (mode === "dark") {

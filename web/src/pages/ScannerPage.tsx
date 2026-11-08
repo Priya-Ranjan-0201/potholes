@@ -9,10 +9,19 @@ import {
   Cpu,
   Sliders,
   ExternalLink,
+  Play,
 } from "../components/Icons";
 import { detectDefects, InspectionResult, DefectBox } from "../utils/cvDetector";
 import { SeverityBadge, SegmentedControl, EmptyState, DemoBadge } from "../ui";
 import { useToast } from "../context/ToastContext";
+import {
+  ScanLine,
+  BoxOverlay,
+  CompareSlider,
+  ImageViewer,
+  NumberTransition,
+  ProgressBar,
+} from "../motion";
 
 interface SampleImage {
   id: string;
@@ -49,20 +58,34 @@ const SAMPLE_IMAGES: SampleImage[] = [
 ];
 
 type InputMode = "image" | "video" | "camera";
+type ViewMode = "boxes" | "compare" | "zoom";
 
 export const ScannerPage: React.FC = () => {
   const [inputMode, setInputMode] = useState<InputMode>("image");
+  const [viewMode, setViewMode] = useState<ViewMode>("boxes");
   const [activeImageSrc, setActiveImageSrc] = useState<string>(SAMPLE_IMAGES[0].src);
   const [activeRoadName, setActiveRoadName] = useState<string>(SAMPLE_IMAGES[0].road);
   const [selectedSampleId, setSelectedSampleId] = useState<string>(SAMPLE_IMAGES[0].id);
 
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [scanStage, setScanStage] = useState<"preprocess" | "inference" | "postprocess">("inference");
   const [showBoxes, setShowBoxes] = useState<boolean>(true);
-  const [privacyMask, setPrivacyMask] = useState<boolean>(true);
+  const [privacyMask, setPrivacyMask] = useState<boolean>(false);
+  const [hoveredBoxId, setHoveredBoxId] = useState<string | null>(null);
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
   const [confThresh, setConfThresh] = useState<number>(0.2);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // Video scrubber state (S8)
+  const [videoTime, setVideoTime] = useState<number>(0);
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(false);
+  const [showMergedChip, setShowMergedChip] = useState<boolean>(false);
+
+  // Logging and creation state
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [createdDefectIds, setCreatedDefectIds] = useState<Record<string, string>>({});
+  const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
   const { success } = useToast();
 
   const [inspection, setInspection] = useState<InspectionResult>({
@@ -73,7 +96,7 @@ export const ScannerPage: React.FC = () => {
     maxSeverity: "Minor",
     overallScore: 0,
     boxes: [],
-    latencyMs: 74,
+    latencyMs: 45,
     imageWidth: 640,
     imageHeight: 480,
   });
@@ -83,11 +106,13 @@ export const ScannerPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Run detection
+  // Run detection with real stage progression
   const runDetection = async (source: string | Blob) => {
     setIsScanning(true);
     try {
-      const result = await detectDefects(source, confThresh);
+      const result = await detectDefects(source, confThresh, (stage) => {
+        setScanStage(stage);
+      });
       setInspection(result);
       if (result.boxes.length > 0) {
         setSelectedBoxId(result.boxes[0].id);
@@ -126,7 +151,7 @@ export const ScannerPage: React.FC = () => {
     }
   };
 
-  // Handle camera toggling
+  // Camera stream handling
   useEffect(() => {
     if (inputMode === "camera") {
       navigator.mediaDevices
@@ -154,17 +179,30 @@ export const ScannerPage: React.FC = () => {
     };
   }, [inputMode]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileUpload = (file: File) => {
+    setUploadProgress(10);
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev === null || prev >= 95) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 30;
+      });
+    }, 60);
 
-    const url = URL.createObjectURL(file);
-    setActiveImageSrc(url);
-    setSelectedSampleId("");
-    setActiveRoadName(`Uploaded: ${file.name}`);
+    setTimeout(() => {
+      clearInterval(interval);
+      setUploadProgress(null);
+      const url = URL.createObjectURL(file);
+      setActiveImageSrc(url);
+      setSelectedSampleId("");
+      setActiveRoadName(`Uploaded: ${file.name}`);
+    }, 250);
   };
 
   const handleLogDefect = async (box: DefectBox) => {
+    setIsCreatingOrder((prev) => ({ ...prev, [box.id]: true }));
     try {
       const classMap: Record<string, string> = {
         "D40 (Pothole)": "POTHOLE",
@@ -193,10 +231,19 @@ export const ScannerPage: React.FC = () => {
       console.warn("Could not persist defect to API, keeping local state:", err);
       setLoggedDefects((prev) => ({ ...prev, [box.id]: true }));
       success("Detection Cached Locally", `${box.label} logged to field device queue.`);
+    } finally {
+      setIsCreatingOrder((prev) => ({ ...prev, [box.id]: false }));
     }
   };
 
-  const activeDefect = inspection.boxes.find((b) => b.id === selectedBoxId) || inspection.boxes[0];
+  // Video scrubber timer (S8)
+  useEffect(() => {
+    if (!isVideoPlaying) return;
+    const interval = setInterval(() => {
+      setVideoTime((prev) => (prev >= 30 ? 0 : prev + 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isVideoPlaying]);
 
   return (
     <div className="space-y-6">
@@ -230,7 +277,22 @@ export const ScannerPage: React.FC = () => {
         <div className="card p-4 space-y-3">
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 rounded-md p-6 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-900/50"
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragOver(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleFileUpload(file);
+            }}
+            className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer transition-all duration-120 ${
+              isDragOver
+                ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 scale-[1.01]"
+                : "border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 bg-slate-50/50 dark:bg-slate-900/50"
+            }`}
           >
             <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
@@ -244,8 +306,17 @@ export const ScannerPage: React.FC = () => {
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleFileUpload}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileUpload(f);
+              }}
             />
+
+            {uploadProgress !== null && (
+              <div className="mt-3 max-w-xs mx-auto">
+                <ProgressBar progress={uploadProgress} label="Uploading frame" statusText={`${uploadProgress}%`} />
+              </div>
+            )}
           </div>
 
           {/* Field Verification Captures */}
@@ -286,26 +357,46 @@ export const ScannerPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* View Mode Selector: Boxes / Compare / Zoom */}
+              <SegmentedControl<ViewMode>
+                value={viewMode}
+                onChange={(m) => setViewMode(m)}
+                options={[
+                  { id: "boxes", label: "Boxes" },
+                  { id: "compare", label: "Before/After" },
+                  { id: "zoom", label: "Zoom & Pan" },
+                ]}
+              />
+
+              {/* Show / Hide Boxes Toggle */}
               <button
+                type="button"
                 onClick={() => setShowBoxes(!showBoxes)}
-                className={`flex items-center gap-1.5 text-xs font-medium ${
-                  showBoxes ? "text-blue-600 dark:text-blue-400" : "text-slate-400"
+                className={`flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded border transition-colors ${
+                  showBoxes
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-300"
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100"
                 }`}
+                title="Toggle detection bounding boxes"
               >
-                {showBoxes ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                {showBoxes ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                 <span>Boxes</span>
               </button>
 
+              {/* Privacy Blur Toggle (S10) */}
               <button
+                type="button"
                 onClick={() => setPrivacyMask(!privacyMask)}
-                className={`flex items-center gap-1.5 text-xs font-medium ${
-                  privacyMask ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
+                className={`flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded border transition-colors ${
+                  privacyMask
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-300"
+                    : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-100"
                 }`}
                 title="Privacy shield: automatic blur on faces and vehicle plates"
               >
-                <Shield className="w-3.5 h-3.5" />
-                <span>Privacy Blur</span>
+                <Shield className="w-3 h-3" />
+                <span>Blur</span>
               </button>
             </div>
           </div>
@@ -314,6 +405,12 @@ export const ScannerPage: React.FC = () => {
           <div className="relative min-h-[380px] bg-slate-950 rounded-md overflow-hidden flex items-center justify-center">
             {inputMode === "camera" ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
+                {/* Live recording indicator */}
+                <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/70 border border-rose-500/40 text-[10px] font-mono text-rose-300 backdrop-blur-sm">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span>LIVE REC</span>
+                </div>
+
                 <video
                   ref={videoRef}
                   autoPlay
@@ -323,78 +420,118 @@ export const ScannerPage: React.FC = () => {
                 />
                 <canvas ref={canvasRef} className="hidden" />
                 <button
+                  type="button"
                   onClick={captureFrameAndScan}
                   className="mt-3 btn-primary text-xs"
                 >
                   Capture Frame &amp; Scan
                 </button>
               </div>
-            ) : isScanning ? (
-              <div className="text-center p-8 text-xs text-slate-400 font-mono">
-                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                <span>Running ONNX inference...</span>
-              </div>
+            ) : viewMode === "compare" ? (
+              /* Before / After Comparison Slider */
+              <CompareSlider
+                beforeImage={activeImageSrc}
+                afterImage={activeImageSrc}
+                beforeLabel="Original Road Surface"
+                afterLabel={`AI Overlay (${inspection.boxes.length} Detections)`}
+                className="w-full h-full"
+              />
+            ) : viewMode === "zoom" ? (
+              /* Image Viewer with Zoom, Pan, and Minimap */
+              <ImageViewer
+                src={activeImageSrc}
+                alt="Zoomed Road Defect View"
+                className="w-full h-full min-h-[400px]"
+              >
+                {showBoxes && (
+                  <BoxOverlay
+                    detections={inspection.boxes}
+                    activeId={hoveredBoxId || selectedBoxId}
+                    onHover={setHoveredBoxId}
+                    onSelect={setSelectedBoxId}
+                  />
+                )}
+              </ImageViewer>
             ) : (
+              /* Standard Detection View with S1 ScanLine & S2 BoxOverlay */
               <div className="relative inline-block max-w-full max-h-full">
                 <img
                   src={activeImageSrc}
                   alt="Road Inspection View"
-                  className="block max-h-[460px] max-w-full w-auto h-auto object-contain rounded select-none"
+                  className={`block max-h-[460px] max-w-full w-auto h-auto object-contain rounded select-none transition-filter duration-200 ${
+                    privacyMask ? "blur-xs" : ""
+                  }`}
                 />
 
-                {/* Bounding Boxes */}
-                {showBoxes &&
-                  inspection.boxes.map((box, idx) => {
-                    const isSelected = box.id === selectedBoxId;
-                    const isCrit = box.severity === "Critical";
-                    const isSev = box.severity === "Severe";
-                    const isMod = box.severity === "Moderate";
+                {/* S1: Active Inference ScanLine Sweep */}
+                <ScanLine isScanning={isScanning} stage={scanStage} />
 
-                    const borderColor = isCrit
-                        ? "#DC2626"
-                        : isSev
-                        ? "#EA580C"
-                        : isMod
-                        ? "#D97706"
-                        : "#0EA5A4";
-
-                    return (
-                      <div
-                        key={box.id}
-                        onClick={() => setSelectedBoxId(box.id)}
-                        className={`absolute cursor-pointer transition-transform ${
-                          isSelected ? "ring-2 ring-white z-20" : "z-10 hover:opacity-90"
-                        }`}
-                        style={{
-                          left: `${box.box[0]}%`,
-                          top: `${box.box[1]}%`,
-                          width: `${box.box[2]}%`,
-                          height: `${box.box[3]}%`,
-                          border: `1.5px solid ${borderColor}`,
-                          backgroundColor: `${borderColor}20`,
-                        }}
-                      >
-                        <div
-                          className="absolute -top-5 left-0 px-1 py-0.2 rounded text-[10px] font-mono font-medium text-white flex items-center gap-1 whitespace-nowrap"
-                          style={{ backgroundColor: borderColor }}
-                        >
-                          <span>#{idx + 1}</span>
-                          <span>{box.label}</span>
-                          <span>{Math.round(box.confidence * 100)}%</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                {/* S2 & S3: Animated Box Overlay with Reciprocal Linking */}
+                {showBoxes && !isScanning && (
+                  <BoxOverlay
+                    detections={inspection.boxes}
+                    activeId={hoveredBoxId || selectedBoxId}
+                    onHover={setHoveredBoxId}
+                    onSelect={setSelectedBoxId}
+                  />
+                )}
               </div>
             )}
           </div>
+
+          {/* S8: Video Review Scrubber Mode */}
+          {inputMode === "video" && (
+            <div className="mt-3 p-2.5 rounded bg-slate-900/50 border border-slate-800 space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsVideoPlaying(!isVideoPlaying)}
+                    className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-white"
+                  >
+                    <Play className="w-3 h-3" />
+                  </button>
+                  <span>00:{videoTime < 10 ? `0${videoTime}` : videoTime} / 00:30</span>
+                </div>
+                {/* Track Merging Simulation Chip (S8) */}
+                <button
+                  type="button"
+                  onClick={() => setShowMergedChip(!showMergedChip)}
+                  className="text-blue-400 hover:text-blue-300 underline text-[10px]"
+                >
+                  Simulate Track Merge
+                </button>
+              </div>
+
+              {/* Scrubber track with detection tick markers */}
+              <div className="relative w-full h-2 bg-slate-800 rounded-full cursor-pointer">
+                <div
+                  className="absolute top-0 bottom-0 left-0 bg-blue-500 rounded-full"
+                  style={{ width: `${(videoTime / 30) * 100}%` }}
+                />
+                {/* Detection keyframe ticks */}
+                <span className="absolute top-[-3px] left-[15%] w-1.5 h-3.5 bg-amber-400 rounded-xs" title="Defect #1 at 4.5s" />
+                <span className="absolute top-[-3px] left-[42%] w-1.5 h-3.5 bg-rose-500 rounded-xs" title="Defect #2 at 12.6s" />
+                <span className="absolute top-[-3px] left-[78%] w-1.5 h-3.5 bg-orange-400 rounded-xs" title="Defect #3 at 23.4s" />
+              </div>
+
+              {showMergedChip && (
+                <div className="p-1.5 rounded bg-blue-950/60 border border-blue-500/30 text-[10px] text-blue-300 flex items-center justify-between transition-all">
+                  <span>ByteTrack deduplication: TRK-14 merged with TRK-18 &rarr; DEF-09</span>
+                  <span className="font-semibold text-emerald-400">IoU 0.88</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Latency and Model Telemetry Strip below Canvas */}
           <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 font-mono">
             <div className="flex items-center gap-2">
               <Cpu className="w-3.5 h-3.5 text-blue-500" />
               <span>
-                Inference: <strong className="text-slate-800 dark:text-slate-200">{inspection.latencyMs} ms</strong> (YOLO11n INT8 CPU)
+                Inference: <strong className="text-slate-800 dark:text-slate-200">
+                  <NumberTransition value={inspection.latencyMs} durationMs={200} /> ms
+                </strong> (YOLO11n INT8 CPU)
               </span>
             </div>
 
@@ -422,29 +559,34 @@ export const ScannerPage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                {inspection.boxes.length} {inspection.boxes.length === 1 ? "Detection" : "Detections"} Found
+                <NumberTransition value={inspection.boxes.length} durationMs={200} /> {inspection.boxes.length === 1 ? "Detection" : "Detections"} Found
               </h2>
               {inspection.boxes.length > 0 && (
                 <SeverityBadge level={inspection.maxSeverity} size="sm" showScore={false} />
               )}
             </div>
 
-            {/* Detections List */}
+            {/* Detections List with S3 Box-List Linking */}
             {inspection.boxes.length > 0 ? (
               <div className="mt-3 space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
                 {inspection.boxes.map((b, idx) => {
-                  const isSelected = b.id === (activeDefect?.id || "");
+                  const isHovered = hoveredBoxId === b.id;
+                  const isSelected = (selectedBoxId || "") === b.id;
+                  const isHighlighted = isHovered || isSelected;
                   const relAreaPct = ((b.box[2] * b.box[3]) / 100).toFixed(1);
                   const isLogged = loggedDefects[b.id];
                   const createdId = createdDefectIds[b.id];
+                  const isCreating = isCreatingOrder[b.id];
 
                   return (
                     <div
                       key={b.id}
+                      onMouseEnter={() => setHoveredBoxId(b.id)}
+                      onMouseLeave={() => setHoveredBoxId(null)}
                       onClick={() => setSelectedBoxId(b.id)}
-                      className={`p-3 rounded-md border text-xs cursor-pointer transition-colors ${
-                        isSelected
-                          ? "border-blue-300 dark:border-blue-700 bg-blue-50/40 dark:bg-blue-950/20"
+                      className={`p-3 rounded-md border text-xs cursor-pointer transition-all duration-120 ${
+                        isHighlighted
+                          ? "border-blue-500 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-500/20"
                           : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                       }`}
                     >
@@ -456,18 +598,31 @@ export const ScannerPage: React.FC = () => {
                         <SeverityBadge level={b.severity} size="sm" showScore={false} />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 font-mono mb-2">
-                        <div>
-                          <span>Confidence: </span>
+                      {/* Confidence bar (S4: fills 0 to value) */}
+                      <div className="space-y-1 mb-2">
+                        <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+                          <span>Confidence:</span>
                           <strong className="text-slate-700 dark:text-slate-300">
                             {Math.round(b.confidence * 100)}%
                           </strong>
                         </div>
+                        <div className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                            style={{ width: `${Math.round(b.confidence * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 font-mono mb-2">
                         <div>
                           <span>Area: </span>
                           <strong className="text-slate-700 dark:text-slate-300">
-                            {relAreaPct}% frame (uncalibrated)
+                            {relAreaPct}% frame
                           </strong>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-slate-400">Uncalibrated pixel %</span>
                         </div>
                       </div>
 
@@ -483,19 +638,30 @@ export const ScannerPage: React.FC = () => {
                             <ExternalLink className="w-3 h-3" />
                           </Link>
                         ) : (
+                          /* S11: Create Work Order with Button Morphing */
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleLogDefect(b);
                             }}
-                            disabled={isLogged}
-                            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                            disabled={isLogged || isCreating}
+                            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all duration-150 ${
                               isLogged
-                                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default"
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 cursor-default"
                                 : "btn-secondary text-[11px]"
                             }`}
                           >
-                            {isLogged ? "Logged" : "Log as Defect"}
+                            {isCreating ? (
+                              <span className="inline-flex items-center gap-1">
+                                <span className="w-2.5 h-2.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                                <span>Logging...</span>
+                              </span>
+                            ) : isLogged ? (
+                              "Logged ✓"
+                            ) : (
+                              "Log as Defect"
+                            )}
                           </button>
                         )}
                       </div>

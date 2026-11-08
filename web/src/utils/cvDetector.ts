@@ -33,11 +33,14 @@ export interface InspectionResult {
  */
 export async function detectDefects(
   imageSource: File | Blob | string,
-  confThresh: number = 0.15
+  confThresh: number = 0.15,
+  onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void
 ): Promise<InspectionResult> {
   const startTime = performance.now();
 
-  // 1. Try Backend YOLO Inference API (/api/v1/infer)
+  // 1. Preprocessing Stage
+  onStageChange?.("preprocess");
+
   try {
     let blob: Blob;
     if (typeof imageSource === "string") {
@@ -53,12 +56,18 @@ export async function detectDefects(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
+    // 2. Active Model Inference Stage
+    onStageChange?.("inference");
+
     const apiRes = await fetch(`/api/v1/infer?conf_thresh=${confThresh}`, {
       method: "POST",
       body: formData,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
+
+    // 3. Postprocessing & Coordinate Decoding Stage
+    onStageChange?.("postprocess");
 
     if (apiRes.ok) {
       const data = await apiRes.json();
