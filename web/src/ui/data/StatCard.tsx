@@ -47,16 +47,16 @@ export const StatCard: React.FC<StatCardProps> = ({
         onClick ? "cursor-pointer" : ""
       } ${className}`}
     >
-      <div className="flex items-center justify-between text-xs font-medium text-muted mb-2">
+      <div className="flex items-center justify-between text-xs font-medium text-slate-400 dark:text-slate-400 mb-2">
         <span>{label}</span>
         <div className="flex items-center gap-1.5">
           {badge}
-          {icon && <span className="text-muted">{icon}</span>}
+          {icon && <span className="text-slate-400 dark:text-slate-400">{icon}</span>}
         </div>
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl font-bold tracking-tight text-text font-mono">
+        <span className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-mono">
           {typeof value === "number" ? <NumberTransition value={value} /> : value}
         </span>
         {change && (

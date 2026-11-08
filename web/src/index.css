@@ -103,7 +103,7 @@
   }
 }
 
-/* Data Zone Cards: Flat, solid, 1px border, 10px radius (Rule SPEC v12) */
+/* Data Zone Cards: Flat, solid, 1px border, 10px radius */
 .card {
   background-color: var(--surface-solid);
   border: 1px solid var(--border);

@@ -35,7 +35,7 @@ export const LandingPage: React.FC = () => {
     {
       step: "02",
       title: "Detect",
-      desc: "Quantized neural inference spots physical crater potholes and cracks in under 50ms.",
+      desc: "On-device INT8 inference spots physical crater potholes and cracks in under 50ms.",
       icon: Activity,
     },
     {
@@ -73,7 +73,7 @@ export const LandingPage: React.FC = () => {
           </h1>
 
           <p className="text-base sm:text-lg text-muted max-w-2xl mx-auto leading-relaxed">
-            Edge computer vision and municipal workflow management for asphalt distress. Engineered for real Indian road conditions with zero mock metrics.
+            Edge computer vision and municipal workflow management for asphalt distress. Engineered for real Indian road conditions with authentic field metrics.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">

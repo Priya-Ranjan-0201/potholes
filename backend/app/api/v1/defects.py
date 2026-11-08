@@ -433,3 +433,30 @@ async def override_severity(
         source=assessment.source,
         created_at=assessment.created_at,
     )
+
+
+@router.delete(
+    "/defects/clear-all",
+    summary="Clear all test defects and work orders",
+    tags=["Defects"],
+)
+async def clear_all_defects(
+    db: AsyncSession = Depends(get_db),
+):
+    """Purge all recorded defects, work orders, observations, and complaints so the portal reflects only user-tested data."""
+    from sqlalchemy import text
+    try:
+        await db.execute(text("TRUNCATE work_orders, complaints, defect_observations, severity_assessments, defect_merge_log, defects CASCADE"))
+        await db.commit()
+        return {"status": "success", "message": "All defects and work orders cleared successfully."}
+    except Exception as e:
+        await db.rollback()
+        # Fallback to standard deletes
+        await db.execute(text("DELETE FROM work_orders"))
+        await db.execute(text("DELETE FROM complaints"))
+        await db.execute(text("DELETE FROM defect_observations"))
+        await db.execute(text("DELETE FROM severity_assessments"))
+        await db.execute(text("DELETE FROM defects"))
+        await db.commit()
+        return {"status": "success", "message": "All defects cleared via fallback delete."}
+

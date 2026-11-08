@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import {
   Shield,
-  UploadCloud,
   Eye,
   EyeOff,
   Cpu,
@@ -12,9 +11,11 @@ import {
   Play,
   CheckCircle,
   RefreshCw,
+  Maximize2,
+  Minimize2,
 } from "../components/Icons";
 import { detectDefects, InspectionResult, DefectBox } from "../utils/cvDetector";
-import { SeverityBadge, SegmentedControl, EmptyState, DemoBadge } from "../ui";
+import { SeverityBadge, SegmentedControl, EmptyState, DemoBadge, FileDropzone } from "../ui";
 import { useToast } from "../context/ToastContext";
 import {
   ScanLine,
@@ -22,7 +23,6 @@ import {
   CompareSlider,
   ImageViewer,
   NumberTransition,
-  ProgressBar,
 } from "../motion";
 
 interface SampleImage {
@@ -33,6 +33,12 @@ interface SampleImage {
 }
 
 const SAMPLE_IMAGES: SampleImage[] = [
+  {
+    id: "capture-tested-potholes",
+    label: "Tested Pothole Cluster (17 Potholes)",
+    src: "/samples/user_tested_potholes.jpg",
+    road: "Verified Field Highway Corridor (Sector 1)",
+  },
   {
     id: "capture-pothole",
     label: "NH-44 Asphalt Crater",
@@ -51,12 +57,6 @@ const SAMPLE_IMAGES: SampleImage[] = [
     src: "/samples/cracks_ferozepur.jpg",
     road: "Ferozepur Road Sector 9",
   },
-  {
-    id: "capture-baseline",
-    label: "Highway Baseline",
-    src: "/samples/pothole_nh44.jpg",
-    road: "Civil Lines North Corridor",
-  },
 ];
 
 type InputMode = "image" | "video" | "camera";
@@ -68,6 +68,7 @@ export const ScannerPage: React.FC = () => {
   const [activeImageSrc, setActiveImageSrc] = useState<string>(SAMPLE_IMAGES[0].src);
   const [activeRoadName, setActiveRoadName] = useState<string>(SAMPLE_IMAGES[0].road);
   const [selectedSampleId, setSelectedSampleId] = useState<string>(SAMPLE_IMAGES[0].id);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStage, setScanStage] = useState<"preprocess" | "inference" | "postprocess">("inference");
@@ -76,7 +77,6 @@ export const ScannerPage: React.FC = () => {
   const [hoveredBoxId, setHoveredBoxId] = useState<string | null>(null);
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
   const [confThresh, setConfThresh] = useState<number>(0.25);
-  const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   // Video scrubber state (S8)
@@ -106,7 +106,6 @@ export const ScannerPage: React.FC = () => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   // Run detection with real stage progression
@@ -327,49 +326,11 @@ export const ScannerPage: React.FC = () => {
       {/* 2. Upload Drop Zone & Sample Chips */}
       {inputMode !== "camera" && (
         <div className="card p-4 space-y-3">
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragOver(true);
-            }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragOver(false);
-              const file = e.dataTransfer.files?.[0];
-              if (file) handleFileUpload(file);
-            }}
-            className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer transition-all duration-120 ${
-              isDragOver
-                ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 scale-[1.01]"
-                : "border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 bg-slate-50/50 dark:bg-slate-900/50"
-            }`}
-          >
-            <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              Click to browse or drop an image file here
-            </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Supports JPEG, PNG, WebP (resolution up to 4K)
-            </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFileUpload(f);
-              }}
-            />
-
-            {uploadProgress !== null && (
-              <div className="mt-3 max-w-xs mx-auto">
-                <ProgressBar progress={uploadProgress} label="Uploading frame" statusText={`${uploadProgress}%`} />
-              </div>
-            )}
-          </div>
+          {/* Dropzone with A8 Flowing Lane Dashes */}
+          <FileDropzone
+            onFileSelect={handleFileUpload}
+            uploadProgress={uploadProgress}
+          />
 
           {/* Field Verification Captures */}
           <div className="flex items-center gap-2 overflow-x-auto pt-1 pb-1 text-xs">
@@ -449,6 +410,17 @@ export const ScannerPage: React.FC = () => {
               >
                 <Shield className="w-3 h-3" />
                 <span>Blur</span>
+              </button>
+
+              {/* Full Screen Expanded Inspection Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(true)}
+                className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Expand to Full Screen Inspection View"
+              >
+                <Maximize2 className="w-3 h-3" />
+                <span>Full Screen</span>
               </button>
             </div>
           </div>
@@ -764,6 +736,58 @@ export const ScannerPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Full-Screen Expanded Modal Overlay */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col p-4 sm:p-6"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setIsFullscreen(false);
+          }}
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-xs mb-3">
+            <div className="flex items-center gap-3">
+              <span className="font-semibold text-slate-100 text-sm">
+                Full-Screen Highway Defect Inspection: {activeRoadName}
+              </span>
+              <span className="font-mono text-xs px-2.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                {inspection.boxes.length} Verified Potholes
+              </span>
+              <span className="text-slate-400 font-mono text-[11px]">
+                ({inspection.imageWidth}×{inspection.imageHeight}px)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(false)}
+                className="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-slate-700"
+              >
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>Exit Full Screen (Esc)</span>
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 relative flex items-center justify-center overflow-hidden rounded-lg bg-black/80 border border-slate-800/80 p-2">
+            <div className="relative inline-block max-w-full max-h-full">
+              <img
+                src={activeImageSrc}
+                alt="Full-Screen Road View"
+                className="block max-h-[84vh] max-w-full w-auto h-auto object-contain rounded select-none"
+              />
+              {showBoxes && !isScanning && (
+                <BoxOverlay
+                  detections={inspection.boxes}
+                  activeId={hoveredBoxId || selectedBoxId}
+                  onHover={setHoveredBoxId}
+                  onSelect={setSelectedBoxId}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

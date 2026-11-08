@@ -382,6 +382,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  clearAllDefects: () =>
+    request<{ status: string; message: string }>("/defects/clear-all", {
+      method: "DELETE",
+    }),
+
   overrideSeverity: (id: string, payload: { override_level: string; reason: string }) =>
     request<any>(`/defects/${id}/override-severity`, {
       method: "POST",

@@ -37,16 +37,13 @@ class InferenceResponse(BaseModel):
     detections: List[DetectionBox]
 
 
-def get_inference_engine(conf_thresh: float = 0.15, iou_thresh: float = 0.40):
+def get_inference_engine(conf_thresh: float = 0.25, iou_thresh: float = 0.45):
     """Load pure ONNX Runtime engine without AGPL Ultralytics runtime dependency."""
     from edge.agent.infer import EdgeInferenceEngine
     onnx_paths = [
         "runs/export/best_yolo11_int8.onnx",
         "runs/export/best_int8.onnx",
         "runs/export/best.onnx",
-        "ml/runs/pothole_yolov8n/weights/best_int8.onnx",
-        "ml/runs/pothole_yolov8n/weights/best.onnx",
-        "runs/baselines/yolov8n/weights/best.onnx"
     ]
     for p in onnx_paths:
         if os.path.exists(p):
@@ -117,10 +114,10 @@ async def infer_road_defects(
                 continue
 
             # Civil engineering road plane constraint:
-            # Road distress (potholes/cracks) cannot exist in the sky / upper horizon.
-            # Discard detections whose center is located in the upper 18% of the frame (treetop/skyline/overpass).
+            # Road distress (potholes/cracks) cannot exist in the sky, trees, or upper vehicular traffic.
+            # Discard detections whose vertical center is located in the upper 30% of the frame (vehicles/skyline/horizon).
             cy = (bx[1] + bx[3]) / 2.0
-            if cy < (h * 0.18) and bx[3] < (h * 0.22):
+            if cy < (h * 0.30):
                 continue
 
             # Discard horizontal scanner line artifacts

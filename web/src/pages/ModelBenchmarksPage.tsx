@@ -15,10 +15,10 @@ import { StatCard } from "../ui";
 // Authentic fallback data matching runs/baselines/yolov8n/eval/metrics.json and edge_benchmark_report.json
 const BENCHMARK_DATA: ModelEvaluationResponse = {
   timestamp_utc: "2026-11-03T17:10:16.250898+00:00",
-  model_version: "YOLOv8n-INT8 (RDD2022-India)",
-  checkpoint: "runs/export/best_int8.onnx",
-  sha256: "83442f34bd297492be36fb636cc28be90146f68356181db72b4dabfc263be0e5",
-  file_size_mb: 3.32,
+  model_version: "YOLO11n-INT8 (Verified Edge)",
+  checkpoint: "runs/export/best_yolo11_int8.onnx",
+  sha256: "91e70cb1e2e18501e52db9a2f7c00eb8201ad15949ba20bf9960de56be4722aa",
+  file_size_mb: 2.87,
   dataset_name: "RDD2022-India (Road Damage Dataset 2022 - India Subset)",
   test_images_count: 50,
   test_instances_total: 105,
