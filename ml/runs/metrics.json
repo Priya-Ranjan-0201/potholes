@@ -1,9 +1,9 @@
 {
-  "timestamp_utc": "2026-11-07T12:32:10.329850+00:00",
-  "model_version": "YOLO11n-INT8",
+  "timestamp_utc": "2026-11-08T07:25:01.406563+00:00",
+  "model_version": "YOLOv8n-INT8 (RDD2022-India)",
   "checkpoint": "runs/export/best_int8.onnx",
-  "sha256": "528450066f566691a5b356496e26bb7e52743891942b95132d978899ce2672c0",
-  "file_size_mb": 2.87,
+  "sha256": "83442f34bd297492be36fb636cc28be90146f68356181db72b4dabfc263be0e5",
+  "file_size_mb": 3.32,
   "dataset_name": "RDD2022-India (Road Damage Dataset 2022 - India Subset)",
   "test_images_count": 50,
   "test_instances_total": 105,
@@ -57,11 +57,11 @@
   },
   "confusion_matrix": {
     "classes": [
-      "pothole",
-      "crack_longitudinal",
-      "crack_transverse",
-      "crack_alligator",
-      "background"
+      "Pothole",
+      "Long Crack",
+      "Trans Crack",
+      "Allig Crack",
+      "Background"
     ],
     "counts": [
       [
@@ -139,16 +139,16 @@
     ]
   },
   "inference_latency": {
-    "host_os": "Windows",
-    "host_processor": "AMD64 Family 25 Model 124 Stepping 0, AuthenticAMD",
-    "device": "Host CPU (x86_64)",
+    "host_os": "Windows 11 (win32)",
+    "host_processor": "AMD Ryzen 7 CPU",
+    "device": "Host Laptop CPU (AMD Ryzen 7)",
     "execution_provider": "CPUExecutionProvider",
     "imgsz": 640,
-    "p50_ms": 73.57,
-    "p95_ms": 98.45,
-    "p99_ms": 106.51,
-    "throughput_fps": 13.6,
-    "test_iterations": 50
+    "p50_ms": 45.46,
+    "p95_ms": 53.29,
+    "p99_ms": 61.2,
+    "throughput_fps": 21.0,
+    "test_iterations": 100
   },
   "confidence_calibration": {
     "ece": 0.0191,
@@ -327,5 +327,89 @@
       "root_cause": "Shallow pothole (depth <2cm) at far distance (>18m from vehicle hood) occupying fewer than 24x24 pixels.",
       "mitigation": "Temporal ByteTrack aggregation across consecutive frames as vehicle approaches defect within 8m range."
     }
-  ]
+  ],
+  "device_matrix": [
+    {
+      "device": "Host Laptop CPU (AMD Ryzen 7)",
+      "status": "BENCHMARKED",
+      "fps": 21.0,
+      "latency_p50_ms": 45.46
+    },
+    {
+      "device": "Raspberry Pi 5 (8GB)",
+      "status": "UNTESTED",
+      "notes": "Queued in docs/HUMAN_TODO.md (HT-03)"
+    },
+    {
+      "device": "Jetson Orin Nano (8GB)",
+      "status": "UNTESTED",
+      "notes": "Queued in docs/HUMAN_TODO.md (HT-03)"
+    },
+    {
+      "device": "OPPO K13 Smartphone (Snapdragon 7)",
+      "status": "UNTESTED",
+      "notes": "Queued in docs/HUMAN_TODO.md (HT-03)"
+    }
+  ],
+  "quantization": {
+    "fp32_size_mb": 12.18,
+    "int8_size_mb": 3.32,
+    "compression_percentage": 72.7
+  },
+  "model_comparisons": [
+    {
+      "name": "YOLOv8 Nano (yolov8n)",
+      "family": "YOLOv8",
+      "tier": "Edge",
+      "weights": "runs\\baselines\\yolov8n\\weights\\best.pt",
+      "params_m": 3.14,
+      "size_mb": 6.2,
+      "mean_latency_ms": 58.72,
+      "p95_latency_ms": 73.45,
+      "fps": 17.0,
+      "precision": 0.8125,
+      "recall": 0.9,
+      "mAP50": 0.8575,
+      "mAP50_95": 0.7913,
+      "efficiency_ratio": 13.48
+    },
+    {
+      "name": "YOLOv8 Small (yolov8s)",
+      "family": "YOLOv8",
+      "tier": "Reference",
+      "weights": "runs\\baselines\\yolov8s\\weights\\best.pt",
+      "params_m": 11.14,
+      "size_mb": 21.47,
+      "mean_latency_ms": 177.62,
+      "p95_latency_ms": 256.05,
+      "fps": 5.6,
+      "precision": 0.4911,
+      "recall": 0.5,
+      "mAP50": 0.4988,
+      "mAP50_95": 0.498,
+      "efficiency_ratio": 2.8
+    },
+    {
+      "name": "YOLO11 Nano (yolo11n)",
+      "family": "YOLO11",
+      "tier": "Edge Modern",
+      "weights": "runs\\ablations\\ablation_A2_yolo11n_640\\weights\\best.pt",
+      "params_m": 2.61,
+      "size_mb": 5.25,
+      "mean_latency_ms": 54.3,
+      "p95_latency_ms": 63.6,
+      "fps": 18.4,
+      "precision": 0.5,
+      "recall": 0.5,
+      "mAP50": 0.4975,
+      "mAP50_95": 0.4975,
+      "efficiency_ratio": 9.16
+    }
+  ],
+  "dataset_splits": {
+    "train": 36,
+    "val": 9,
+    "test": 50,
+    "total": 95
+  }
 }

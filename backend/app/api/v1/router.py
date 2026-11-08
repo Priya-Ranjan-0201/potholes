@@ -13,6 +13,7 @@ from backend.app.api.v1.reports import router as reports_router
 from backend.app.api.v1.stats import router as stats_router
 from backend.app.api.v1.sync import router as sync_router
 from backend.app.api.v1.infer import router as infer_router
+from backend.app.api.v1.benchmarks import router as benchmarks_router
 from fastapi import APIRouter
 
 api_v1_router = APIRouter()
@@ -22,6 +23,9 @@ api_v1_router.include_router(health_router, prefix="", tags=["Health"])
 
 # Real-Time AI Inference (YOLO + Surface Edge CV)
 api_v1_router.include_router(infer_router, prefix="", tags=["AI Inference"])
+
+# Model Benchmarks & Edge Telemetry (Rule R1 & Rule P4)
+api_v1_router.include_router(benchmarks_router, prefix="", tags=["Model Benchmarks"])
 
 # Authentication & RBAC
 api_v1_router.include_router(auth_router, prefix="", tags=["Authentication & RBAC"])

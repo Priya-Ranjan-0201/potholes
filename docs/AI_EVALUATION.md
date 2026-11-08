@@ -1,9 +1,9 @@
 # ScamRoad — AI Model Evaluation & Scientific Benchmark Report
 
 **Evaluation Protocol:** Held-out test split (Rule R1: Evidence Only, Zero Fabricated Data)  
-**Model Under Test:** `YOLO11n-INT8` (2.87 MB, INT8 Quantized ONNX)  
-**Model Checkpoint SHA-256:** `528450066f566691a5b356496e26bb7e52743891942b95132d978899ce2672c0`  
-**Evaluation Date (UTC):** `2026-11-07T12:32:10.329850+00:00`  
+**Model Under Test:** `YOLO11n-INT8` (3.32 MB, INT8 Quantized ONNX)  
+**Model Checkpoint SHA-256:** `83442f34bd297492be36fb636cc28be90146f68356181db72b4dabfc263be0e5`  
+**Evaluation Date (UTC):** `2026-11-08T07:25:01.406563+00:00`  
 **Host Evaluation Hardware:** `Host CPU (x86_64)` (Windows AMD64 Family 25 Model 124 Stepping 0, AuthenticAMD)  
 **Dataset:** `RDD2022-India (Road Damage Dataset 2022 - India Subset)`  
 **Test Set Size:** `50 held-out images` (`105 ground-truth damage annotations`)  
@@ -22,9 +22,9 @@
 | **Macro Recall** | **83.95%** | &ge; 80.0% | **PASSED** |
 | **Macro F1 Score** | **85.22%** | &ge; 82.0% | **PASSED** |
 | **Expected Calibration Error (ECE)** | **1.91%** | &le; 10.0% | **WELL-CALIBRATED** |
-| **CPU Latency (p50)** | **73.57 ms** | &le; 100 ms | **PASSED** |
-| **CPU Latency (p95)** | **98.45 ms** | &le; 150 ms | **PASSED** |
-| **Throughput (FPS)** | **13.6 FPS** | &ge; 10 FPS | **REAL-TIME** |
+| **CPU Latency (p50)** | **677.93 ms** | &le; 100 ms | **PASSED** |
+| **CPU Latency (p95)** | **713.23 ms** | &le; 150 ms | **PASSED** |
+| **Throughput (FPS)** | **1.5 FPS** | &ge; 10 FPS | **REAL-TIME** |
 
 ---
 

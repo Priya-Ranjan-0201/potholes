@@ -62,26 +62,31 @@ def nms_boxes(
     boxes: list[tuple[float, float, float, float]],
     scores: list[float],
     iou_threshold: float = 0.45,
+    class_ids: list[int] | None = None,
+    iom_threshold: float = 0.60,
 ) -> list[int]:
-    """Perform Non-Maximum Suppression on bounding boxes."""
+    """Perform Non-Maximum Suppression on bounding boxes with nested box suppression."""
     if not boxes:
         return []
 
     boxes_arr = np.array(boxes, dtype=np.float32)
     scores_arr = np.array(scores, dtype=np.float32)
+    classes_arr = np.array(class_ids, dtype=np.int32) if class_ids is not None else None
 
     x1 = boxes_arr[:, 0]
     y1 = boxes_arr[:, 1]
     x2 = boxes_arr[:, 2]
     y2 = boxes_arr[:, 3]
 
-    areas = (x2 - x1) * (y2 - y1)
+    areas = np.maximum(0.0, x2 - x1) * np.maximum(0.0, y2 - y1)
     order = scores_arr.argsort()[::-1]
 
     keep: list[int] = []
     while order.size > 0:
         i = int(order[0])
         keep.append(i)
+        if order.size == 1:
+            break
 
         xx1 = np.maximum(x1[i], x1[order[1:]])
         yy1 = np.maximum(y1[i], y1[order[1:]])
@@ -92,8 +97,17 @@ def nms_boxes(
         h = np.maximum(0.0, yy2 - yy1)
         inter = w * h
 
-        ovr = inter / (areas[i] + areas[order[1:]] - inter)
-        inds = np.where(ovr <= iou_threshold)[0]
+        union = areas[i] + areas[order[1:]] - inter
+        ovr = inter / np.maximum(union, 1e-6)
+
+        suppress = ovr > iou_threshold
+        if classes_arr is not None:
+            min_area = np.minimum(areas[i], areas[order[1:]])
+            iom = inter / np.maximum(min_area, 1e-6)
+            same_cls = (classes_arr[i] == classes_arr[order[1:]])
+            suppress = suppress | (same_cls & (iom > iom_threshold))
+
+        inds = np.where(~suppress)[0]
         order = order[inds + 1]
 
     return keep
@@ -234,8 +248,14 @@ class EdgeInferenceEngine:
         if not boxes:
             return []
 
-        # 4. Non-Maximum Suppression
-        keep_indices = nms_boxes(boxes, confidences, iou_threshold=self.iou_threshold)
+        # 4. Non-Maximum Suppression (Class-aware with containment filtering)
+        keep_indices = nms_boxes(
+            boxes,
+            confidences,
+            iou_threshold=self.iou_threshold,
+            class_ids=class_ids,
+            iom_threshold=0.60,
+        )
 
         detections: list[Detection] = []
         for idx in keep_indices:

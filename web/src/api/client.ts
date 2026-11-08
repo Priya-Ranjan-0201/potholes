@@ -204,6 +204,38 @@ export interface ModelEvaluationResponse {
     root_cause: string;
     mitigation: string;
   }>;
+  device_matrix?: Array<{
+    device: string;
+    status: string;
+    fps: number | null;
+    latency_p50_ms: number | null;
+    notes?: string;
+  }>;
+  model_comparisons?: Array<{
+    name: string;
+    family: string;
+    tier: string;
+    params_m: number;
+    size_mb: number;
+    latency_ms: number;
+    fps: number;
+    precision: number;
+    recall: number;
+    mAP50: number;
+    mAP50_95: number;
+  }>;
+  quantization?: {
+    fp32_size_mb: number;
+    int8_size_mb: number;
+    compression_percentage: number;
+  };
+  dataset_splits?: {
+    train?: number;
+    val?: number;
+    test?: number;
+    total?: number;
+  };
+  limitations_note?: string;
 }
 
 export interface WorkOrder {
