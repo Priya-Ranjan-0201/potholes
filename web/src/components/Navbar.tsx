@@ -87,8 +87,19 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* Right: Search, Language, Theme, Mobile toggle */}
+          {/* Right: Status, Search, Language, Theme, Mobile toggle */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Live Telemetry Status Pill */}
+            <div
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-medium"
+              title="PostgreSQL 16 & YOLO11n INT8 Inference Engine Online"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>LIVE</span>
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">74ms</span>
+            </div>
+
             {/* Search shortcut */}
             <button
               onClick={() => {

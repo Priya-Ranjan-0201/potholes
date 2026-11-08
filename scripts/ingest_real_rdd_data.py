@@ -139,10 +139,10 @@ def ingest_real_rdd_dataset() -> None:
 
         # SLA Policies
         sla_policies = {}
-        for level, hrs, penalty in [("Critical", 24, 25000.0), ("Severe", 72, 10000.0), ("Moderate", 168, 5000.0), ("Minor", 360, 2000.0)]:
+        for name, level, hrs in [("SLA-CRITICAL", "Critical", 24), ("SLA-SEVERE", "Severe", 72), ("SLA-MODERATE", "Moderate", 168), ("SLA-MINOR", "Minor", 360)]:
             p = session.scalar(select(SlaPolicy).where(SlaPolicy.severity_level == level))
             if not p:
-                p = SlaPolicy(severity_level=level, max_resolution_hours=hrs, penalty_per_day=penalty)
+                p = SlaPolicy(name=name, severity_level=level, max_resolution_hours=hrs)
                 session.add(p)
                 session.flush()
             sla_policies[level] = p

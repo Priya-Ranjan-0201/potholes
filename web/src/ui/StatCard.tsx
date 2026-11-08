@@ -28,9 +28,8 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`card p-4 flex flex-col justify-between transition-colors ${
-        onClick ? "cursor-pointer hover:border-slate-400 dark:hover:border-slate-600" : ""
-      } ${className}`}
+      className={`card p-4 flex flex-col justify-between transition-colors ${onClick ? "cursor-pointer hover:border-slate-400 dark:hover:border-slate-600" : ""
+        } ${className}`}
     >
       <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
         <span>{label}</span>
@@ -46,13 +45,12 @@ export const StatCard: React.FC<StatCardProps> = ({
         </span>
         {change && (
           <span
-            className={`text-xs font-medium flex items-center gap-0.5 ${
-              change.trend === "up"
-                ? "text-emerald-600 dark:text-emerald-400"
-                : change.trend === "down"
+            className={`text-xs font-medium flex items-center gap-0.5 ${change.trend === "up"
+              ? "text-emerald-600 dark:text-emerald-400"
+              : change.trend === "down"
                 ? "text-rose-600 dark:text-rose-400"
                 : "text-slate-500 dark:text-slate-400"
-            }`}
+              }`}
           >
             {change.trend === "up" && "↑"}
             {change.trend === "down" && "↓"}

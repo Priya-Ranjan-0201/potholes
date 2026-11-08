@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from backend.app.api.deps import get_current_user, require_role
+from backend.app.api.deps import get_current_user, get_optional_user, require_role
 from backend.app.db.session import get_db
 from backend.app.models.auth import User
 from backend.app.models.complaint import (
@@ -100,12 +100,12 @@ class ComplaintListResponse(BaseModel):
 )
 async def create_citizen_report(
     req: CreateReportRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ) -> ComplaintResponse:
     """Submit citizen road defect report and initialize complaint in SUBMITTED status."""
     report = CitizenReport(
-        reporter_user_id=current_user.id,
+        reporter_user_id=current_user.id if current_user else None,
         location=f"POINT({req.longitude} {req.latitude})",
         description=req.description,
         media_path=req.media_path,
@@ -125,7 +125,7 @@ async def create_citizen_report(
         complaint_id=complaint.id,
         from_status="NONE",
         to_status="SUBMITTED",
-        changed_by_user_id=current_user.id,
+        changed_by_user_id=current_user.id if current_user else None,
         comment="Initial submission by citizen",
     )
     db.add(history)
@@ -147,7 +147,7 @@ async def create_citizen_report(
             StatusHistoryResponse(
                 from_status="NONE",
                 to_status="SUBMITTED",
-                changed_by_user_id=current_user.id,
+                changed_by_user_id=current_user.id if current_user else None,
                 comment="Initial submission by citizen",
                 created_at=history.created_at,
             )

@@ -1,5 +1,6 @@
 """Pytest fixtures for backend testing."""
 
+import os
 import pytest
 from backend.app.db.session import sync_engine
 from backend.app.main import app
@@ -15,7 +16,9 @@ def client() -> TestClient:
 
 @pytest.fixture(autouse=True)
 def clean_database() -> None:
-    """Clean test tables before each test to guarantee complete test isolation."""
+    """Clean test tables before each test if not explicitly skipped."""
+    if os.getenv("SKIP_CLEAN_DB") == "1":
+        return
     try:
         with sync_engine.begin() as conn:
             conn.execute(

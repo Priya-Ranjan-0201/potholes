@@ -84,7 +84,9 @@ export interface DefectItem {
   times_seen: number;
   is_demo: boolean;
   severity_level?: string | null;
+  latest_severity_level?: string | null;
   normalized_score?: number | null;
+  latest_severity_score?: number | null;
   factor_breakdown?: Record<string, number> | null;
   missing_factors?: string[] | null;
   needs_human_review?: boolean;

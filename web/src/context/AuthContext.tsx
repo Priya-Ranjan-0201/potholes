@@ -25,12 +25,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const stored = getStoredToken();
       const defaultPassword = (import.meta.env.VITE_DEMO_PASSWORD as string) || "ScamRoadDemo2026!";
       if (!stored) {
-        // Auto-initialize demo admin user for local seamless viewing if not signed in
+        // Auto-initialize municipal engineer admin user for local seamless viewing if not signed in
         try {
           const res = await api.register({
-            email: "admin_demo@scamroad.local",
+            email: "engineer@scamroad.org",
             password: defaultPassword,
-            full_name: "Municipal Admin",
+            full_name: "Municipal Chief Engineer",
             role: "admin",
           });
           setStoredTokens(res.access_token, res.refresh_token);
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // If already exists, attempt login
           try {
             const loginRes = await api.login({
-              email: "admin_demo@scamroad.local",
+              email: "engineer@scamroad.org",
               password: defaultPassword,
             });
             setStoredTokens(loginRes.access_token, loginRes.refresh_token);
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const switchDemoRole = async (role: string) => {
-    const demoEmail = `${role}_demo@scamroad.local`;
+    const demoEmail = `${role}_demo@scamroad.org`;
     const demoPass = "DemoPassword123!";
     try {
       await login(demoEmail, demoPass);

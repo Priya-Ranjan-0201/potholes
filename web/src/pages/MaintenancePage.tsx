@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, WorkOrder } from "../api/client";
 import {
@@ -8,6 +9,7 @@ import {
   X,
   FileCheck2,
   Search,
+  MessageSquareWarning,
 } from "../components/Icons";
 import {
   SeverityBadge,
@@ -15,12 +17,15 @@ import {
   SegmentedControl,
   DemoBadge,
 } from "../ui";
+import { useToast } from "../context/ToastContext";
 
 type SubTab = "work-orders" | "defects" | "reports";
 type ViewMode = "table" | "kanban";
 
 export const MaintenancePage: React.FC = () => {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { success, info } = useToast();
 
   // Tab & View States
   const [subTab, setSubTab] = useState<SubTab>("work-orders");
@@ -34,10 +39,16 @@ export const MaintenancePage: React.FC = () => {
   // Modals & Drawers
   const [selectedDefectId, setSelectedDefectId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createComplaintModalOpen, setCreateComplaintModalOpen] = useState(false);
   const [newDefectId, setNewDefectId] = useState("");
   const [newContractorId, setNewContractorId] = useState("");
   const [newPriority] = useState("HIGH");
   const [newCost, setNewCost] = useState("15000");
+
+  // Citizen Complaint Modal State
+  const [newComplaintDesc, setNewComplaintDesc] = useState("");
+  const [newComplaintLat, setNewComplaintLat] = useState("30.9010");
+  const [newComplaintLng, setNewComplaintLng] = useState("75.8573");
 
   // Engineer Sign-Off Modal
   const [verifyModalWo, setVerifyModalWo] = useState<WorkOrder | null>(null);
@@ -80,13 +91,42 @@ export const MaintenancePage: React.FC = () => {
     enabled: Boolean(selectedDefectId),
   });
 
+  const workOrders = woData?.items || [];
+  const defects = defectsData?.items || [];
+  const complaints = complaintsData?.items || [];
+
+  // Deep-linking URL Query Params Sync
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "defects" || tabParam === "reports" || tabParam === "work-orders") {
+      setSubTab(tabParam as SubTab);
+    }
+    const idParam = searchParams.get("id");
+    if (idParam && workOrders.length > 0) {
+      const foundWo = workOrders.find((w) => w.id === idParam || w.id.startsWith(idParam));
+      if (foundWo) {
+        setSelectedDefectId(foundWo.defect_id);
+      }
+    }
+    const defectIdParam = searchParams.get("defectId");
+    if (defectIdParam) {
+      setSelectedDefectId(defectIdParam);
+    }
+    const wardParam = searchParams.get("ward");
+    if (wardParam) {
+      setSearchQuery(wardParam);
+    }
+  }, [searchParams, workOrders]);
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: api.createWorkOrder,
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["workOrdersList"] });
+      queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
       setCreateModalOpen(false);
       setNewDefectId("");
+      success("Work Order Dispatched", `Order #${res.id.slice(0, 8)} created and dispatched to contractor.`);
     },
   });
 
@@ -96,8 +136,10 @@ export const MaintenancePage: React.FC = () => {
         new_status: vars.new_status,
         notes: vars.notes,
       }),
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["workOrdersList"] });
+      queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
+      info("Status Updated", `Work order #${vars.id.slice(0, 8)} shifted to ${vars.new_status}.`);
     },
   });
 
@@ -115,10 +157,11 @@ export const MaintenancePage: React.FC = () => {
         human_decision: vars.decision,
         decision_reason: vars.reason,
       }),
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["workOrdersList"] });
       queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
       setVerifyModalWo(null);
+      success("Authoritative Sign-Off Recorded", `Order #${vars.id.slice(0, 8)} signed off as ${vars.decision}.`);
     },
   });
 
@@ -128,16 +171,24 @@ export const MaintenancePage: React.FC = () => {
         override_level: vars.level,
         reason: vars.reason,
       }),
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["defectDetail", selectedDefectId] });
       queryClient.invalidateQueries({ queryKey: ["defectsList"] });
+      queryClient.invalidateQueries({ queryKey: ["statsOverview"] });
       setOverrideReason("");
+      success("Severity Overridden", `Defect #${vars.id.slice(0, 8)} reassessed as ${vars.level}.`);
     },
   });
 
-  const workOrders = woData?.items || [];
-  const defects = defectsData?.items || [];
-  const complaints = complaintsData?.items || [];
+  const createComplaintMutation = useMutation({
+    mutationFn: api.createComplaint,
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["complaintsList"] });
+      setCreateComplaintModalOpen(false);
+      setNewComplaintDesc("");
+      success("Citizen Report Registered", `Public grievance #${res.id.slice(0, 8)} logged to municipal intake.`);
+    },
+  });
 
   // Filter Work Orders
   const filteredWorkOrders = workOrders.filter((wo) => {
@@ -156,11 +207,16 @@ export const MaintenancePage: React.FC = () => {
   // Filter Defects
   const filteredDefects = defects.filter((def) => {
     if (statusFilter !== "ALL" && def.status !== statusFilter) return false;
-    if (severityFilter !== "ALL" && def.severity_level?.toUpperCase() !== severityFilter.toUpperCase())
+    const sev = (def.latest_severity_level || def.severity_level || "Minor").toUpperCase();
+    if (severityFilter !== "ALL" && sev !== severityFilter.toUpperCase())
       return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      return def.id.toLowerCase().includes(q) || def.class_code.toLowerCase().includes(q);
+      return (
+        def.id.toLowerCase().includes(q) ||
+        def.class_code.toLowerCase().includes(q) ||
+        (def.road_segment_id && def.road_segment_id.toLowerCase().includes(q))
+      );
     }
     return true;
   });
@@ -186,10 +242,12 @@ export const MaintenancePage: React.FC = () => {
     { key: "VERIFIED", label: "Verified" },
   ];
 
+  const linkedOrderForSelectedDefect = workOrders.find((w) => w.defect_id === selectedDefectId);
+
   return (
     <div className="space-y-6">
       {/* 1. Page Header with Sub-tabs & Create Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
@@ -202,10 +260,13 @@ export const MaintenancePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <SegmentedControl<SubTab>
             value={subTab}
-            onChange={(tab) => setSubTab(tab)}
+            onChange={(tab) => {
+              setSubTab(tab);
+              setSearchParams({ tab });
+            }}
             options={[
               { id: "work-orders", label: "Work Orders", count: workOrders.length },
               { id: "defects", label: "Defects", count: defects.length },
@@ -213,13 +274,26 @@ export const MaintenancePage: React.FC = () => {
             ]}
           />
 
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="btn-primary text-xs inline-flex items-center gap-1.5 shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Create Order</span>
-          </button>
+          {subTab === "reports" ? (
+            <button
+              onClick={() => setCreateComplaintModalOpen(true)}
+              className="btn-primary text-xs inline-flex items-center gap-1.5 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Report Hazard</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setNewDefectId(defects[0]?.id || "");
+                setCreateModalOpen(true);
+              }}
+              className="btn-primary text-xs inline-flex items-center gap-1.5 shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Order</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -236,6 +310,14 @@ export const MaintenancePage: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs w-48 sm:w-60 focus:outline-hidden"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
           {/* Status Filter */}
@@ -245,14 +327,24 @@ export const MaintenancePage: React.FC = () => {
             className="py-1.5 px-2.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-medium"
           >
             <option value="ALL">All Statuses</option>
-            <option value="CREATED">Created</option>
-            <option value="ASSIGNED">Assigned</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="VERIFIED">Verified</option>
+            {subTab === "reports" ? (
+              <>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+              </>
+            ) : (
+              <>
+                <option value="CREATED">Created</option>
+                <option value="ASSIGNED">Assigned</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="VERIFIED">Verified</option>
+              </>
+            )}
           </select>
 
-          {/* Severity Filter (only relevant for Work Orders and Defects) */}
+          {/* Severity Filter */}
           {subTab !== "reports" && (
             <select
               value={severityFilter}
@@ -322,12 +414,13 @@ export const MaintenancePage: React.FC = () => {
                           return (
                             <div
                               key={wo.id}
-                              className="card p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 transition-colors shadow-2xs space-y-2"
+                              className="card p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors shadow-2xs space-y-2"
                             >
                               <div className="flex items-center justify-between text-xs">
                                 <span
                                   onClick={() => setSelectedDefectId(wo.defect_id)}
                                   className="font-mono font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                                  title="Inspect defect details"
                                 >
                                   #{wo.id.slice(0, 8)}
                                 </span>
@@ -428,7 +521,7 @@ export const MaintenancePage: React.FC = () => {
                           );
                         })
                       ) : (
-                        <div className="py-8 text-center text-xs text-slate-400">
+                        <div className="py-8 text-center text-xs text-slate-400 font-mono">
                           No orders
                         </div>
                       )}
@@ -509,7 +602,7 @@ export const MaintenancePage: React.FC = () => {
                           ) : (
                             <button
                               onClick={() => setSelectedDefectId(wo.defect_id)}
-                              className="text-xs text-slate-600 hover:underline"
+                              className="text-xs text-blue-600 hover:underline"
                             >
                               Inspect
                             </button>
@@ -558,8 +651,8 @@ export const MaintenancePage: React.FC = () => {
                     </td>
                     <td>
                       <SeverityBadge
-                        level={def.severity_level || "Minor"}
-                        score={def.normalized_score ?? undefined}
+                        level={def.latest_severity_level || def.severity_level || "Minor"}
+                        score={def.latest_severity_score ?? def.normalized_score ?? undefined}
                         size="sm"
                       />
                     </td>
@@ -603,51 +696,86 @@ export const MaintenancePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredComplaints.map((cmp) => {
-                const createdDate = new Date(cmp.created_at);
-                return (
-                  <tr key={cmp.id}>
-                    <td className="font-mono text-xs font-semibold">
-                      #{cmp.id.slice(0, 8)}
-                    </td>
-                    <td className="font-mono text-xs text-slate-500">
-                      {createdDate.toLocaleDateString([], { month: "short", day: "numeric" })}
-                    </td>
-                    <td className="text-slate-700 dark:text-slate-300 max-w-sm truncate">
-                      {cmp.description || "Public surface hazard reported"}
-                    </td>
-                    <td className="font-mono text-xs">
-                      {cmp.defect_id ? (
-                        <button
-                          onClick={() => setSelectedDefectId(cmp.defect_id)}
-                          className="text-blue-600 hover:underline"
-                        >
-                          #{cmp.defect_id.slice(0, 8)}
-                        </button>
-                      ) : (
-                        <span className="text-slate-400">Unlinked</span>
-                      )}
-                    </td>
-                    <td>
-                      <StatusChip status={cmp.status} />
-                    </td>
-                    <td className="text-right">
-                      {cmp.status === "SUBMITTED" && (
-                        <button
-                          onClick={() =>
-                            api.transitionComplaintStatus(cmp.id, {
-                              new_status: "IN_PROGRESS",
-                            }).then(() => queryClient.invalidateQueries({ queryKey: ["complaintsList"] }))
-                          }
-                          className="btn-secondary text-xs"
-                        >
-                          Acknowledge
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+              {filteredComplaints.length > 0 ? (
+                filteredComplaints.map((cmp) => {
+                  const createdDate = new Date(cmp.created_at);
+                  return (
+                    <tr key={cmp.id}>
+                      <td className="font-mono text-xs font-semibold">
+                        #{cmp.id.slice(0, 8)}
+                      </td>
+                      <td className="font-mono text-xs text-slate-500">
+                        {createdDate.toLocaleDateString([], { month: "short", day: "numeric" })}
+                      </td>
+                      <td className="text-slate-700 dark:text-slate-300 max-w-sm truncate">
+                        {cmp.description || "Public surface hazard reported"}
+                      </td>
+                      <td className="font-mono text-xs">
+                        {cmp.defect_id ? (
+                          <button
+                            onClick={() => setSelectedDefectId(cmp.defect_id)}
+                            className="text-blue-600 hover:underline"
+                          >
+                            #{cmp.defect_id.slice(0, 8)}
+                          </button>
+                        ) : (
+                          <span className="text-slate-400">Unlinked</span>
+                        )}
+                      </td>
+                      <td>
+                        <StatusChip status={cmp.status} />
+                      </td>
+                      <td className="text-right">
+                        {cmp.status === "SUBMITTED" && (
+                          <button
+                            onClick={() =>
+                              api
+                                .transitionComplaintStatus(cmp.id, {
+                                  new_status: "UNDER_REVIEW",
+                                })
+                                .then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ["complaintsList"] });
+                                  info("Complaint Under Review", `Grievance #${cmp.id.slice(0, 8)} moved to active review.`);
+                                })
+                            }
+                            className="btn-secondary text-xs"
+                          >
+                            Acknowledge
+                          </button>
+                        )}
+                        {cmp.status === "UNDER_REVIEW" && (
+                          <button
+                            onClick={() =>
+                              api
+                                .transitionComplaintStatus(cmp.id, {
+                                  new_status: "VERIFIED",
+                                })
+                                .then(() => {
+                                  queryClient.invalidateQueries({ queryKey: ["complaintsList"] });
+                                  info("Complaint Verified", `Grievance #${cmp.id.slice(0, 8)} verified by field engineer.`);
+                                })
+                            }
+                            className="btn-primary text-xs"
+                          >
+                            Verify &rarr;
+                          </button>
+                        )}
+                        {cmp.status === "VERIFIED" && (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
+                            Verified
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-xs text-slate-400">
+                    No citizen complaints logged. Click &quot;Report Hazard&quot; above to submit an observation.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -686,11 +814,29 @@ export const MaintenancePage: React.FC = () => {
               </div>
             ) : defectDetail ? (
               <div className="space-y-4 text-xs">
+                {/* Visual Photographic Evidence */}
+                <div className="space-y-1.5">
+                  <span className="text-slate-500 font-medium">Photographic Evidence</span>
+                  <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 aspect-video relative flex items-center justify-center">
+                    <img
+                      src={`/api/v1/media/${selectedDefectId}.jpg`}
+                      onError={(e) => {
+                        e.currentTarget.src = "/samples/asphalt_crater.jpg";
+                      }}
+                      alt={`Defect ${selectedDefectId}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-white font-mono text-[10px] backdrop-blur-xs">
+                      {defectDetail.latitude?.toFixed(4)}°N, {defectDetail.longitude?.toFixed(4)}°E
+                    </div>
+                  </div>
+                </div>
+
                 {/* Defect Metadata Card */}
                 <div className="card p-3 space-y-2 bg-slate-50 dark:bg-slate-800/40">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Distress Classification:</span>
-                    <strong className="text-slate-800 dark:text-slate-200">
+                    <strong className="text-slate-800 dark:text-slate-200 font-mono">
                       {defectDetail.class_code}
                     </strong>
                   </div>
@@ -711,9 +857,40 @@ export const MaintenancePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Sightings Count:</span>
                     <span className="font-mono text-slate-700 dark:text-slate-300">
-                      {defectDetail.times_seen} passes
+                      {defectDetail.times_seen} camera passes
                     </span>
                   </div>
+                </div>
+
+                {/* Associated Work Order Status */}
+                <div className="card p-3 space-y-2 bg-slate-50 dark:bg-slate-800/20">
+                  <span className="text-slate-500 font-medium block">Associated Work Order</span>
+                  {linkedOrderForSelectedDefect ? (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-mono font-semibold text-slate-900 dark:text-slate-100">
+                          #{linkedOrderForSelectedDefect.id.slice(0, 8)}
+                        </div>
+                        <span className="text-[11px] text-slate-400">
+                          Priority: {linkedOrderForSelectedDefect.priority}
+                        </span>
+                      </div>
+                      <StatusChip status={linkedOrderForSelectedDefect.status} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">No active work order dispatched.</span>
+                      <button
+                        onClick={() => {
+                          setNewDefectId(selectedDefectId);
+                          setCreateModalOpen(true);
+                        }}
+                        className="btn-primary text-[11px] py-1 px-2"
+                      >
+                        + Dispatch Order
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Engineer Severity Override Section */}
@@ -722,24 +899,24 @@ export const MaintenancePage: React.FC = () => {
                     Human Engineer Severity Override
                   </h4>
                   <p className="text-[11px] text-slate-500">
-                    Municipal engineers may override automated AI score with justification.
+                    Municipal engineers may override automated AI score with engineering justification.
                   </p>
 
                   <div className="space-y-2">
                     <select
                       value={overrideLevel}
                       onChange={(e) => setOverrideLevel(e.target.value)}
-                      className="w-full py-1.5 px-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"
+                      className="w-full py-1.5 px-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-200"
                     >
-                      <option value="Minor">Minor</option>
-                      <option value="Moderate">Moderate</option>
-                      <option value="Severe">Severe</option>
-                      <option value="Critical">Critical</option>
+                      <option value="Minor">Minor (Routine maintenance)</option>
+                      <option value="Moderate">Moderate (Scheduled patching)</option>
+                      <option value="Severe">Severe (48h resolution SLA)</option>
+                      <option value="Critical">Critical (Immediate road hazard)</option>
                     </select>
 
                     <textarea
                       rows={2}
-                      placeholder="Engineer reasoning for override..."
+                      placeholder="Engineer reasoning for override (e.g. adjacent water main risk)..."
                       value={overrideReason}
                       onChange={(e) => setOverrideReason(e.target.value)}
                       className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-hidden"
@@ -806,7 +983,7 @@ export const MaintenancePage: React.FC = () => {
                 <select
                   value={humanDecision}
                   onChange={(e) => setHumanDecision(e.target.value as "APPROVED" | "REJECTED")}
-                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                 >
                   <option value="APPROVED">APPROVED — Repair Accepted</option>
                   <option value="REJECTED">REJECTED — Rework Required</option>
@@ -882,12 +1059,12 @@ export const MaintenancePage: React.FC = () => {
                 <select
                   value={newDefectId}
                   onChange={(e) => setNewDefectId(e.target.value)}
-                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                 >
                   <option value="">Select an active defect...</option>
-                  {defects.slice(0, 20).map((d) => (
+                  {defects.slice(0, 30).map((d) => (
                     <option key={d.id} value={d.id}>
-                      #{d.id.slice(0, 8)} — {d.class_code} ({d.severity_level || "Defect"})
+                      #{d.id.slice(0, 8)} — {d.class_code} ({d.latest_severity_level || d.severity_level || "Defect"})
                     </option>
                   ))}
                 </select>
@@ -900,7 +1077,7 @@ export const MaintenancePage: React.FC = () => {
                 <select
                   value={newContractorId}
                   onChange={(e) => setNewContractorId(e.target.value)}
-                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
                 >
                   <option value="">Select certified contractor...</option>
                   {contractors?.map((c) => (
@@ -943,6 +1120,95 @@ export const MaintenancePage: React.FC = () => {
                   className="btn-primary text-xs"
                 >
                   Dispatch Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. Citizen Report Modal */}
+      {createComplaintModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setCreateComplaintModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-md card p-5 border shadow-xl bg-white dark:bg-slate-900 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <MessageSquareWarning className="w-4 h-4 text-amber-500" />
+                <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
+                  Submit Citizen Road Hazard Report
+                </h3>
+              </div>
+              <button
+                onClick={() => setCreateComplaintModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Hazard Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe road defect location, size, and vehicle safety hazard..."
+                  value={newComplaintDesc}
+                  onChange={(e) => setNewComplaintDesc(e.target.value)}
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-hidden"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Latitude
+                  </label>
+                  <input
+                    type="text"
+                    value={newComplaintLat}
+                    onChange={(e) => setNewComplaintLat(e.target.value)}
+                    className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Longitude
+                  </label>
+                  <input
+                    type="text"
+                    value={newComplaintLng}
+                    onChange={(e) => setNewComplaintLng(e.target.value)}
+                    className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  onClick={() => setCreateComplaintModalOpen(false)}
+                  className="btn-secondary text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() =>
+                    createComplaintMutation.mutate({
+                      latitude: parseFloat(newComplaintLat) || 30.901,
+                      longitude: parseFloat(newComplaintLng) || 75.8573,
+                      description: newComplaintDesc || "Public surface hazard reported",
+                    })
+                  }
+                  className="btn-primary text-xs"
+                >
+                  Submit Grievance
                 </button>
               </div>
             </div>
