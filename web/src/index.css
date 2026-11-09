@@ -46,19 +46,19 @@
 
   /* LIGHT "Morning India" */
   :root {
-    --bg: #FFF9F0;
+    --bg: #F8FAFC;
     --bg-raised: #FFFFFF;
-    --bg-sky: linear-gradient(to bottom, #FFF9F0, #EAF3FF);
+    --bg-sky: linear-gradient(to bottom, #F8FAFC, #EDF2F7);
     --surface: #FFFFFF;
     --surface-solid: #FFFFFF;
-    --border: #E8DFD0;
-    --border-strong: #D8CCB8;
-    --text: #14161F;
-    --muted: #53586B;
-    --faint: #8E94A8;
+    --border: #CBD5E1;
+    --border-strong: #94A3B8;
+    --text: #0F172A;
+    --muted: #475569;
+    --faint: #64748B;
     
-    --primary: #3730A3; /* deep indigo */
-    --primary-hover: #4338CA;
+    --primary: #2563EB; /* robust deep blue */
+    --primary-hover: #1D4ED8;
     --primary-contrast: #FFFFFF;
     
     --accent-saffron: #F59E0B;
@@ -68,7 +68,7 @@
     --success: #15803D;
     --warn: #B45309;
     --danger: #B91C1C;
-    --focus: #3730A3;
+    --focus: #2563EB;
 
     /* Severity road-sign tokens */
     --sev-minor: #0EA5A4;
@@ -79,7 +79,7 @@
     /* Semantic aliases */
     --theme-bg: var(--bg);
     --theme-surface: var(--surface-solid);
-    --theme-surface-2: #F5EFE3;
+    --theme-surface-2: #F1F5F9;
     --theme-border: var(--border);
     --theme-text: var(--text);
     --theme-muted: var(--muted);
@@ -108,7 +108,7 @@
   background-color: var(--surface-solid);
   border: 1px solid var(--border);
   border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
@@ -189,12 +189,12 @@
   text-align: left;
   font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
-  background-color: var(--surface-solid);
+  background-color: var(--theme-surface-2);
 }
 
 .data-table td {

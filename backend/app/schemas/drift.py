@@ -128,3 +128,4 @@ class TriggerRetrainingRequest(BaseModel):
     dataset_version: str = "RDD2022-India-v2.2-patch"
     epochs: int = 100
     engineer_notes: Optional[str] = None
+

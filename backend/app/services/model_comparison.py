@@ -321,3 +321,4 @@ def evaluate_model_promotion(
         summary=summary,
         checks=checks,
     )
+

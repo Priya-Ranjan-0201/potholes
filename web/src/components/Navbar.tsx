@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-surface/85 backdrop-blur-md border-b border-border shadow-sm">
+      <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.03} />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
@@ -67,7 +67,7 @@ export const Navbar: React.FC = () => {
                 <span className="font-heading font-extrabold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
                   ScamRoad
                 </span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
+                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium tracking-tight mt-0.5">
                   Road defect management
                 </span>
               </div>
@@ -86,10 +86,10 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`relative px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-2 ${
+                    className={`relative px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-2 ${
                       isActive
-                        ? "text-amber-500 dark:text-amber-400 font-bold"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 font-medium"
+                        ? "text-amber-600 dark:text-amber-400 font-bold"
+                        : "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-medium"
                     }`}
                   >
                     {isActive && !isReduced && (
@@ -113,13 +113,13 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-1.5 shrink-0">
               {/* Live Telemetry Status Pill */}
               <div
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/50 border border-emerald-500/35 text-emerald-400 text-xs font-mono font-medium"
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-500/35 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-medium"
                 title="PostgreSQL & YOLO11n INT8 Inference Engine Online"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
                 <span>LIVE</span>
-                <span className="text-slate-600">|</span>
-                <span className="text-slate-400 text-[11px]">74ms</span>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
+                <span className="text-slate-600 dark:text-slate-400 text-[11px]">74ms</span>
               </div>
 
               {/* Command Palette Trigger */}
@@ -128,11 +128,11 @@ export const Navbar: React.FC = () => {
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("scamroad:open-palette"));
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
                 title="Search & Command Palette (Ctrl+K)"
               >
-                <Search className="w-3.5 h-3.5 text-slate-400" />
-                <span className="font-mono text-[10px] text-slate-400">Ctrl+K</span>
+                <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400">Ctrl+K</span>
               </button>
 
               {/* Language Selector Dropdown */}
@@ -140,15 +140,15 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
                   title="Switch language"
                 >
-                  <Globe className="w-3.5 h-3.5 text-amber-400" />
+                  <Globe className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   <span className="font-medium hidden sm:inline">{currentOption.nativeName}</span>
                 </button>
 
                 {langDropdownOpen && (
-                  <div className="absolute right-0 mt-1.5 w-44 bg-slate-900 border border-slate-700 rounded-md shadow-xl py-1 z-50 text-xs">
+                  <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-xl py-1 z-50 text-xs">
                     {LANGUAGES.map((opt) => (
                       <button
                         key={opt.code}
@@ -157,14 +157,14 @@ export const Navbar: React.FC = () => {
                           setLanguage(opt.code);
                           setLangDropdownOpen(false);
                         }}
-                        className={`w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-slate-800 transition-colors cursor-pointer ${
+                        className={`w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ${
                           language === opt.code
-                            ? "text-amber-400 font-bold bg-amber-500/10"
-                            : "text-slate-200"
+                            ? "text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-500/10"
+                            : "text-slate-800 dark:text-slate-200"
                         }`}
                       >
                         <span>{opt.nativeName}</span>
-                        <span className="text-[10px] text-slate-400 font-mono uppercase">{opt.code}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase">{opt.code}</span>
                       </button>
                     ))}
                   </div>
@@ -177,8 +177,8 @@ export const Navbar: React.FC = () => {
                 onClick={() => setReducedMotion(!reducedMotion)}
                 className={`p-1.5 rounded-md border text-xs transition-colors cursor-pointer outline-none ${
                   reducedMotion
-                    ? "bg-amber-500/20 border-amber-500/50 text-amber-500 dark:text-amber-300"
-                    : "bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                    ? "bg-amber-500/20 border-amber-500/50 text-amber-600 dark:text-amber-300"
+                    : "bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
                 }`}
                 title={reducedMotion ? "Reduce motion active" : "Full motion active"}
                 aria-label="Toggle reduced motion"
