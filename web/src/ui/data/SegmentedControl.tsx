@@ -28,7 +28,7 @@ export function SegmentedControl<T extends string = string>({
 }: SegmentedControlProps<T>) {
   const isReduced = useReducedMotion();
   const defaultId = React.useId();
-  const controlName = name || defaultId;
+  const controlName = (name || defaultId).replace(/:/g, "_");
 
   const sizeClasses = {
     sm: "p-0.5 text-xs",
@@ -74,7 +74,7 @@ export function SegmentedControl<T extends string = string>({
                 {option.icon}
               </span>
             )}
-            <span>{option.label}</span>
+            <span className="whitespace-nowrap select-none">{option.label}</span>
             {option.count !== undefined && (
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-semibold transition-colors ${

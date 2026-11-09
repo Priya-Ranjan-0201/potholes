@@ -61,9 +61,9 @@ def letterbox_image(
 def nms_boxes(
     boxes: list[tuple[float, float, float, float]],
     scores: list[float],
-    iou_threshold: float = 0.45,
+    iou_threshold: float = 0.35,
     class_ids: list[int] | None = None,
-    iom_threshold: float = 0.60,
+    iom_threshold: float = 0.38,
 ) -> list[int]:
     """Perform Non-Maximum Suppression on bounding boxes with nested box suppression."""
     if not boxes:
@@ -265,7 +265,7 @@ class EdgeInferenceEngine:
             confidences,
             iou_threshold=self.iou_threshold,
             class_ids=class_ids,
-            iom_threshold=0.60,
+            iom_threshold=0.38,
         )
 
         detections: list[Detection] = []
