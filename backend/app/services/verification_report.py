@@ -359,3 +359,4 @@ def generate_verifications_csv(records: list[dict[str, Any]]) -> str:
         )
 
     return output.getvalue()
+

@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-surface/85 backdrop-blur-md border-b border-border shadow-xs">
+      <header className="sticky top-0 z-40 w-full bg-surface/85 backdrop-blur-md border-b border-border shadow-sm">
         <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.03} />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
@@ -64,10 +64,10 @@ export const Navbar: React.FC = () => {
             <Link to="/" className="flex items-center gap-2.5 shrink-0 select-none">
               <Logo showWordmark={false} size="sm" />
               <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-sm tracking-tight text-white leading-none">
+                <span className="font-heading font-extrabold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
                   ScamRoad
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
                   Road defect management
                 </span>
               </div>
@@ -88,8 +88,8 @@ export const Navbar: React.FC = () => {
                     to={link.to}
                     className={`relative px-3.5 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-2 ${
                       isActive
-                        ? "text-amber-400 font-bold"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800/60 font-medium"
+                        ? "text-amber-500 dark:text-amber-400 font-bold"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60 font-medium"
                     }`}
                   >
                     {isActive && !isReduced && (
@@ -128,7 +128,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("scamroad:open-palette"));
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-colors cursor-pointer"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
                 title="Search & Command Palette (Ctrl+K)"
               >
                 <Search className="w-3.5 h-3.5 text-slate-400" />
@@ -140,7 +140,7 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-slate-500 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 transition-colors cursor-pointer outline-none"
                   title="Switch language"
                 >
                   <Globe className="w-3.5 h-3.5 text-amber-400" />
@@ -175,10 +175,10 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setReducedMotion(!reducedMotion)}
-                className={`p-1.5 rounded-md border text-xs transition-colors cursor-pointer ${
+                className={`p-1.5 rounded-md border text-xs transition-colors cursor-pointer outline-none ${
                   reducedMotion
-                    ? "bg-amber-500/20 border-amber-500/50 text-amber-300"
-                    : "bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-700 hover:border-slate-500"
+                    ? "bg-amber-500/20 border-amber-500/50 text-amber-500 dark:text-amber-300"
+                    : "bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
                 }`}
                 title={reducedMotion ? "Reduce motion active" : "Full motion active"}
                 aria-label="Toggle reduced motion"
@@ -193,7 +193,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-1.5 rounded-md bg-slate-900 border border-slate-700 text-slate-300 hover:text-white cursor-pointer"
+                className="md:hidden p-1.5 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer outline-none"
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}

@@ -95,7 +95,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="engineer@scamroad.local"
-                className="w-full px-3 py-2 rounded-md bg-bg-raised border border-border text-text placeholder-muted text-xs focus:outline-hidden focus:border-primary transition-colors"
+                className="w-full px-3 py-2 rounded-md bg-bg-raised border border-border text-text placeholder-muted text-xs outline-none focus:ring-1 focus:ring-primary transition-colors"
               />
             </div>
 
@@ -112,7 +112,7 @@ export const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-3 py-2 rounded-md bg-bg-raised border border-border text-text placeholder-muted text-xs focus:outline-hidden focus:border-primary pr-9 transition-colors"
+                  className="w-full px-3 py-2 rounded-md bg-bg-raised border border-border text-text placeholder-muted text-xs outline-none focus:ring-1 focus:ring-primary pr-9 transition-colors"
                 />
                 <button
                   type="button"

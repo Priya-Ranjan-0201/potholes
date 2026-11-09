@@ -43,7 +43,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               transition: { duration: 0.16, ease: "easeOut" },
             }
       }
-      className={`card p-3.5 bg-slate-900/90 dark:bg-slate-950/80 border border-slate-700/80 rounded-xl shadow-xs transition-all duration-200 hover:border-slate-500 ${
+      className={`card p-3.5 bg-slate-900/90 dark:bg-slate-950/80 border border-slate-700/80 rounded-xl shadow-sm transition-all duration-200 hover:border-slate-500 ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
     >

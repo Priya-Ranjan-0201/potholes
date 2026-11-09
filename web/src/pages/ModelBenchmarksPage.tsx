@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, ModelEvaluationResponse } from "../api/client";
 import {
@@ -10,7 +10,8 @@ import {
   Smartphone,
   ShieldCheck,
 } from "../components/Icons";
-import { StatCard } from "../ui";
+import { StatCard, SegmentedControl } from "../ui";
+import { ModelDriftMonitoringWorkbench } from "../components/ModelDriftMonitoringWorkbench";
 
 // Authentic fallback data matching runs/baselines/yolov8n/eval/metrics.json and edge_benchmark_report.json
 const BENCHMARK_DATA: ModelEvaluationResponse = {
@@ -263,6 +264,8 @@ const pct = (v: number | undefined | null, decimals = 1): string =>
   `${((typeof v === "number" && !isNaN(v) ? v : 0) * 100).toFixed(decimals)}%`;
 
 export const ModelBenchmarksPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"benchmarks" | "drift">("benchmarks");
+
   const { data: apiEval } = useQuery({
     queryKey: ["modelEvaluationReport"],
     queryFn: api.getModelEvaluation,
@@ -283,7 +286,7 @@ export const ModelBenchmarksPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-              Model Benchmarks &amp; Edge Telemetry
+              Model Benchmarks &amp; Intelligence
             </h1>
             <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-semibold">
               {evaluation.model_version}
@@ -294,10 +297,24 @@ export const ModelBenchmarksPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="text-xs text-slate-400 font-mono">
-          <span>Evaluated: {new Date(evaluation.timestamp_utc).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}</span>
+        <div className="flex items-center gap-3">
+          <SegmentedControl<"benchmarks" | "drift">
+            name="benchmarks-subtab"
+            size="sm"
+            value={activeTab}
+            onChange={(tab) => setActiveTab(tab)}
+            options={[
+              { id: "benchmarks", label: "Edge Benchmarks & Telemetry" },
+              { id: "drift", label: "Drift & Performance Monitoring" },
+            ]}
+          />
         </div>
       </div>
+
+      {activeTab === "drift" ? (
+        <ModelDriftMonitoringWorkbench />
+      ) : (
+        <>
 
       {/* 2. Top Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -621,6 +638,8 @@ export const ModelBenchmarksPage: React.FC = () => {
             "Student research project evaluated on RDD2022-India dataset subset. Not an official government benchmark. Severity rubric is a project method, not an official standard."}
         </p>
       </div>
+      </>
+      )}
     </div>
   );
 };

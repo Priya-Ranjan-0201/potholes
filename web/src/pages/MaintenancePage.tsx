@@ -337,7 +337,7 @@ export const MaintenancePage: React.FC = () => {
               placeholder="Filter by ID, corridor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs w-48 sm:w-60 focus:outline-hidden"
+              className="pl-8 pr-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs w-48 sm:w-60 outline-none focus:ring-1 focus:ring-amber-500"
             />
             {searchQuery && (
               <button
@@ -460,7 +460,7 @@ export const MaintenancePage: React.FC = () => {
                 return (
                   <div
                     key={col.key}
-                    className="card p-3 flex flex-col min-h-[460px] bg-slate-50/50 dark:bg-slate-900/30"
+                    className="card p-3 flex flex-col min-h-[220px] bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-lg"
                   >
                     <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800">
                       <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
@@ -601,10 +601,10 @@ export const MaintenancePage: React.FC = () => {
                           );
                         })
                       ) : (
-                        <div className="h-44 rounded-lg border border-dashed border-slate-700/60 bg-slate-900/40 flex flex-col items-center justify-center p-4 text-center">
-                          <ClipboardList className="w-5 h-5 text-slate-500 mb-1.5" />
-                          <span className="text-xs font-semibold text-slate-300">No {col.label.toLowerCase()} orders</span>
-                          <span className="text-[10px] text-slate-500 mt-0.5">Dispatches will appear here</span>
+                        <div className="h-32 rounded-lg border border-dashed border-slate-300 dark:border-slate-800 bg-slate-100/40 dark:bg-slate-900/40 flex flex-col items-center justify-center p-3 text-center">
+                          <ClipboardList className="w-4 h-4 text-slate-400 mb-1" />
+                          <span className="text-xs font-medium text-slate-600 dark:text-slate-300">No {col.label.toLowerCase()} orders</span>
+                          <span className="text-[10px] text-slate-400 mt-0.5">Dispatches appear here</span>
                         </div>
                       )}
                     </div>
@@ -963,7 +963,7 @@ export const MaintenancePage: React.FC = () => {
       {/* 6. Defect Inspection Slide Drawer (Modal/Drawer) */}
       {selectedDefectId && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-end"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex justify-end"
           onClick={() => setSelectedDefectId(null)}
         >
           <div
@@ -1005,7 +1005,7 @@ export const MaintenancePage: React.FC = () => {
                       alt={`Defect ${selectedDefectId}`}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-white font-mono text-[10px] backdrop-blur-xs">
+                    <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-white font-mono text-[10px] backdrop-blur-sm">
                       {defectDetail.latitude?.toFixed(4)}°N, {defectDetail.longitude?.toFixed(4)}°E
                     </div>
                   </div>
@@ -1098,7 +1098,7 @@ export const MaintenancePage: React.FC = () => {
                       placeholder="Engineer reasoning for override (e.g. adjacent water main risk)..."
                       value={overrideReason}
                       onChange={(e) => setOverrideReason(e.target.value)}
-                      className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-hidden"
+                      className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs outline-none focus:ring-1 focus:ring-amber-500"
                     />
 
                     <button
@@ -1128,7 +1128,7 @@ export const MaintenancePage: React.FC = () => {
       {/* 7. Human Engineer Sign-Off Modal */}
       {verifyModalWo && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setVerifyModalWo(null)}
         >
           <div
@@ -1194,7 +1194,7 @@ export const MaintenancePage: React.FC = () => {
                   value={decisionReason}
                   onChange={(e) => setDecisionReason(e.target.value)}
                   placeholder="Enter civil inspection justification..."
-                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-hidden"
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 {decisionReason.trim().length < 10 && (
                   <span className="text-[10px] text-rose-500 mt-0.5 block">
@@ -1234,7 +1234,7 @@ export const MaintenancePage: React.FC = () => {
       {/* 8. Create Work Order Modal */}
       {createModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setCreateModalOpen(false)}
         >
           <div
@@ -1332,7 +1332,7 @@ export const MaintenancePage: React.FC = () => {
       {/* 9. Citizen Report Modal */}
       {createComplaintModalOpen && (
         <div
-          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setCreateComplaintModalOpen(false)}
         >
           <div
@@ -1364,7 +1364,7 @@ export const MaintenancePage: React.FC = () => {
                   placeholder="Describe road defect location, size, and vehicle safety hazard..."
                   value={newComplaintDesc}
                   onChange={(e) => setNewComplaintDesc(e.target.value)}
-                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-hidden"
+                  className="w-full p-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs outline-none focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 

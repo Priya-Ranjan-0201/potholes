@@ -502,7 +502,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                         width: `${def.box[2]}%`,
                         height: `${def.box[3]}%`,
                       }}
-                      className="border-2 border-red-500 bg-red-500/20 rounded-xs pointer-events-none"
+                      className="border-2 border-red-500 bg-red-500/20 rounded-sm pointer-events-none"
                     >
                       <span className="absolute -top-5 left-0 px-1 py-0.5 rounded bg-red-600 text-[9px] font-mono text-white font-bold whitespace-nowrap">
                         {def.label} {(def.confidence * 100).toFixed(0)}%
@@ -530,7 +530,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                         width: `${def.box[2]}%`,
                         height: `${def.box[3]}%`,
                       }}
-                      className="border-2 border-amber-500 bg-amber-500/20 rounded-xs pointer-events-none"
+                      className="border-2 border-amber-500 bg-amber-500/20 rounded-sm pointer-events-none"
                     >
                       <span className="absolute -top-5 left-0 px-1 py-0.5 rounded bg-amber-600 text-[9px] font-mono text-slate-950 font-bold whitespace-nowrap">
                         REMAINING {def.label}
@@ -682,7 +682,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                 placeholder="Search audit records..."
                 value={recordSearch}
                 onChange={(e) => setRecordSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-md border border-slate-700 bg-slate-950 text-slate-200 text-xs w-44 sm:w-56 focus:outline-hidden"
+                className="pl-8 pr-3 py-1.5 rounded-md border border-slate-700 bg-slate-950 text-slate-200 text-xs w-44 sm:w-56 outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
 

@@ -255,7 +255,7 @@ export const DashboardPage: React.FC = () => {
             <select
               value={selectedCorridor}
               onChange={(e) => setSelectedCorridor(e.target.value)}
-              className="py-1.5 px-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-slate-700 dark:text-slate-200 font-medium focus:outline-hidden focus:border-blue-500"
+              className="py-1.5 px-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-slate-700 dark:text-slate-200 font-medium outline-none focus:ring-1 focus:ring-amber-500"
             >
               <option value="all">All Corridors &amp; Sectors ({sortedWards.length})</option>
               {sortedWards.map((w) => (
@@ -418,9 +418,9 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-center rounded-md border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-50 dark:bg-slate-900 text-[11px] self-start sm:self-auto">
                 <button
                   onClick={() => setTrendView("distribution")}
-                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 cursor-pointer outline-none ${
                     trendView === "distribution"
-                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
+                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-sm"
                       : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
@@ -429,9 +429,9 @@ export const DashboardPage: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setTrendView("daily")}
-                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 cursor-pointer outline-none ${
                     trendView === "daily"
-                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
+                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-sm"
                       : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >

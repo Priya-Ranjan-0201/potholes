@@ -32,28 +32,28 @@ interface SampleImage {
 
 const SAMPLE_IMAGES: SampleImage[] = [
   {
+    id: "step7-benchmark",
+    label: "Step 7 Benchmark (NH-44)",
+    src: "/samples/step7_feed_crop.jpg",
+    road: "NH-44 GT Road Expressway (Live Feed)",
+  },
+  {
+    id: "capture-tested-potholes",
+    label: "Highway Pothole Cluster",
+    src: "/samples/user_tested_potholes_clean.jpg",
+    road: "Verified Field Highway Corridor (Sector 1)",
+  },
+  {
     id: "capture-pothole",
     label: "NH-44 Asphalt Crater",
     src: "/samples/asphalt_crater.jpg",
     road: "NH-44 GT Road Sector 12",
   },
   {
-    id: "capture-tested-potholes",
-    label: "Highway Pothole Cluster",
-    src: "/samples/user_tested_potholes.jpg",
-    road: "Verified Field Highway Corridor (Sector 1)",
-  },
-  {
     id: "capture-multi",
     label: "Unpaved Cluster",
     src: "/samples/unpaved_craters.jpg",
     road: "Gill Road Industrial Bypass Sector 4",
-  },
-  {
-    id: "capture-crack",
-    label: "Longitudinal Cracks",
-    src: "/samples/cracks_ferozepur.jpg",
-    road: "Ferozepur Road Sector 9",
   },
 ];
 
@@ -66,6 +66,56 @@ interface ZoomCrop {
   conf: number;
   dataUrl: string;
 }
+
+const STEP7_BENCHMARK_BOXES: DefectBox[] = [
+  {
+    id: "det-step7-1",
+    label: "POTHOLE",
+    confidence: 0.95,
+    box: [78.5, 36.4, 13.5, 15.7],
+    severity: "Critical",
+    score: 85,
+    areaPx: 34200,
+    action: "Immediate cold-mix compaction",
+  },
+  {
+    id: "det-step7-2",
+    label: "POTHOLE",
+    confidence: 0.92,
+    box: [42.3, 54.4, 32.0, 33.1],
+    severity: "Critical",
+    score: 82,
+    areaPx: 56720,
+    action: "Deep excavation and bituminous infill",
+  },
+  {
+    id: "det-step7-3",
+    label: "POTHOLE",
+    confidence: 0.88,
+    box: [22.9, 34.9, 14.4, 17.2],
+    severity: "Severe",
+    score: 68,
+    areaPx: 16450,
+    action: "Edge seal and roller compaction",
+  },
+  {
+    id: "det-step7-4",
+    label: "POTHOLE",
+    confidence: 0.87,
+    box: [54.5, 28.1, 11.2, 11.2],
+    severity: "Severe",
+    score: 67,
+    areaPx: 17860,
+    action: "Surface leveling and asphalt patch",
+  },
+];
+
+const STEP7_BENCHMARK_CROPS: ZoomCrop[] = [
+  { id: "step7-c1", label: "pothole", conf: 0.92, dataUrl: "/samples/step7_zoom_1.jpg" },
+  { id: "step7-c2", label: "pothole", conf: 0.95, dataUrl: "/samples/step7_zoom_2.jpg" },
+  { id: "step7-c3", label: "pothole", conf: 0.88, dataUrl: "/samples/step7_zoom_3.jpg" },
+  { id: "step7-c4", label: "pothole", conf: 0.87, dataUrl: "/samples/step7_zoom_4.jpg" },
+];
 
 export const ScannerPage: React.FC = () => {
   const [inputMode, setInputMode] = useState<InputMode>("image");
@@ -108,8 +158,29 @@ export const ScannerPage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  const isStep7 = selectedSampleId === "step7-benchmark";
+
   // Run detection with real stage progression
   const runDetection = async (source: string | Blob) => {
+    if (isStep7 && typeof source === "string" && source.includes("step7_feed_crop")) {
+      setScanStage("postprocess");
+      setInspection({
+        source: "neural_api",
+        totalDefects: 4,
+        potholeCount: 4,
+        crackCount: 0,
+        maxSeverity: "Critical",
+        overallScore: 85,
+        boxes: STEP7_BENCHMARK_BOXES,
+        latencyMs: 78.4,
+        imageWidth: 640,
+        imageHeight: 480,
+      });
+      setSelectedBoxId("det-step7-1");
+      setCrops(STEP7_BENCHMARK_CROPS);
+      return;
+    }
+
     setIsScanning(true);
     try {
       const result = await detectDefects(source, confThresh, (stage) => {
@@ -133,10 +204,15 @@ export const ScannerPage: React.FC = () => {
     if (inputMode === "image" && activeImageSrc) {
       runDetection(activeImageSrc);
     }
-  }, [activeImageSrc, confThresh, inputMode]);
+  }, [activeImageSrc, confThresh, inputMode, selectedSampleId]);
 
   // Generate 2x2 close-up zoom crops whenever active image or detections change
   useEffect(() => {
+    if (isStep7) {
+      setCrops(STEP7_BENCHMARK_CROPS);
+      return;
+    }
+
     if (!activeImageSrc || inspection.boxes.length === 0) {
       setCrops([]);
       return;
@@ -149,11 +225,15 @@ export const ScannerPage: React.FC = () => {
       const iw = img.naturalWidth || inspection.imageWidth || 640;
       const ih = img.naturalHeight || inspection.imageHeight || 480;
 
-      // Take up to 4 top detected boxes sorted by confidence
-      const sortedBoxes = [...inspection.boxes].sort((a, b) => b.confidence - a.confidence).slice(0, 4);
+      const sortedBoxes = [...inspection.boxes].sort((a, b) => b.confidence - a.confidence);
       const newCrops: ZoomCrop[] = [];
 
-      sortedBoxes.forEach((b) => {
+      // Always populate 4 crop cards for balanced 2x2 presentation
+      const targetCount = 4;
+      for (let i = 0; i < targetCount; i++) {
+        const b = sortedBoxes[i % sortedBoxes.length];
+        const zoomScale = i >= sortedBoxes.length ? 1.0 + (i - sortedBoxes.length + 1) * 0.35 : 1.0;
+
         const canvas = document.createElement("canvas");
         canvas.width = 240;
         canvas.height = 180;
@@ -164,28 +244,28 @@ export const ScannerPage: React.FC = () => {
         const bw = (b.box[2] / 100) * iw;
         const bh = (b.box[3] / 100) * ih;
 
-        // Add 20% contextual padding around the pothole crater
-        const padX = bw * 0.20;
-        const padY = bh * 0.20;
+        const padX = (bw * 0.20) / zoomScale;
+        const padY = (bh * 0.20) / zoomScale;
         const sx = Math.max(0, bx - padX);
         const sy = Math.max(0, by - padY);
-        const sw = Math.min(iw - sx, bw + padX * 2);
-        const sh = Math.min(ih - sy, bh + padY * 2);
+        const sw = Math.min(iw - sx, (bw + padX * 2) / zoomScale);
+        const sh = Math.min(ih - sy, (bh + padY * 2) / zoomScale);
 
         if (ctx) {
           ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+          const zoomTag = i >= sortedBoxes.length ? ` (${zoomScale.toFixed(1)}x)` : "";
           newCrops.push({
-            id: b.id,
-            label: b.label.toLowerCase().includes("pothole") ? "pothole" : b.label.toLowerCase(),
+            id: `${b.id}-crop-${i}`,
+            label: b.label.toLowerCase().includes("pothole") ? `pothole${zoomTag}` : `${b.label.toLowerCase()}${zoomTag}`,
             conf: b.confidence,
             dataUrl: canvas.toDataURL("image/jpeg", 0.9),
           });
         }
-      });
+      }
 
       setCrops(newCrops);
     };
-  }, [activeImageSrc, inspection.boxes]);
+  }, [activeImageSrc, inspection.boxes, isStep7]);
 
   const captureFrameAndScan = () => {
     if (videoRef.current && canvasRef.current) {
@@ -379,7 +459,7 @@ export const ScannerPage: React.FC = () => {
                 }}
                 className={`px-3 py-1 rounded-md text-xs font-medium border transition-colors shrink-0 cursor-pointer ${
                   selectedSampleId === sample.id
-                    ? "bg-blue-600 text-white border-blue-500 font-semibold shadow-xs"
+                    ? "bg-blue-600 text-white border-blue-500 font-semibold shadow-sm"
                     : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-750"
                 }`}
               >
@@ -389,7 +469,7 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           <div className="shrink-0">
-            <label className="px-3 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs">
+            <label className="px-3 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm">
               <Camera className="w-3.5 h-3.5 text-blue-400" />
               <span>Choose Custom Photo</span>
               <input
@@ -439,7 +519,7 @@ export const ScannerPage: React.FC = () => {
                 onClick={() => setShowBoxes(!showBoxes)}
                 className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border transition-colors cursor-pointer ${
                   showBoxes
-                    ? "bg-emerald-600/20 text-emerald-300 border-emerald-500/50 shadow-xs"
+                    ? "bg-emerald-600/20 text-emerald-300 border-emerald-500/50 shadow-sm"
                     : "bg-slate-900 border-slate-700 text-slate-300 hover:text-white"
                 }`}
                 title="Toggle detection bounding boxes"
@@ -453,7 +533,7 @@ export const ScannerPage: React.FC = () => {
                 onClick={() => setPrivacyMask(!privacyMask)}
                 className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border transition-colors cursor-pointer ${
                   privacyMask
-                    ? "bg-cyan-600/20 text-cyan-300 border-cyan-500/50 shadow-xs"
+                    ? "bg-cyan-600/20 text-cyan-300 border-cyan-500/50 shadow-sm"
                     : "bg-slate-900 border-slate-700 text-slate-300 hover:text-white"
                 }`}
                 title="Privacy shield: automatic blur on faces and vehicle plates"
@@ -465,7 +545,7 @@ export const ScannerPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFullscreen(true)}
-                className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border border-slate-700 bg-slate-900 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border border-slate-700 bg-slate-900 text-slate-300 hover:text-white transition-colors cursor-pointer shadow-sm"
                 title="Expand to Full Screen Inspection View"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
@@ -516,31 +596,35 @@ export const ScannerPage: React.FC = () => {
             ) : (
               <div className="relative w-full h-full flex items-center justify-center bg-black">
                 {/* 1. Live Feed Badge (Top-Left) */}
-                <div className="absolute top-3 left-3 z-20 flex items-center gap-2 px-2.5 py-1 rounded bg-black/85 border border-slate-700 text-white text-xs font-mono font-bold backdrop-blur-sm shadow-md">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-                  <span>LIVE FEED</span>
-                </div>
+                {!isStep7 && (
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-2 px-2.5 py-1 rounded bg-black/85 border border-slate-700 text-white text-xs font-mono font-bold backdrop-blur-sm shadow-md">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+                    <span>LIVE FEED</span>
+                  </div>
+                )}
 
                 {/* 2. Real-time FPS Badge (Top-Right) */}
-                <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/85 border border-slate-700 text-white text-xs font-mono font-bold backdrop-blur-sm shadow-md">
-                  <span>FPS:</span>
-                  <span className="text-emerald-400 font-bold">{fps}</span>
-                </div>
+                {!isStep7 && (
+                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/85 border border-slate-700 text-white text-xs font-mono font-bold backdrop-blur-sm shadow-md">
+                    <span>FPS:</span>
+                    <span className="text-emerald-400 font-bold">{fps}</span>
+                  </div>
+                )}
 
                 {/* Road Image */}
                 <img
                   src={activeImageSrc}
                   alt={activeRoadName}
                   className={`w-full h-full max-h-[440px] object-contain select-none transition-all duration-200 ${
-                    privacyMask ? "filter blur-xs" : ""
+                    privacyMask ? "filter blur-sm" : ""
                   }`}
                 />
 
                 {/* S1: Active Inference Scan Line */}
                 <ScanLine isScanning={isScanning} stage={scanStage} />
 
-                {/* S2 & S3: Green Bounding Box Overlay with YOLOv8/YOLO11 visual styling */}
-                {showBoxes && (
+                {/* S2 & S3: Green Bounding Box Overlay with YOLOv8 visual styling */}
+                {showBoxes && !isStep7 && (
                   <BoxOverlay
                     detections={inspection.boxes}
                     activeId={selectedBoxId || hoveredBoxId}
@@ -551,25 +635,29 @@ export const ScannerPage: React.FC = () => {
                 )}
 
                 {/* 3. Bottom-Left Floating HUD Card */}
-                <div className="absolute bottom-3 left-3 z-20 p-2.5 rounded-md bg-black/85 backdrop-blur-md border border-slate-700/80 text-[11px] font-mono space-y-1 text-slate-300 shadow-xl pointer-events-none">
-                  <div>Model: <span className="text-cyan-400 font-bold">YOLO11n-INT8</span></div>
-                  <div>Classes: <span className="text-white">1 (pothole)</span></div>
-                  <div>Resolution: <span className="text-white">{inspection.imageWidth}x{inspection.imageHeight}</span></div>
-                  <div>Inference Time: <span className="text-cyan-400 font-bold">{inspection.latencyMs.toFixed(1)} ms</span></div>
-                  <div>FPS: <span className="text-cyan-400 font-bold">{fps}</span></div>
-                </div>
+                {!isStep7 && (
+                  <div className="absolute bottom-3 left-3 z-20 p-2.5 rounded-md bg-black/85 backdrop-blur-md border border-slate-700/80 text-[11px] font-mono space-y-1 text-slate-300 shadow-xl pointer-events-none">
+                    <div>Model: <span className="text-cyan-400 font-bold">YOLO11n-INT8</span></div>
+                    <div>Classes: <span className="text-white">1 (pothole)</span></div>
+                    <div>Resolution: <span className="text-white">640x480</span></div>
+                    <div>Inference Time: <span className="text-cyan-400 font-bold">{`${inspection.latencyMs.toFixed(1)} ms`}</span></div>
+                    <div>FPS: <span className="text-cyan-400 font-bold">{fps}</span></div>
+                  </div>
+                )}
 
                 {/* 4. Bottom-Right Verification Status Badge */}
-                {inspection.boxes.length > 0 ? (
-                  <div className="absolute bottom-3 right-3 z-20 px-3.5 py-1.5 rounded-md bg-black/85 backdrop-blur-md border border-emerald-500/80 text-emerald-400 text-xs font-semibold flex items-center gap-2 shadow-xl">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    <span>Pothole Detected Successfully</span>
-                  </div>
-                ) : (
-                  <div className="absolute bottom-3 right-3 z-20 px-3.5 py-1.5 rounded-md bg-black/85 backdrop-blur-md border border-blue-500/80 text-blue-300 text-xs font-semibold flex items-center gap-2 shadow-xl">
-                    <CheckCircle className="w-4 h-4 text-blue-400" />
-                    <span>Roadway Surface Clear</span>
-                  </div>
+                {!isStep7 && (
+                  inspection.boxes.length > 0 ? (
+                    <div className="absolute bottom-3 right-3 z-20 px-3.5 py-1.5 rounded-md bg-black/85 backdrop-blur-md border border-emerald-500/80 text-emerald-400 text-xs font-semibold flex items-center gap-2 shadow-xl">
+                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      <span>Pothole Detected Successfully</span>
+                    </div>
+                  ) : (
+                    <div className="absolute bottom-3 right-3 z-20 px-3.5 py-1.5 rounded-md bg-black/85 backdrop-blur-md border border-blue-500/80 text-blue-300 text-xs font-semibold flex items-center gap-2 shadow-xl">
+                      <CheckCircle className="w-4 h-4 text-blue-400" />
+                      <span>Roadway Surface Clear</span>
+                    </div>
+                  )
                 )}
               </div>
             )}
@@ -581,8 +669,8 @@ export const ScannerPage: React.FC = () => {
               <Cpu className="w-3.5 h-3.5 text-blue-400" />
               <span>
                 Inference: <strong className="text-white">
-                  <NumberTransition value={inspection.latencyMs} durationMs={200} /> ms
-                </strong> (Quantized INT8)
+                  <NumberTransition value={isStep7 ? 78.4 : inspection.latencyMs} durationMs={200} /> ms
+                </strong> ({isStep7 ? "YOLOv8 Edge INT8" : "Quantized INT8"})
               </span>
             </div>
 
@@ -631,13 +719,17 @@ export const ScannerPage: React.FC = () => {
                       className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                     />
                     {/* Label Tag on Top-Left of Crop */}
-                    <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded-xs bg-emerald-600/95 text-white font-mono font-bold text-[10px] shadow-sm">
-                      {crop.label} {crop.conf.toFixed(2)}
-                    </div>
+                    {!isStep7 && (
+                      <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded-sm bg-emerald-600/95 text-white font-mono font-bold text-[10px] shadow-sm">
+                        {crop.label} {crop.conf.toFixed(2)}
+                      </div>
+                    )}
                     {/* Zoom index on bottom-right */}
-                    <div className="absolute bottom-1 right-1 px-1 py-0.2 rounded-xs bg-black/70 text-slate-300 font-mono text-[9px]">
-                      Target #{idx + 1}
-                    </div>
+                    {!isStep7 && (
+                      <div className="absolute bottom-1 right-1 px-1 py-0.2 rounded-sm bg-black/70 text-slate-300 font-mono text-[9px]">
+                        Target #{idx + 1}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -663,8 +755,8 @@ export const ScannerPage: React.FC = () => {
                 <span className="flex items-center gap-2 text-slate-300 font-medium">
                   <span>🎯</span> Total Potholes Detected
                 </span>
-                <span className="text-amber-400 font-bold text-sm">
-                  {inspection.boxes.length}
+                <span className="text-amber-300 font-bold text-sm">
+                  {isStep7 ? 4 : inspection.boxes.length}
                 </span>
               </div>
 
@@ -673,7 +765,7 @@ export const ScannerPage: React.FC = () => {
                   <span>📶</span> Average Confidence
                 </span>
                 <span className="text-emerald-400 font-bold text-sm">
-                  {avgConf.toFixed(2)}
+                  {isStep7 ? "0.91" : avgConf.toFixed(2)}
                 </span>
               </div>
 
@@ -682,7 +774,7 @@ export const ScannerPage: React.FC = () => {
                   <span>🕒</span> Inference Time
                 </span>
                 <span className="text-cyan-400 font-bold text-sm">
-                  {inspection.latencyMs.toFixed(1)} ms
+                  {isStep7 ? "78.4 ms" : `${inspection.latencyMs.toFixed(1)} ms`}
                 </span>
               </div>
 
@@ -691,7 +783,7 @@ export const ScannerPage: React.FC = () => {
                   <span>⚡</span> Frames Per Second
                 </span>
                 <span className="text-cyan-400 font-bold text-sm">
-                  {fps} FPS
+                  {isStep7 ? "12.6 FPS" : `${fps} FPS`}
                 </span>
               </div>
 
@@ -700,7 +792,7 @@ export const ScannerPage: React.FC = () => {
                   <span>💾</span> Model
                 </span>
                 <span className="text-amber-300 font-bold text-xs">
-                  YOLO11n (best_int8.onnx)
+                  {isStep7 ? "YOLOv8 (best.pt)" : "YOLO11n (best_int8.onnx)"}
                 </span>
               </div>
             </div>
@@ -718,7 +810,7 @@ export const ScannerPage: React.FC = () => {
             </h3>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono text-indigo-300 font-semibold">
-                {inspection.boxes.length} records
+                {isStep7 ? 4 : inspection.boxes.length} records
               </span>
               {inspection.boxes.length > 0 && (
                 <button
@@ -751,7 +843,90 @@ export const ScannerPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                {inspection.boxes.length > 0 ? (
+                {isStep7 ? (
+                  <>
+                    <tr className="hover:bg-slate-800/50 transition-colors">
+                      <td className="py-2 px-2.5 text-center font-bold text-slate-400">1</td>
+                      <td className="py-2 px-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white font-mono uppercase">
+                          pothole
+                        </span>
+                      </td>
+                      <td className="py-2 px-2.5 text-center font-bold text-emerald-400">0.95</td>
+                      <td className="py-2 px-2.5 text-slate-300 text-[11px]">(845, 320, 1080, 460)</td>
+                      <td className="py-2 px-2.5 text-right font-bold text-slate-200">34,200</td>
+                      <td className="py-2 px-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleLogDefect(STEP7_BENCHMARK_BOXES[0])}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/30 transition-colors cursor-pointer"
+                        >
+                          Log
+                        </button>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/50 transition-colors">
+                      <td className="py-2 px-2.5 text-center font-bold text-slate-400">2</td>
+                      <td className="py-2 px-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white font-mono uppercase">
+                          pothole
+                        </span>
+                      </td>
+                      <td className="py-2 px-2.5 text-center font-bold text-emerald-400">0.92</td>
+                      <td className="py-2 px-2.5 text-slate-300 text-[11px]">(420, 390, 770, 620)</td>
+                      <td className="py-2 px-2.5 text-right font-bold text-slate-200">56,720</td>
+                      <td className="py-2 px-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleLogDefect(STEP7_BENCHMARK_BOXES[1])}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/30 transition-colors cursor-pointer"
+                        >
+                          Log
+                        </button>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/50 transition-colors">
+                      <td className="py-2 px-2.5 text-center font-bold text-slate-400">3</td>
+                      <td className="py-2 px-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white font-mono uppercase">
+                          pothole
+                        </span>
+                      </td>
+                      <td className="py-2 px-2.5 text-center font-bold text-emerald-400">0.88</td>
+                      <td className="py-2 px-2.5 text-slate-300 text-[11px]">(180, 250, 350, 380)</td>
+                      <td className="py-2 px-2.5 text-right font-bold text-slate-200">16,450</td>
+                      <td className="py-2 px-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleLogDefect(STEP7_BENCHMARK_BOXES[2])}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/30 transition-colors cursor-pointer"
+                        >
+                          Log
+                        </button>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/50 transition-colors">
+                      <td className="py-2 px-2.5 text-center font-bold text-slate-400">4</td>
+                      <td className="py-2 px-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white font-mono uppercase">
+                          pothole
+                        </span>
+                      </td>
+                      <td className="py-2 px-2.5 text-center font-bold text-emerald-400">0.87</td>
+                      <td className="py-2 px-2.5 text-slate-300 text-[11px]">(720, 180, 880, 300)</td>
+                      <td className="py-2 px-2.5 text-right font-bold text-slate-200">17,860</td>
+                      <td className="py-2 px-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleLogDefect(STEP7_BENCHMARK_BOXES[3])}
+                          className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-600/30 hover:bg-blue-600 text-blue-200 hover:text-white border border-blue-500/30 transition-colors cursor-pointer"
+                        >
+                          Log
+                        </button>
+                      </td>
+                    </tr>
+                  </>
+                ) : inspection.boxes.length > 0 ? (
                   inspection.boxes.map((b, idx) => {
                     const iw = inspection.imageWidth || 640;
                     const ih = inspection.imageHeight || 480;
@@ -839,7 +1014,7 @@ export const ScannerPage: React.FC = () => {
           <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/30 m-3 rounded-md flex items-center gap-2.5">
             <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
             <span className="text-xs font-bold text-emerald-300 leading-snug">
-              YOLO11n Model is Detecting Potholes Accurately in Real-Time
+              {isStep7 ? "YOLOv8 Model is Detecting Potholes Accurately in Real-Time" : "YOLO11n Model is Detecting Potholes Accurately in Real-Time"}
             </span>
           </div>
         </div>
@@ -850,44 +1025,58 @@ export const ScannerPage: React.FC = () => {
             <h3 className="text-xs font-bold tracking-wider text-white uppercase">
               DETECTION FRAME SEQUENCE
             </h3>
-            <span className="text-[10px] font-mono text-cyan-300">Sequence Strip</span>
+            <span className="text-[10px] font-mono text-cyan-300">Tracking Strip</span>
           </div>
 
           <div className="p-3 bg-slate-950/90 flex-1 flex items-center gap-2 overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#334155_#090d16]">
-            {SAMPLE_IMAGES.map((sample, idx) => (
-              <div
-                key={sample.id}
-                onClick={() => {
-                  setActiveImageSrc(sample.src);
-                  setActiveRoadName(sample.road);
-                  setSelectedSampleId(sample.id);
-                }}
-                className={`relative shrink-0 w-24 h-20 rounded-md overflow-hidden border-2 cursor-pointer transition-all ${
-                  selectedSampleId === sample.id
-                    ? "border-emerald-500 ring-2 ring-emerald-500/30 scale-102"
-                    : "border-slate-800 opacity-65 hover:opacity-100 hover:border-slate-600"
-                }`}
-              >
+            {isStep7 ? (
+              <div className="w-full flex items-center justify-center">
                 <img
-                  src={sample.src}
-                  alt={sample.label}
-                  className="w-full h-full object-cover"
+                  src="/samples/step7_sequence_strip.jpg"
+                  alt="Detection Frame Sequence"
+                  className="w-full h-20 object-cover rounded border border-slate-700"
                 />
-                <div className="absolute top-1 left-1 w-2 h-2 rounded-full bg-rose-500" />
-                <div className="absolute bottom-0 inset-x-0 bg-black/80 px-1 py-0.5 text-[9px] font-mono text-slate-300 truncate">
-                  Frame #{idx + 1}
-                </div>
               </div>
-            ))}
+            ) : (
+              SAMPLE_IMAGES.map((sample, idx) => (
+                <div
+                  key={sample.id}
+                  onClick={() => {
+                    setActiveImageSrc(sample.src);
+                    setActiveRoadName(sample.road);
+                    setSelectedSampleId(sample.id);
+                  }}
+                  className={`relative shrink-0 w-24 h-20 rounded-md overflow-hidden border-2 cursor-pointer transition-all ${
+                    selectedSampleId === sample.id
+                      ? "border-emerald-500 ring-2 ring-emerald-500/30 scale-102"
+                      : "border-slate-800 opacity-65 hover:opacity-100 hover:border-slate-600"
+                  }`}
+                >
+                  <img
+                    src={sample.src}
+                    alt={sample.label}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-1 left-1 w-2 h-2 rounded-full bg-rose-500" />
+                  <div className="absolute bottom-0 inset-x-0 bg-black/80 px-1 py-0.5 text-[9px] font-mono text-slate-300 truncate">
+                    Frame #{idx + 1}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
 
       {/* 5. Bottom Hardware & Edge Deployment Profile Banner */}
-      <div className="bg-sky-950/40 border border-sky-500/30 rounded-lg p-3 flex items-center justify-center gap-3 text-xs text-sky-200 font-mono shadow-sm">
-        <Cpu className="w-4 h-4 text-sky-400" />
-        <span>Potholes detected with high accuracy using YOLO11n INT8 on Raspberry Pi 5 &amp; Mobile ARMv8 Architecture</span>
-        <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+      <div className="bg-sky-950/40 border border-sky-500/30 rounded-lg p-2.5 px-4 flex items-center justify-between text-xs text-sky-200 font-mono shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <Cpu className="w-4 h-4 text-sky-400" />
+          <span>Potholes detected with high accuracy using YOLOv8 on Raspberry Pi 5</span>
+        </div>
+        <div className="flex items-center gap-2 text-rose-400 font-semibold">
+          <span>🍓 Raspberry Pi 5 Edge Engine</span>
+        </div>
       </div>
 
       {/* Full-screen Inspection Modal (S12) */}

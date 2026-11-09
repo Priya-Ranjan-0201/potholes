@@ -52,7 +52,7 @@ export const Logo: React.FC<LogoProps> = ({
     <img
       src={logoIcon}
       alt={alt}
-      className={`rounded-xl transition-transform hover:scale-105 duration-200 object-contain shadow-xs select-none ${dim} ${className}`}
+      className={`rounded-xl transition-transform hover:scale-105 duration-200 object-contain shadow-sm select-none ${dim} ${className}`}
     />
   );
 };

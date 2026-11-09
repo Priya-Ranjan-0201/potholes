@@ -385,6 +385,100 @@ export interface VerifyRepairPayload {
   before_detections?: Array<any> | null;
 }
 
+// --------------------------------------------------------------------------
+// Model Drift & Performance Monitoring Schemas
+// --------------------------------------------------------------------------
+
+export interface ModelRegistryItem {
+  id: string;
+  model_name: string;
+  architecture: string;
+  version: string;
+  training_dataset_version: string;
+  training_config: Record<string, any>;
+  training_date: string;
+  evaluation_metrics: Record<string, any>;
+  checkpoint_location: string;
+  deployment_status: string;
+  previous_model_version?: string | null;
+  is_active: boolean;
+}
+
+export interface ModelCompareResponse {
+  candidate: Record<string, any>;
+  production: Record<string, any>;
+  promotion_gate: {
+    passed_all: boolean;
+    verdict: string;
+    rules: Array<{
+      rule_name: string;
+      description: string;
+      passed: boolean;
+      candidate_val: any;
+      production_val: any;
+    }>;
+  };
+  all_models: Array<Record<string, any>>;
+}
+
+export interface DriftAnalysisResponse {
+  model_version: string;
+  dataset_name: string;
+  sample_count: number;
+  evaluation_timestamp: string;
+
+  psi_brightness: number;
+  psi_contrast: number;
+  psi_sharpness: number;
+  psi_overall: number;
+  ks_brightness_stat: number;
+  ks_brightness_pvalue: number;
+  is_input_drift_detected: boolean;
+  input_drift_summary: string;
+
+  has_ground_truth: boolean;
+  concept_drift_detected: boolean;
+  map50?: number | null;
+  map50_95?: number | null;
+  precision?: number | null;
+  recall?: number | null;
+  f1?: number | null;
+  map50_delta_vs_baseline?: number | null;
+  recall_delta_vs_baseline?: number | null;
+  per_class_metrics: Record<string, any>;
+
+  environmental_matrix: Record<string, any>;
+  geographic_matrix: Record<string, any>;
+
+  alerts_triggered: Array<Record<string, any>>;
+  retraining_recommendation?: Record<string, any> | null;
+}
+
+export interface ModelDriftAlertItem {
+  id: string;
+  severity: "CRITICAL" | "WARNING" | "INFO";
+  alert_type: string;
+  affected_model_version: string;
+  affected_categories: string[];
+  metrics: Record<string, any>;
+  suggested_investigation_steps: string[];
+  is_acknowledged: boolean;
+  acknowledged_by?: string | null;
+  created_at: string;
+}
+
+export interface RetrainingRecommendationItem {
+  recommendation_id: string;
+  model_version: string;
+  affected_domain: string;
+  weak_classes: string[];
+  sample_count_needed: number;
+  dataset_version_target: string;
+  status: string;
+  acceptance_criteria: Record<string, any>;
+  action_plan: string[];
+}
+
 // Token storage helpers
 export function getStoredToken(): string | null {
   return localStorage.getItem("scamroad_access_token");
@@ -585,4 +679,52 @@ export const api = {
 
   getVerificationPdfUrl: (id: string) => `${BASE_URL}/verifications/${id}/pdf`,
   getVerificationsCsvUrl: () => `${BASE_URL}/verifications/export.csv`,
+
+  // Model Drift & Continuous Performance Monitoring
+  listModelRegistry: () => request<ModelRegistryItem[]>("/drift/registry"),
+  getModelRegistryDetail: (version: string) => request<ModelRegistryItem>(`/drift/registry/${version}`),
+  compareModels: (payload: { candidate_version: string; baseline_version: string }) =>
+    request<ModelCompareResponse>("/drift/compare", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  analyzeDrift: (payload: {
+    model_version?: string;
+    dataset_name?: string;
+    include_ground_truth?: boolean;
+    simulate_domain_shift?: string | null;
+    sample_count?: number;
+  }) =>
+    request<DriftAnalysisResponse>("/drift/analyze", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  listDriftRecords: () => request<any[]>("/drift/records"),
+  listDriftAlerts: (params?: { severity?: string; unacknowledged_only?: boolean }) => {
+    const qs = new URLSearchParams();
+    if (params?.severity) qs.set("severity", params.severity);
+    if (params?.unacknowledged_only !== undefined)
+      qs.set("unacknowledged_only", params.unacknowledged_only ? "true" : "false");
+    const query = qs.toString() ? `?${qs.toString()}` : "";
+    return request<ModelDriftAlertItem[]>(`/drift/alerts${query}`);
+  },
+  acknowledgeDriftAlert: (id: string, payload: { engineer_name: string; investigation_notes: string }) =>
+    request<ModelDriftAlertItem>(`/drift/alerts/${id}/acknowledge`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  listRetrainingRecommendations: () =>
+    request<RetrainingRecommendationItem[]>("/drift/retraining/recommendations"),
+  triggerRetraining: (payload: {
+    recommendation_id: string;
+    dataset_version?: string;
+    epochs?: number;
+    engineer_notes?: string;
+  }) =>
+    request<RetrainingRecommendationItem>("/drift/retraining/trigger", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  getDriftRobustness: () => request<any>("/drift/robustness"),
+  getDriftExportCsvUrl: () => `${BASE_URL}/drift/export.csv`,
 };

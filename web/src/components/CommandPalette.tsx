@@ -186,7 +186,7 @@ export const CommandPalette: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-start justify-center pt-20 px-4"
+      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
       onClick={() => setIsOpen(false)}
     >
       <div
@@ -206,7 +206,7 @@ export const CommandPalette: React.FC = () => {
               setSelectedIndex(0);
             }}
             placeholder="Type a command or search..."
-            className="w-full bg-transparent text-slate-900 dark:text-slate-100 text-xs sm:text-sm font-normal focus:outline-hidden"
+            className="w-full bg-transparent text-slate-900 dark:text-slate-100 text-xs sm:text-sm font-normal outline-none"
           />
           <button
             onClick={() => setIsOpen(false)}

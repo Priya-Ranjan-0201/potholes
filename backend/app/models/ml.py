@@ -110,3 +110,82 @@ class Measurement(Base, UUIDMixin, TimestampMixin):
     width_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     height_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     area_value: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+
+class ModelRegistryEntry(Base, UUIDMixin, TimestampMixin):
+    """Complete Model Registry containing versioning, training configuration, and deployment state."""
+
+    __tablename__ = "model_registry"
+
+    model_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    architecture: Mapped[str] = mapped_column(String(50), nullable=False)
+    version: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
+    training_dataset_version: Mapped[str] = mapped_column(String(100), nullable=False)
+    training_config: Mapped[str] = mapped_column(Text, nullable=False)  # JSON
+    training_date: Mapped[str] = mapped_column(String(50), nullable=False)
+    evaluation_metrics: Mapped[str] = mapped_column(Text, nullable=False)  # JSON
+    checkpoint_location: Mapped[str] = mapped_column(String(500), nullable=False)
+    deployment_status: Mapped[str] = mapped_column(
+        String(50), default="CANDIDATE", nullable=False, index=True
+    )  # PRODUCTION | PREVIOUS | CANDIDATE | ARCHIVED | REJECTED
+    previous_model_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+
+class ModelDriftRecord(Base, UUIDMixin, TimestampMixin):
+    """Record of an empirical data drift and concept drift evaluation session."""
+
+    __tablename__ = "model_drift_records"
+
+    model_version: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    dataset_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    sample_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    psi_brightness: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    psi_contrast: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    psi_sharpness: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    psi_overall: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    ks_statistic: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    ks_pvalue: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    is_input_drift_detected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    has_ground_truth: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    map50: Mapped[float | None] = mapped_column(Float, nullable=True)
+    map50_95: Mapped[float | None] = mapped_column(Float, nullable=True)
+    precision: Mapped[float | None] = mapped_column(Float, nullable=True)
+    recall: Mapped[float | None] = mapped_column(Float, nullable=True)
+    f1: Mapped[float | None] = mapped_column(Float, nullable=True)
+    per_class_metrics: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON
+    environmental_matrix: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class ModelDriftAlert(Base, UUIDMixin, TimestampMixin):
+    """Actionable alert generated when model performance degradation or significant data drift is observed."""
+
+    __tablename__ = "model_drift_alerts"
+
+    severity: Mapped[str] = mapped_column(String(20), nullable=False, index=True)  # CRITICAL | WARNING | INFO
+    alert_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    affected_model_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    affected_categories: Mapped[str] = mapped_column(Text, nullable=False)  # JSON list
+    metrics_summary: Mapped[str] = mapped_column(Text, nullable=False)  # JSON dict
+    suggested_investigation_steps: Mapped[str] = mapped_column(Text, nullable=False)  # JSON list
+    is_acknowledged: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    acknowledged_by: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+
+class ModelRetrainingRecommendation(Base, UUIDMixin, TimestampMixin):
+    """Targeted retraining proposal triggered by domain drift or class-wise degradation."""
+
+    __tablename__ = "model_retraining_recommendations"
+
+    trigger_alert_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    model_version: Mapped[str] = mapped_column(String(50), nullable=False)
+    affected_domain: Mapped[str] = mapped_column(String(100), nullable=False)
+    weak_classes: Mapped[str] = mapped_column(Text, nullable=False)  # JSON list
+    sample_count_needed: Mapped[int] = mapped_column(Integer, default=150, nullable=False)
+    dataset_version_target: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(50), default="RECOMMENDED", nullable=False, index=True
+    )  # RECOMMENDED | CURATING_DATA | RETRAINING_SCHEDULED | EVALUATING_CANDIDATE | PROMOTED | REJECTED
+    acceptance_criteria: Mapped[str] = mapped_column(Text, nullable=False)  # JSON dict
+

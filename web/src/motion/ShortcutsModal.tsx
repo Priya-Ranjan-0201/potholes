@@ -76,7 +76,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
               {shortcuts.map((sc) => (
                 <div key={sc.key} className="py-2 flex items-center justify-between">
                   <span className="text-slate-600 dark:text-slate-400">{sc.label}</span>
-                  <kbd className="px-2 py-0.5 font-mono text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded shadow-xs font-semibold">
+                  <kbd className="px-2 py-0.5 font-mono text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded shadow-sm font-semibold">
                     {sc.key}
                   </kbd>
                 </div>

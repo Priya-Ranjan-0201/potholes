@@ -15,6 +15,7 @@ from backend.app.api.v1.sync import router as sync_router
 from backend.app.api.v1.infer import router as infer_router
 from backend.app.api.v1.benchmarks import router as benchmarks_router
 from backend.app.api.v1.verification import router as verification_router
+from backend.app.api.v1.drift import router as drift_router
 from fastapi import APIRouter
 
 api_v1_router = APIRouter()
@@ -30,6 +31,9 @@ api_v1_router.include_router(verification_router, prefix="", tags=["Repair Verif
 
 # Model Benchmarks & Edge Telemetry (Rule R1 & Rule P4)
 api_v1_router.include_router(benchmarks_router, prefix="", tags=["Model Benchmarks"])
+
+# Model Drift, Continuous Monitoring & Governance
+api_v1_router.include_router(drift_router, prefix="/drift", tags=["Model Drift & Monitoring"])
 
 # Authentication & RBAC
 api_v1_router.include_router(auth_router, prefix="", tags=["Authentication & RBAC"])

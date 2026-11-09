@@ -45,9 +45,9 @@ export function SegmentedControl<T extends string = string>({
             role="tab"
             aria-selected={isSelected}
             onClick={() => onChange(option.id)}
-            className={`inline-flex items-center gap-1.5 font-medium rounded transition-colors ${itemPadding} ${
+            className={`inline-flex items-center gap-1.5 font-medium rounded transition-colors outline-none cursor-pointer ${itemPadding} ${
               isSelected
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs font-semibold"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm font-semibold"
                 : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
             }`}
           >
