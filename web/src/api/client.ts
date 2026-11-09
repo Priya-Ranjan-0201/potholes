@@ -301,6 +301,90 @@ export interface SlaPolicy {
   max_resolution_hours: number;
 }
 
+export interface VerificationAssessment {
+  id: string;
+  status:
+    | "successfully_repaired"
+    | "partially_repaired"
+    | "incomplete_repair"
+    | "damage_recurring"
+    | "new_damage_detected"
+    | "verification_inconclusive"
+    | string;
+  effectiveness_pct: number;
+  explanation: string;
+  alignment_confidence: number;
+  inliers_count: number;
+  matches_count: number;
+  inlier_ratio: number;
+  perspective_corrected: boolean;
+  before_area_px: number;
+  remaining_area_px: number;
+  new_area_px: number;
+  area_reduction_pct: number;
+  measurement_type: string;
+  is_calibrated: boolean;
+  before_defects: Array<{ id?: string; label: string; confidence: number; box: number[]; area_px: number }>;
+  remaining_defects: Array<{ id?: string; label: string; confidence: number; box: number[]; area_px: number }>;
+  new_defects: Array<{ id?: string; label: string; confidence: number; box: number[]; area_px: number }>;
+  resolved_defects: Array<{ id?: string; label: string; confidence: number; box: number[]; area_px: number }>;
+  recurrence_detected: boolean;
+  recurrence_count: number;
+  days_to_recurrence: number | null;
+  feature_matches_data_uri?: string | null;
+  difference_heatmap_data_uri?: string | null;
+  aligned_after_data_uri?: string | null;
+  corridor_name: string;
+  latitude: number;
+  longitude: number;
+  inspection_date: string;
+  repair_date?: string | null;
+  created_at: string;
+}
+
+export interface VerificationRecordItem {
+  id: string;
+  work_order_id?: string | null;
+  defect_id?: string | null;
+  corridor_name: string;
+  latitude: number;
+  longitude: number;
+  inspection_date: string;
+  repair_date?: string | null;
+  status: string;
+  effectiveness_pct: number;
+  before_area_px: number;
+  remaining_area_px: number;
+  area_reduction_pct: number;
+  recurrence_detected: boolean;
+  recurrence_count: number;
+  alignment_confidence: number;
+  created_at: string;
+}
+
+export interface BenchmarkPairItem {
+  id: string;
+  title: string;
+  category_expected: string;
+  before_src: string;
+  after_src: string;
+  corridor: string;
+  description: string;
+}
+
+export interface VerifyRepairPayload {
+  work_order_id?: string | null;
+  defect_id?: string | null;
+  corridor_name?: string;
+  latitude?: number;
+  longitude?: number;
+  inspection_date?: string;
+  repair_date?: string | null;
+  before_image_src?: string | null;
+  after_image_src?: string | null;
+  before_detections?: Array<any> | null;
+}
+
 // Token storage helpers
 export function getStoredToken(): string | null {
   return localStorage.getItem("scamroad_access_token");
@@ -477,4 +561,28 @@ export const api = {
   // AI Model Evaluation Metrics
   getModelEvaluation: () => request<ModelEvaluationResponse>("/models/evaluation"),
   health: () => request<any>("/health"),
+
+  // AI-Powered Repair Verification
+  verifyRepairAssessment: (payload: VerifyRepairPayload) =>
+    request<VerificationAssessment>("/verifications/verify", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  listVerificationRecords: (params?: { status?: string; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.status && params.status !== "ALL") qs.set("status", params.status);
+    if (params?.limit) qs.set("limit", params.limit.toString());
+    const query = qs.toString() ? `?${qs.toString()}` : "";
+    return request<VerificationRecordItem[]>(`/verifications/records${query}`);
+  },
+
+  getVerificationBenchmarks: () =>
+    request<BenchmarkPairItem[]>("/verifications/benchmarks"),
+
+  getVerificationDetail: (id: string) =>
+    request<VerificationAssessment>(`/verifications/${id}`),
+
+  getVerificationPdfUrl: (id: string) => `${BASE_URL}/verifications/${id}/pdf`,
+  getVerificationsCsvUrl: () => `${BASE_URL}/verifications/export.csv`,
 };

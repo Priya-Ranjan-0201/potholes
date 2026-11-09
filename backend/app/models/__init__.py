@@ -33,6 +33,7 @@ from backend.app.models.maintenance import (
     Contractor,
     RepairRecord,
     RepairVerification,
+    RepairVerificationRecord,
     SlaPolicy,
     WorkOrder,
     WorkOrderHistory,

@@ -14,6 +14,7 @@ from backend.app.api.v1.stats import router as stats_router
 from backend.app.api.v1.sync import router as sync_router
 from backend.app.api.v1.infer import router as infer_router
 from backend.app.api.v1.benchmarks import router as benchmarks_router
+from backend.app.api.v1.verification import router as verification_router
 from fastapi import APIRouter
 
 api_v1_router = APIRouter()
@@ -23,6 +24,9 @@ api_v1_router.include_router(health_router, prefix="", tags=["Health"])
 
 # Real-Time AI Inference (YOLO + Surface Edge CV)
 api_v1_router.include_router(infer_router, prefix="", tags=["AI Inference"])
+
+# AI-Powered Road Repair Verification (Module v12)
+api_v1_router.include_router(verification_router, prefix="", tags=["Repair Verification"])
 
 # Model Benchmarks & Edge Telemetry (Rule R1 & Rule P4)
 api_v1_router.include_router(benchmarks_router, prefix="", tags=["Model Benchmarks"])

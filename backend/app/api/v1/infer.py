@@ -126,7 +126,7 @@ async def infer_road_defects(
             # An upright vehicle (van, ambulance, SUV, motorcycle rider) standing on the road plane has large vertical
             # height spanning into the mid/upper ground. Real road distress lying flat on asphalt has bh/h < 0.20
             # when starting in the midground (y1 < 0.48*h) due to perspective foreshortening.
-            if bx[1] < (h * 0.48) and (bh / h >= 0.20):
+            if cy < (h * 0.48) and (bh / h >= 0.20):
                 continue
 
             # 4. Crack Vertical Boundary:
@@ -137,12 +137,12 @@ async def infer_road_defects(
             # 5. Pothole Geometric & Morphology Constraint:
             # Potholes are localized craters on the asphalt surface. They are roughly circular or elliptical.
             # Extreme aspect ratios (e.g. 9:1 horizontal banner lines or thin vertical strips) are camera/sensor artifacts.
-            # No single pothole spans >60% of frame width or height.
+            # No single pothole spans >70% of frame width or height.
             if "POTHOLE" in lbl:
                 aspect = max(bw / bh, bh / bw)
                 if aspect > 2.8:
                     continue
-                if (bw / w > 0.60) or (bh / h > 0.60):
+                if (bw / w > 0.70) or (bh / h > 0.70):
                     continue
 
             # 6. Dashcam Hood / Bumper Reflection Filter:

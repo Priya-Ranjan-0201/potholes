@@ -140,3 +140,52 @@ class BudgetAllocation(Base, UUIDMixin, TimestampMixin):
     fiscal_year: Mapped[str] = mapped_column(String(20), nullable=False)
     allocated_amount: Mapped[float] = mapped_column(Float, nullable=False)
     spent_amount: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+
+
+class RepairVerificationRecord(Base, UUIDMixin, TimestampMixin):
+    """Historical audit records of AI-powered before-and-after repair verifications."""
+
+    __tablename__ = "repair_verification_records"
+
+    work_order_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("work_orders.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    defect_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("defects.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    corridor_name: Mapped[str] = mapped_column(String(200), default="GT Road Corridor", nullable=False)
+    latitude: Mapped[float] = mapped_column(Float, default=30.9010, nullable=False)
+    longitude: Mapped[float] = mapped_column(Float, default=75.8573, nullable=False)
+
+    before_image_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    after_image_path: Mapped[str] = mapped_column(String(500), nullable=False)
+
+    repair_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    inspection_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    status: Mapped[str] = mapped_column(
+        String(50), nullable=False, index=True
+    )  # successfully_repaired | partially_repaired | incomplete_repair | damage_recurring | new_damage_detected | verification_inconclusive
+
+    effectiveness_pct: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    before_area_px: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    remaining_area_px: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    area_change_px: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    alignment_confidence: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    inliers_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    recurrence_detected: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    recurrence_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    days_to_recurrence: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    explanation: Mapped[str] = mapped_column(Text, nullable=False)
+    details_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+

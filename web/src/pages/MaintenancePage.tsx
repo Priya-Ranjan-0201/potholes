@@ -23,8 +23,9 @@ import { useToast } from "../context/ToastContext";
 import { CompareSlider } from "../motion/CompareSlider";
 import { NumberTransition } from "../motion/NumberTransition";
 import { useReducedMotion } from "../motion/motion";
+import { RepairVerificationWorkbench } from "../components/RepairVerificationWorkbench";
 
-type SubTab = "work-orders" | "defects" | "reports";
+type SubTab = "work-orders" | "defects" | "reports" | "verification";
 type ViewMode = "table" | "kanban";
 
 export const MaintenancePage: React.FC = () => {
@@ -108,7 +109,12 @@ export const MaintenancePage: React.FC = () => {
   // Deep-linking URL Query Params Sync
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam === "defects" || tabParam === "reports" || tabParam === "work-orders") {
+    if (
+      tabParam === "defects" ||
+      tabParam === "reports" ||
+      tabParam === "work-orders" ||
+      tabParam === "verification"
+    ) {
       setSubTab(tabParam as SubTab);
     }
     const idParam = searchParams.get("id");
@@ -291,10 +297,11 @@ export const MaintenancePage: React.FC = () => {
               { id: "work-orders", label: "Work Orders", count: workOrders.length },
               { id: "defects", label: "Defects", count: defects.length },
               { id: "reports", label: "Citizen Reports", count: complaints.length },
+              { id: "verification", label: "Repair Verification" },
             ]}
           />
 
-          {subTab === "reports" ? (
+          {subTab === "reports" && (
             <button
               onClick={() => setCreateComplaintModalOpen(true)}
               className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-sm transition-colors cursor-pointer"
@@ -302,7 +309,8 @@ export const MaintenancePage: React.FC = () => {
               <Plus className="w-3.5 h-3.5" />
               <span>Report Hazard</span>
             </button>
-          ) : (
+          )}
+          {subTab !== "reports" && subTab !== "verification" && (
             <button
               onClick={() => {
                 setNewDefectId(defects[0]?.id || "");
@@ -317,7 +325,8 @@ export const MaintenancePage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Filter Bar */}
+      {/* 2. Filter Bar (for Work Orders, Defects, and Citizen Reports) */}
+      {subTab !== "verification" && (
       <div className="card p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* Search Box */}
@@ -406,6 +415,7 @@ export const MaintenancePage: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* 3. Sub-Tab Content: Work Orders */}
       {subTab === "work-orders" && (
@@ -940,6 +950,14 @@ export const MaintenancePage: React.FC = () => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* 5. Sub-Tab Content: AI-Powered Road Repair Verification */}
+      {subTab === "verification" && (
+        <RepairVerificationWorkbench
+          initialWorkOrderId={searchParams.get("woId")}
+          initialDefectId={searchParams.get("defectId")}
+        />
       )}
 
       {/* 6. Defect Inspection Slide Drawer (Modal/Drawer) */}
