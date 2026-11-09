@@ -16,6 +16,7 @@ interface BoxOverlayProps {
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
   className?: string;
+  colorScheme?: "emerald" | "severity";
 }
 
 /**
@@ -29,6 +30,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   onHover,
   onSelect,
   className = "",
+  colorScheme = "emerald",
 }) => {
   const isReduced = useReducedMotion();
 
@@ -36,6 +38,9 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
 
   const getSeverityColor = (sev?: string) => {
+    if (colorScheme === "emerald") {
+      return "#22C55E"; // Bright neon green matching YOLOv8/YOLO11 visual standard
+    }
     switch (sev?.toLowerCase()) {
       case "critical":
         return "#EF4444"; // Red
@@ -44,7 +49,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
       case "moderate":
         return "#F59E0B"; // Amber
       default:
-        return "#3B82F6"; // Blue
+        return "#22C55E"; // Emerald
     }
   };
 
@@ -136,10 +141,10 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
               <rect
                 x={0}
                 y={-3.2}
-                width={Math.max(w * 0.9, 14)}
+                width={Math.max(w * 0.9, 16)}
                 height={3.4}
-                fill="#0F172A"
-                fillOpacity={0.9}
+                fill={colorScheme === "emerald" ? "#16A34A" : "#0F172A"}
+                fillOpacity={0.95}
                 stroke={color}
                 strokeWidth={0.2}
                 rx={0.4}
@@ -148,11 +153,11 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
                 x={0.8}
                 y={-1.0}
                 fill="#FFFFFF"
-                fontSize={2.0}
+                fontSize={2.1}
                 fontFamily="monospace"
                 fontWeight="bold"
               >
-                {d.label.slice(0, 10)} {(d.confidence * 100).toFixed(0)}%
+                {d.label.toLowerCase()} {d.confidence.toFixed(2)}
               </text>
             </g>
           </g>
