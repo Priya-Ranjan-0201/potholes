@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative mt-auto border-t border-border bg-surface-solid text-muted text-xs overflow-hidden">
       <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.025} />
-      <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Left: Version + API status */}
           <div className="flex items-center gap-2">

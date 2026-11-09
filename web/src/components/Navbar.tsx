@@ -58,7 +58,7 @@ export const Navbar: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 w-full bg-surface/85 backdrop-blur-md border-b border-border shadow-xs">
         <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.03} />
-        <div className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
             {/* Brand Logo & Name */}
             <Link to="/" className="flex items-center gap-2.5 shrink-0 select-none">

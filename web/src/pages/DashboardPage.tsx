@@ -185,21 +185,21 @@ export const DashboardPage: React.FC = () => {
         moderate: potholeCount > 0 ? mod : 0,
       },
       {
-        name: "Longitudinal Cracks (D00)",
+        name: "Longitudinal (D00)",
         count: crackLongCount,
         critical: 0,
         severe: 0,
         moderate: crackLongCount,
       },
       {
-        name: "Alligator Cracks (D20)",
+        name: "Alligator (D20)",
         count: crackAlliCount,
         critical: 0,
         severe: 0,
         moderate: crackAlliCount,
       },
       {
-        name: "Transverse Cracks (D10)",
+        name: "Transverse (D10)",
         count: crackTransCount,
         critical: 0,
         severe: 0,
@@ -207,9 +207,7 @@ export const DashboardPage: React.FC = () => {
       },
     ];
 
-    // If only potholes exist, only return potholes. If nothing exists, show baseline zero.
-    const activeItems = items.filter((item) => item.count > 0);
-    return activeItems.length > 0 ? activeItems : [items[0]];
+    return items;
   }, [stats]);
 
   // Filter trends: only distinct dates with detections or activity
@@ -449,32 +447,68 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : trendView === "distribution" ? (
               <div>
-                <div className="h-64 w-full pt-2">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={defectDistributionData}
-                      margin={{ top: 10, right: 15, left: -15, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.2} />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} />
-                      <YAxis tick={{ fontSize: 11, fill: "#64748B" }} allowDecimals={false} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#0F172A",
-                          borderColor: "#1E293B",
-                          color: "#F8FAFC",
-                          borderRadius: "6px",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }} />
-                      <Bar dataKey="critical" name="Critical" fill="#EF4444" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
-                      <Bar dataKey="severe" name="Severe" fill="#F59E0B" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
-                      <Bar dataKey="moderate" name="Moderate" fill="#3B82F6" radius={[3, 3, 0, 0]} isAnimationActive={!isReduced} animationDuration={600} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                  {/* Left: Bar Chart (7 cols) */}
+                  <div className="md:col-span-7 h-56 w-full pt-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={defectDistributionData}
+                        margin={{ top: 8, right: 10, left: -20, bottom: 0 }}
+                        barGap={2}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.25} />
+                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94A3B8" }} />
+                        <YAxis tick={{ fontSize: 10, fill: "#94A3B8" }} allowDecimals={false} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#0F172A",
+                            borderColor: "#334155",
+                            color: "#F8FAFC",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }} />
+                        <Bar dataKey="critical" name="Critical" fill="#EF4444" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
+                        <Bar dataKey="severe" name="Severe" fill="#F59E0B" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
+                        <Bar dataKey="moderate" name="Moderate" fill="#3B82F6" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Right: Telemetry & Severity Distribution Panel (5 cols) */}
+                  <div className="md:col-span-5 flex flex-col justify-between p-3.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs space-y-2">
+                    <span className="font-semibold text-slate-200 text-xs">Distress Telemetry</span>
+                    
+                    <div className="space-y-1.5 text-[11px]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Potholes (D40)</span>
+                        <span className="font-mono font-bold text-white">{stats?.defects_by_class?.["POTHOLE"] ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Critical Safety Hazards</span>
+                        <span className="font-mono font-bold text-rose-400">{stats?.defects_by_severity?.["Critical"] ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Severe Cratering</span>
+                        <span className="font-mono font-bold text-amber-400">{stats?.defects_by_severity?.["Severe"] ?? 0}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Moderate Depressions</span>
+                        <span className="font-mono font-bold text-blue-400">{stats?.defects_by_severity?.["Moderate"] ?? 0}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">Repairs Dispatched</span>
+                      <span className="font-mono font-bold text-emerald-400">
+                        {stats?.repaired_defects ?? 0} / {stats?.total_defects ?? 0}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
                   <span>Computed from {stats?.total_defects ?? 0} tested road distress detections</span>
                   <Link to="/maintenance?tab=defects" className="text-blue-600 dark:text-blue-400 hover:underline">
                     View raw defect catalog &rarr;
