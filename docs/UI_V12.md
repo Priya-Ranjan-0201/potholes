@@ -246,3 +246,4 @@ P8  i18n completion across 6 languages and glyph checks; copy deck applied; CI g
 P9  Visual QA, rubric scoring (all pages >= 8), accessibility and performance reports, GIFs, README.
 GATE each phase: build, lint, types, unit and E2E green; reduced-motion passes; CLS < 0.1; rubric >= 8 for
 the pages built so far; no banned strings; every data animation tied to a real event.
+

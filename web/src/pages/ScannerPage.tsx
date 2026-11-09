@@ -34,16 +34,16 @@ interface SampleImage {
 
 const SAMPLE_IMAGES: SampleImage[] = [
   {
-    id: "capture-tested-potholes",
-    label: "Tested Pothole Cluster (17 Potholes)",
-    src: "/samples/user_tested_potholes.jpg",
-    road: "Verified Field Highway Corridor (Sector 1)",
-  },
-  {
     id: "capture-pothole",
     label: "NH-44 Asphalt Crater",
     src: "/samples/asphalt_crater.jpg",
     road: "NH-44 GT Road Sector 12",
+  },
+  {
+    id: "capture-tested-potholes",
+    label: "Tested Pothole Cluster (17 Potholes)",
+    src: "/samples/user_tested_potholes.jpg",
+    road: "Verified Field Highway Corridor (Sector 1)",
   },
   {
     id: "capture-multi",

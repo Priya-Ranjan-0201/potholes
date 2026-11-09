@@ -6,18 +6,18 @@
   /* DARK "Night highway" (Default theme) */
   html.dark {
     --bg: #070B14;
-    --bg-raised: #0C1220;
-    --surface: rgba(16, 24, 40, 0.82);
+    --bg-raised: #151D2E;
+    --surface: rgba(17, 26, 44, 0.90);
     --surface-solid: #111A2C;
-    --border: #1E2A42;
-    --border-strong: #2B3A5A;
-    --text: #EAF0FA;
-    --muted: #93A3BF;
-    --faint: #5E6E8A;
+    --border: #23314B;
+    --border-strong: #3B4E73;
+    --text: #F8FAFC; /* Clean high-contrast white */
+    --muted: #A0AEC0; /* Clear visible slate */
+    --faint: #718096; /* Visible secondary slate */
     
     --primary: #FFB020; /* road-sign amber */
     --primary-hover: #FFC24D;
-    --primary-contrast: #1A1200;
+    --primary-contrast: #070B14;
     
     --accent-teal: #19D3C5; /* reflector */
     --accent-indigo: #6366F1;
@@ -251,4 +251,30 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Explicit High-Contrast Theme Utilities */
+.text-text {
+  color: var(--text) !important;
+}
+.text-muted {
+  color: var(--muted) !important;
+}
+.text-faint {
+  color: var(--faint) !important;
+}
+.bg-surface {
+  background-color: var(--surface) !important;
+}
+.bg-surface-solid {
+  background-color: var(--surface-solid) !important;
+}
+.bg-bg-raised {
+  background-color: var(--bg-raised) !important;
+}
+.border-border {
+  border-color: var(--border) !important;
+}
+.border-border-strong {
+  border-color: var(--border-strong) !important;
 }

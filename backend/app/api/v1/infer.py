@@ -78,8 +78,8 @@ def get_inference_engine(conf_thresh: float = 0.25, iou_thresh: float = 0.45):
 @router.post("/infer", response_model=InferenceResponse)
 async def infer_road_defects(
     file: UploadFile = File(...),
-    conf_thresh: float = Query(0.15, ge=0.05, le=0.95),
-    iou_thresh: float = Query(0.40, ge=0.1, le=0.9)
+    conf_thresh: float = Query(0.25, ge=0.05, le=0.95),
+    iou_thresh: float = Query(0.45, ge=0.1, le=0.9)
 ):
     """Run real-time defect detection on an uploaded image using fine-tuned YOLO11n ONNX Runtime."""
     try:
@@ -109,15 +109,15 @@ async def infer_road_defects(
             bw = max(1.0, bx[2] - bx[0])
             bh = max(1.0, bx[3] - bx[1])
 
-            # Discard boundary artifacts spanning >96% of the entire image
-            if (bw / w > 0.96) and (bh / h > 0.96):
+            # Discard boundary artifacts spanning >92% of the entire image
+            if (bw / w > 0.92) and (bh / h > 0.92):
                 continue
 
             # Civil engineering road plane constraint:
             # Road distress (potholes/cracks) cannot exist in the sky, trees, or upper vehicular traffic.
-            # Discard detections whose vertical center is located in the upper 30% of the frame (vehicles/skyline/horizon).
+            # Discard detections whose vertical center is in upper 35% or top in upper 18% (horizon/vehicles/skyline).
             cy = (bx[1] + bx[3]) / 2.0
-            if cy < (h * 0.30):
+            if cy < (h * 0.35) or bx[1] < (h * 0.18):
                 continue
 
             # Discard horizontal scanner line artifacts

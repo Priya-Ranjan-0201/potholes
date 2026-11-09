@@ -49,3 +49,4 @@ export const ThemeToggleWipe: React.FC<ThemeToggleWipeProps> = ({
     </button>
   );
 };
+

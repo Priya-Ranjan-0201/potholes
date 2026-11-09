@@ -247,3 +247,4 @@ export const NightRoadCanvas: React.FC<NightRoadCanvasProps> = ({
     </div>
   );
 };
+

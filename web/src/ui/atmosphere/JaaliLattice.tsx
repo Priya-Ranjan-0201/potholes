@@ -48,3 +48,4 @@ export const JaaliLattice: React.FC<JaaliLatticeProps> = ({
     </div>
   );
 };
+

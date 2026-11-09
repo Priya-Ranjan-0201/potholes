@@ -558,12 +558,53 @@ export const DashboardPage: React.FC = () => {
                   </thead>
                   <tbody>
                     {displayedWards.map((w) => {
+                      const cleanWardName = w.ward_name.replace(/\s*\([Ww]-\d+\)$/, "").trim();
                       const repairPct =
                         w.total_defects > 0
                           ? Math.round((w.repaired_defects / w.total_defects) * 100)
                           : 100;
                       const hasCritical = w.critical_defects > 0;
                       const isSelected = selectedCorridor === w.ward_id;
+
+                      // Professional municipal triage status
+                      let statusBadge: React.ReactNode;
+                      if (w.total_defects === 0) {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+                            Awaiting Scan
+                          </span>
+                        );
+                      } else if (repairPct >= 75) {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 font-semibold">
+                            Restored
+                          </span>
+                        );
+                      } else if (repairPct >= 35) {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-500/15 text-blue-300 border border-blue-500/40 font-semibold">
+                            Repairs Active
+                          </span>
+                        );
+                      } else if (w.critical_defects >= 4) {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/20 text-rose-300 border border-rose-500/50 font-semibold">
+                            Immediate Patch
+                          </span>
+                        );
+                      } else if (w.critical_defects > 0) {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/50 font-semibold">
+                            Scheduled Patch
+                          </span>
+                        );
+                      } else {
+                        statusBadge = (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                            Routine Patrol
+                          </span>
+                        );
+                      }
 
                       return (
                         <tr
@@ -579,7 +620,7 @@ export const DashboardPage: React.FC = () => {
                           }}
                         >
                           <td className="font-medium text-slate-900 dark:text-slate-100">
-                            <span>{w.ward_name}</span>
+                            <span>{cleanWardName}</span>
                             {w.ward_code && (
                               <span className="font-mono text-[10px] text-slate-400 ml-1.5">
                                 ({w.ward_code})
@@ -617,23 +658,7 @@ export const DashboardPage: React.FC = () => {
                             )}
                           </td>
                           <td className="text-right">
-                            {w.total_defects === 0 ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
-                                Awaiting Scan
-                              </span>
-                            ) : hasCritical ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-semibold">
-                                Immediate Patch
-                              </span>
-                            ) : w.total_defects > w.repaired_defects ? (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                                In Queue
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                Clear
-                              </span>
-                            )}
+                            {statusBadge}
                           </td>
                           <td className="text-right">
                             {w.total_defects > 0 ? (

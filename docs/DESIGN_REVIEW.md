@@ -45,3 +45,4 @@ A page passes a phase only if every criterion is >= 8/10 with screenshot crop ju
 
 ## Target Gate
 All pages must reach **>= 8/10** on all 10 criteria before Phase 9 final freeze.
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, WorkOrder } from "../api/client";
 import {
@@ -10,6 +10,8 @@ import {
   FileCheck2,
   Search,
   MessageSquareWarning,
+  Camera,
+  ClipboardList,
 } from "../components/Icons";
 import {
   SeverityBadge,
@@ -279,6 +281,7 @@ export const MaintenancePage: React.FC = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           <SegmentedControl<SubTab>
+            name="maintenance-subtabs"
             value={subTab}
             onChange={(tab) => {
               setSubTab(tab);
@@ -294,7 +297,7 @@ export const MaintenancePage: React.FC = () => {
           {subTab === "reports" ? (
             <button
               onClick={() => setCreateComplaintModalOpen(true)}
-              className="btn-primary text-xs inline-flex items-center gap-1.5 shrink-0"
+              className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-sm transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Report Hazard</span>
@@ -305,7 +308,7 @@ export const MaintenancePage: React.FC = () => {
                 setNewDefectId(defects[0]?.id || "");
                 setCreateModalOpen(true);
               }}
-              className="btn-primary text-xs inline-flex items-center gap-1.5 shrink-0"
+              className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shrink-0 shadow-sm transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Order</span>
@@ -387,10 +390,11 @@ export const MaintenancePage: React.FC = () => {
                   ? filteredDefects.length
                   : filteredComplaints.length
               }
-            /> records
+            />{" "}records
           </span>
           {subTab === "work-orders" && (
             <SegmentedControl<ViewMode>
+              name="maintenance-viewmode"
               size="sm"
               value={viewMode}
               onChange={(v) => setViewMode(v)}
@@ -405,7 +409,39 @@ export const MaintenancePage: React.FC = () => {
 
       {/* 3. Sub-Tab Content: Work Orders */}
       {subTab === "work-orders" && (
-        <>
+        <div className="space-y-4">
+          {workOrders.length === 0 && !loadingWo && (
+            <div className="card p-4 bg-slate-900/60 border border-slate-700/80 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+                  <ClipboardList className="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-100">No Active Work Orders</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Orders will appear as you detect road hazards in the Scanner or dispatch contractor repair orders.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  to="/scanner"
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Scan Road First</span>
+                </Link>
+                <button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create Manual Order</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {viewMode === "kanban" ? (
             /* Kanban Board View */
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
@@ -555,8 +591,10 @@ export const MaintenancePage: React.FC = () => {
                           );
                         })
                       ) : (
-                        <div className="py-8 text-center text-xs text-slate-400 font-mono">
-                          No orders
+                        <div className="h-44 rounded-lg border border-dashed border-slate-700/60 bg-slate-900/40 flex flex-col items-center justify-center p-4 text-center">
+                          <ClipboardList className="w-5 h-5 text-slate-500 mb-1.5" />
+                          <span className="text-xs font-semibold text-slate-300">No {col.label.toLowerCase()} orders</span>
+                          <span className="text-[10px] text-slate-500 mt-0.5">Dispatches will appear here</span>
                         </div>
                       )}
                     </div>
@@ -721,7 +759,7 @@ export const MaintenancePage: React.FC = () => {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {/* 4. Sub-Tab Content: Defects Registry */}
