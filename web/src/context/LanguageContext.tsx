@@ -37,8 +37,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "AI Telemetry",
     navEvaluation: "AI Evaluation",
     navCapture: "Drive Capture",
-    reportPotholeBtn: "🚨 Report Defect",
-    scanPhotoBtn: "⚡ Scan Road",
+    reportPotholeBtn: "Report Defect",
+    scanPhotoBtn: "Scan Road",
     
     // Scanner Page
     scannerTitle: "AI Pothole & Road Defect Scanner",
@@ -65,7 +65,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "Estimated Repair Cost",
     surfaceArea: "Damaged Area",
     recommendedAction: "Recommended Engineering Action",
-    dispatchWorkOrderBtn: "🚨 Dispatch PWD Work Order",
+    dispatchWorkOrderBtn: "Dispatch PWD Work Order",
     workOrderDispatched: "Work Order #PWD-WO-2026-9814 Dispatched to Municipal PWD Division!",
     cleanSurfaceTitle: "Road Surface Clean & Safe",
     cleanSurfaceDesc: "Road surface in good condition. No immediate repair required.",
@@ -196,8 +196,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "एआई टेलीमेट्री",
     navEvaluation: "एआई मूल्यांकन",
     navCapture: "ड्राइव कैप्चर",
-    reportPotholeBtn: "🚨 दोष दर्ज करें",
-    scanPhotoBtn: "⚡ सड़क स्कैन करें",
+    reportPotholeBtn: "दोष दर्ज करें",
+    scanPhotoBtn: "सड़क स्कैन करें",
 
     // Scanner Page
     scannerTitle: "एआई सड़क स्कैनर एवं गड्ढा पहचान",
@@ -224,7 +224,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "अनुमानित मरम्मत लागत",
     surfaceArea: "क्षतिग्रस्त क्षेत्रफल",
     recommendedAction: "अनुशंसित तकनीकी मरम्मत कार्य",
-    dispatchWorkOrderBtn: "🚨 PWD कार्य आदेश जारी करें",
+    dispatchWorkOrderBtn: "PWD कार्य आदेश जारी करें",
     workOrderDispatched: "कार्य आदेश #PWD-WO-2026-9814 लोक निर्माण संभाग को सफलतापूर्वक प्रेषित!",
     cleanSurfaceTitle: "सड़क सतह स्वच्छ एवं सुरक्षित",
     cleanSurfaceDesc: "सड़क की सतह अच्छी स्थिति में है। तत्काल मरम्मत की आवश्यकता नहीं।",
@@ -355,8 +355,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "ਏਆਈ ਮਾਡਲ",
     navEvaluation: "ਏਆਈ ਮੁਲਾਂਕਣ",
     navCapture: "ਡਰਾਈਵ ਕੈਪਚਰ",
-    reportPotholeBtn: "🚨 ਸ਼ਿਕਾਇਤ ਦਰਜ ਕਰੋ",
-    scanPhotoBtn: "⚡ ਸੜਕ ਸਕੈਨ ਕਰੋ",
+    reportPotholeBtn: "ਸ਼ਿਕਾਇਤ ਦਰਜ ਕਰੋ",
+    scanPhotoBtn: "ਸੜਕ ਸਕੈਨ ਕਰੋ",
 
     // Scanner Page
     scannerTitle: "ਏਆਈ ਸੜਕ ਸਕੈਨਰ ਅਤੇ ਟੋਇਆਂ ਦੀ ਪਛਾਣ",
@@ -383,7 +383,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "ਅੰਦਾਜ਼ਨ ਮੁਰੰਮਤ ਲਾਗਤ",
     surfaceArea: "ਨੁਕਸਾਨਿਆ ਖੇਤਰਫਲ",
     recommendedAction: "ਸਿਫ਼ਾਰਿਸ਼ ਕੀਤੀ ਮੁਰੰਮਤ",
-    dispatchWorkOrderBtn: "🚨 PWD ਵਰਕ ਆਰਡਰ ਜਾਰੀ ਕਰੋ",
+    dispatchWorkOrderBtn: "PWD ਵਰਕ ਆਰਡਰ ਜਾਰੀ ਕਰੋ",
     workOrderDispatched: "ਵਰਕ ਆਰਡਰ #PWD-WO-2026-9814 PWD ਨੂੰ ਸਫ਼ਲਤਾਪੂਰਵਕ ਭੇਜਿਆ ਗਿਆ!",
     cleanSurfaceTitle: "ਸੜਕ ਸਤਹ ਸਾਫ਼ ਅਤੇ ਸੁਰੱਖਿਅਤ",
     cleanSurfaceDesc: "IRC ਮਾਨਕਾਂ ਅਨੁਸਾਰ ਬਿਲਕੁਲ ਸਹੀ ਹੈ। ਤੁਰੰਤ ਮੁਰੰਮਤ ਦੀ ਲੋੜ ਨਹੀਂ।",
@@ -514,8 +514,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "AI டெலிமெட்ரி",
     navEvaluation: "AI மதிப்பீடு",
     navCapture: "டிரைவ் பிடிப்பு",
-    reportPotholeBtn: "🚨 புகார் பதிவு செய்",
-    scanPhotoBtn: "⚡ சாலையை ஸ்கேன் செய்",
+    reportPotholeBtn: "புகார் பதிவு செய்",
+    scanPhotoBtn: "சாலையை ஸ்கேன் செய்",
 
     // Scanner Page
     scannerTitle: "AI சாலை ஸ்கேனர் & குழி கண்டறிதல்",
@@ -542,7 +542,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "மதிப்பிடப்பட்ட பழுதுபார்ப்பு செலவு",
     surfaceArea: "பாதிக்கப்பட்ட பரப்பளவு",
     recommendedAction: "பரிந்துரைக்கப்பட்ட பழுதுபார்ப்பு நடவடிக்கை",
-    dispatchWorkOrderBtn: "🚨 PWD பணி ஆணை அனுப்பு",
+    dispatchWorkOrderBtn: "PWD பணி ஆணை அனுப்பு",
     workOrderDispatched: "பணி ஆணை #PWD-WO-2026-9814 PWD பிரிவுக்கு வெற்றிகரமாக அனுப்பப்பட்டது!",
     cleanSurfaceTitle: "சாலை மேற்பரப்பு சுத்தமாக உள்ளது",
     cleanSurfaceDesc: "சாலை மேற்பரப்பு நல்ல நிலையில் உள்ளது. உடனடி பழுது தேவையில்லை.",
@@ -673,8 +673,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "AI టెలిమెట్రీ",
     navEvaluation: "AI మూల్యాంకనం",
     navCapture: "డ్రైవ్ క్యాప్చర్",
-    reportPotholeBtn: "🚨 ఫిర్యాదు చేయండి",
-    scanPhotoBtn: "⚡ రోడ్డును స్కాన్ చేయండి",
+    reportPotholeBtn: "ఫిర్యాదు చేయండి",
+    scanPhotoBtn: "రోడ్డును స్కాన్ చేయండి",
 
     // Scanner Page
     scannerTitle: "AI రోడ్డు స్కానర్ & గుంతల గుర్తింపు",
@@ -701,7 +701,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "అంచనా వేసిన మరమ్మతు ఖర్చు",
     surfaceArea: "దెబ్బతిన్న వైశాల్యం",
     recommendedAction: "సిఫార్సు చేయబడిన ఇంజనీరింగ్ మరమ్మతు",
-    dispatchWorkOrderBtn: "🚨 PWD పని ఆర్డర్ జారీ చేయండి",
+    dispatchWorkOrderBtn: "PWD పని ఆర్డర్ జారీ చేయండి",
     workOrderDispatched: "పని ఆర్డర్ #PWD-WO-2026-9814 PWD విభాగానికి విజయవంతంగా పంపబడింది!",
     cleanSurfaceTitle: "రోడ్డు ఉపరితలం శుభ్రంగా మరియు సురక్షితంగా ఉంది",
     cleanSurfaceDesc: "రోడ్డు ఉపరితలం మంచి స్థితిలో ఉంది. తక్షణ మరమ్మతు అవసరం లేదు.",
@@ -832,8 +832,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     navModels: "এআই টেলিমেট্রি",
     navEvaluation: "এআই মূল্যায়ন",
     navCapture: "ড্রাইভ ক্যাপচার",
-    reportPotholeBtn: "🚨 অভিযোগ দাখিল করুন",
-    scanPhotoBtn: "⚡ সড়ক স্ক্যান করুন",
+    reportPotholeBtn: "অভিযোগ দাখিল করুন",
+    scanPhotoBtn: "সড়ক স্ক্যান করুন",
 
     // Scanner Page
     scannerTitle: "এআই সড়ক স্ক্যানার এবং গর্ত সনাক্তকরণ",
@@ -860,7 +860,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     estRepairCost: "আনুমানিক মেরামত খরচ",
     surfaceArea: "ক্ষতিগ্রস্ত আয়তন",
     recommendedAction: "প্রস্তাবিত প্রকৌশল মেরামত কাজ",
-    dispatchWorkOrderBtn: "🚨 PWD কার্য আদেশ জারি করুন",
+    dispatchWorkOrderBtn: "PWD কার্য আদেশ জারি করুন",
     workOrderDispatched: "কার্য আদেশ #PWD-WO-2026-9814 পূর্ত বিভাগে সফলভাবে পাঠানো হয়েছে!",
     cleanSurfaceTitle: "সড়ক পৃষ্ঠ পরিষ্কার এবং নিরাপদ",
     cleanSurfaceDesc: "রাস্তার পৃষ্ঠ ভাল অবস্থায় আছে। অবিলম্বে মেরামতের প্রয়োজন নেই।",

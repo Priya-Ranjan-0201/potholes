@@ -17,3 +17,4 @@ try:
     print('Saved debug_light_mode.png')
 finally:
     driver.quit()
+

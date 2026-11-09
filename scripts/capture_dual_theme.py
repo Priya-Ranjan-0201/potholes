@@ -33,3 +33,4 @@ try:
 
 finally:
     driver.quit()
+

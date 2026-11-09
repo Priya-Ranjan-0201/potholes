@@ -11,6 +11,10 @@ import {
   Maximize2,
   Minimize2,
   Camera,
+  Target,
+  BarChart3,
+  Clock,
+  Zap,
 } from "../components/Icons";
 import { detectDefects, InspectionResult, DefectBox } from "../utils/cvDetector";
 import { SegmentedControl } from "../ui";
@@ -417,13 +421,14 @@ export const ScannerPage: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* 1. Header Banner: Exact Step 7 Executive AI Presentation */}
-      <div className="bg-[#0b1329] border border-slate-800 rounded-lg p-4 sm:p-5 shadow-lg relative overflow-hidden">
+      {/* 1. Header Banner matching Step 7 Executive Benchmark Specification */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-heading font-black tracking-wide text-white uppercase">
+            <h1 className="text-xl sm:text-2xl font-heading font-bold tracking-tight text-slate-900 dark:text-white uppercase">
               STEP 7: POTHOLE DETECTION
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-1">
               The YOLO11n INT8 model detects potholes and displays bounding boxes with confidence scores.
             </p>
           </div>
@@ -446,9 +451,9 @@ export const ScannerPage: React.FC = () => {
 
       {/* 2. Interactive Field Captures Bar & Custom Upload */}
       {inputMode !== "camera" && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 px-3.5">
-          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto [scrollbar-width:thin] [scrollbar-color:#334155_#090d16]">
-            <span className="text-xs text-slate-400 font-medium shrink-0">Field Captures:</span>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 px-3.5 shadow-sm">
+          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto [scrollbar-width:thin]">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium shrink-0">Field Captures:</span>
             {SAMPLE_IMAGES.map((sample) => (
               <button
                 key={sample.id}
@@ -459,8 +464,8 @@ export const ScannerPage: React.FC = () => {
                 }}
                 className={`px-3 py-1 rounded-md text-xs font-medium border transition-colors shrink-0 cursor-pointer ${
                   selectedSampleId === sample.id
-                    ? "bg-blue-600 text-white border-blue-500 font-semibold shadow-sm"
-                    : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-750"
+                    ? "bg-amber-500 text-slate-950 border-amber-500 font-semibold shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750"
                 }`}
               >
                 {sample.label}
@@ -469,8 +474,8 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           <div className="shrink-0">
-            <label className="px-3 py-1 rounded-md text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm">
-              <Camera className="w-3.5 h-3.5 text-blue-400" />
+            <label className="px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm">
+              <Camera className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Choose Custom Photo</span>
               <input
                 type="file"
@@ -489,14 +494,14 @@ export const ScannerPage: React.FC = () => {
       {/* 3. Top Main Grid: Left Canvas (7 cols) + Right Zoom-In Gallery & Telemetry (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Column: Image / Video Live Feed Canvas */}
-        <div className="lg:col-span-7 bg-[#0b1329] border border-slate-800 rounded-lg p-3.5 flex flex-col justify-between shadow-md">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 flex flex-col justify-between shadow-sm">
           {/* Canvas Sub-Header */}
-          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-800 text-xs">
+          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-200 dark:border-slate-800 text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-200">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {activeRoadName}
               </span>
-              <span className="text-slate-400 font-mono text-[11px]">
+              <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                 ({inspection.imageWidth}×{inspection.imageHeight}px)
               </span>
             </div>
@@ -696,17 +701,17 @@ export const ScannerPage: React.FC = () => {
         {/* Right Column: DETECTION OUTPUT (ZOOM-IN) & DETECTION INFO */}
         <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
           {/* Panel 1: DETECTION OUTPUT (ZOOM-IN) 2x2 Grid */}
-          <div className="bg-[#0b1329] border border-slate-800 rounded-lg overflow-hidden shadow-md flex flex-col">
-            <div className="bg-[#132247] px-3.5 py-2 border-b border-blue-900/50 flex items-center justify-between">
-              <h3 className="text-xs font-bold tracking-wider text-white uppercase flex items-center gap-1.5">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm flex flex-col">
+            <div className="bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="text-xs font-bold tracking-wider text-slate-800 dark:text-white uppercase flex items-center gap-1.5">
                 <span>DETECTION OUTPUT (ZOOM-IN)</span>
               </h3>
-              <span className="text-[10px] font-mono text-cyan-300 font-semibold">
+              <span className="text-[11px] font-mono text-slate-600 dark:text-cyan-300 font-semibold">
                 {crops.length} Targets Isolated
               </span>
             </div>
 
-            <div className="p-3 bg-slate-950/90 grid grid-cols-2 gap-2.5 min-h-[200px]">
+            <div className="p-3 bg-slate-50/50 dark:bg-slate-950/90 grid grid-cols-2 gap-2.5 min-h-[200px]">
               {crops.length > 0 ? (
                 crops.slice(0, 4).map((crop, idx) => (
                   <div
@@ -734,7 +739,7 @@ export const ScannerPage: React.FC = () => {
                 ))
               ) : (
                 <div className="col-span-2 flex flex-col items-center justify-center p-6 text-center text-slate-500 text-xs">
-                  <CheckCircle className="w-6 h-6 text-slate-600 mb-1.5" />
+                  <CheckCircle className="w-6 h-6 text-slate-400 dark:text-slate-600 mb-1.5" />
                   <span>No defects detected in current frame</span>
                 </div>
               )}
@@ -742,56 +747,61 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           {/* Panel 2: DETECTION INFO Telemetry Panel */}
-          <div className="bg-[#0b1329] border border-slate-800 rounded-lg overflow-hidden shadow-md">
-            <div className="bg-[#132247] px-3.5 py-2 border-b border-blue-900/50 flex items-center justify-between">
-              <h3 className="text-xs font-bold tracking-wider text-white uppercase">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
+            <div className="bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="text-xs font-bold tracking-wider text-slate-800 dark:text-white uppercase">
                 DETECTION INFO
               </h3>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
             </div>
 
-            <div className="p-3.5 bg-slate-950/90 space-y-2 text-xs font-mono">
-              <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                <span className="flex items-center gap-2 text-slate-300 font-medium">
-                  <span>🎯</span> Total Potholes Detected
+            <div className="p-3.5 bg-white dark:bg-slate-950/90 space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                  <Target className="w-4 h-4 text-amber-500 shrink-0" />
+                  <span>Total Potholes Detected</span>
                 </span>
-                <span className="text-amber-300 font-bold text-sm">
+                <span className="text-amber-600 dark:text-amber-300 font-bold text-sm">
                   {isStep7 ? 4 : inspection.boxes.length}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                <span className="flex items-center gap-2 text-slate-300 font-medium">
-                  <span>📶</span> Average Confidence
+              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                  <BarChart3 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Average Confidence</span>
                 </span>
-                <span className="text-emerald-400 font-bold text-sm">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                   {isStep7 ? "0.91" : avgConf.toFixed(2)}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                <span className="flex items-center gap-2 text-slate-300 font-medium">
-                  <span>🕒</span> Inference Time
+              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                  <Clock className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span>Inference Time</span>
                 </span>
-                <span className="text-cyan-400 font-bold text-sm">
+                <span className="text-blue-600 dark:text-cyan-400 font-bold text-sm">
                   {isStep7 ? "78.4 ms" : `${inspection.latencyMs.toFixed(1)} ms`}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
-                <span className="flex items-center gap-2 text-slate-300 font-medium">
-                  <span>⚡</span> Frames Per Second
+              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                  <Zap className="w-4 h-4 text-cyan-500 shrink-0" />
+                  <span>Frames Per Second</span>
                 </span>
-                <span className="text-cyan-400 font-bold text-sm">
+                <span className="text-blue-600 dark:text-cyan-400 font-bold text-sm">
                   {isStep7 ? "12.6 FPS" : `${fps} FPS`}
                 </span>
               </div>
 
               <div className="flex items-center justify-between py-1">
-                <span className="flex items-center gap-2 text-slate-300 font-medium">
-                  <span>💾</span> Model
+                <span className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
+                  <Cpu className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span>Model</span>
                 </span>
-                <span className="text-amber-300 font-bold text-xs">
+                <span className="text-slate-800 dark:text-amber-300 font-bold text-xs">
                   {isStep7 ? "YOLOv8 (best.pt)" : "YOLO11n (best_int8.onnx)"}
                 </span>
               </div>
@@ -803,13 +813,13 @@ export const ScannerPage: React.FC = () => {
       {/* 4. Bottom Row: Detection Details Table (5 cols), Confidence Legend (3 cols), Frame Sequence (4 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Column 1: DETECTION DETAILS (Current Frame) */}
-        <div className="lg:col-span-5 bg-[#0b1329] border border-slate-800 rounded-lg overflow-hidden shadow-md flex flex-col">
-          <div className="bg-[#1e1b4b] px-3.5 py-2 border-b border-indigo-900/50 flex items-center justify-between">
-            <h3 className="text-xs font-bold tracking-wider text-white uppercase">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm flex flex-col">
+          <div className="bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="text-xs font-bold tracking-wider text-slate-800 dark:text-white uppercase">
               DETECTION DETAILS (Current Frame)
             </h3>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-indigo-300 font-semibold">
+              <span className="text-[10px] font-mono text-slate-500 dark:text-indigo-300 font-semibold">
                 {isStep7 ? 4 : inspection.boxes.length} records
               </span>
               {inspection.boxes.length > 0 && (
@@ -830,9 +840,9 @@ export const ScannerPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto max-h-[220px] overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#334155_#090d16]">
+          <div className="overflow-x-auto max-h-[220px] overflow-y-auto [scrollbar-width:thin]">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-900/90 text-slate-400 text-[11px] font-mono uppercase sticky top-0 border-b border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-900/90 text-slate-700 dark:text-slate-400 text-[11px] font-mono uppercase sticky top-0 border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="py-2 px-2.5 text-center">ID</th>
                   <th className="py-2 px-2.5">Class</th>
@@ -842,7 +852,7 @@ export const ScannerPage: React.FC = () => {
                   <th className="py-2 px-2.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-slate-800 dark:text-slate-300">
                 {isStep7 ? (
                   <>
                     <tr className="hover:bg-slate-800/50 transition-colors">
@@ -983,10 +993,10 @@ export const ScannerPage: React.FC = () => {
         </div>
 
         {/* Column 2: CONFIDENCE LEGEND & Verification Status */}
-        <div className="lg:col-span-3 bg-[#0b1329] border border-slate-800 rounded-lg overflow-hidden shadow-md flex flex-col justify-between">
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm flex flex-col justify-between">
           <div>
-            <div className="bg-[#132247] px-3.5 py-2 border-b border-blue-900/50">
-              <h3 className="text-xs font-bold tracking-wider text-white uppercase">
+            <div className="bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-xs font-bold tracking-wider text-slate-800 dark:text-white uppercase">
                 CONFIDENCE LEGEND
               </h3>
             </div>
@@ -994,47 +1004,47 @@ export const ScannerPage: React.FC = () => {
             <div className="p-3.5 space-y-2 text-xs font-mono">
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
-                <span className="font-bold text-slate-200">0.80 – 1.00</span>
-                <span className="text-slate-400">High Confidence</span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">0.80 – 1.00</span>
+                <span className="text-slate-600 dark:text-slate-400">High Confidence</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
-                <span className="font-bold text-slate-200">0.50 – 0.79</span>
-                <span className="text-slate-400">Medium Confidence</span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">0.50 – 0.79</span>
+                <span className="text-slate-600 dark:text-slate-400">Medium Confidence</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0" />
-                <span className="font-bold text-slate-200">0.00 – 0.49</span>
-                <span className="text-slate-400">Low Confidence</span>
+                <span className="font-bold text-slate-900 dark:text-slate-200">0.00 – 0.49</span>
+                <span className="text-slate-600 dark:text-slate-400">Low Confidence</span>
               </div>
             </div>
           </div>
 
           {/* Real-time Verification Callout */}
-          <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/30 m-3 rounded-md flex items-center gap-2.5">
-            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span className="text-xs font-bold text-emerald-300 leading-snug">
+          <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 m-3 rounded-md flex items-center gap-2.5">
+            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 leading-snug">
               {isStep7 ? "YOLOv8 Model is Detecting Potholes Accurately in Real-Time" : "YOLO11n Model is Detecting Potholes Accurately in Real-Time"}
             </span>
           </div>
         </div>
 
         {/* Column 3: DETECTION FRAME SEQUENCE */}
-        <div className="lg:col-span-4 bg-[#0b1329] border border-slate-800 rounded-lg overflow-hidden shadow-md flex flex-col">
-          <div className="bg-[#132247] px-3.5 py-2 border-b border-blue-900/50 flex items-center justify-between">
-            <h3 className="text-xs font-bold tracking-wider text-white uppercase">
+        <div className="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm flex flex-col">
+          <div className="bg-slate-50 dark:bg-slate-800/80 px-3.5 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="text-xs font-bold tracking-wider text-slate-800 dark:text-white uppercase">
               DETECTION FRAME SEQUENCE
             </h3>
-            <span className="text-[10px] font-mono text-cyan-300">Tracking Strip</span>
+            <span className="text-[10px] font-mono text-slate-500 dark:text-cyan-300">Tracking Strip</span>
           </div>
 
-          <div className="p-3 bg-slate-950/90 flex-1 flex items-center gap-2 overflow-x-auto [scrollbar-width:thin] [scrollbar-color:#334155_#090d16]">
+          <div className="p-3 bg-slate-50/50 dark:bg-slate-950/90 flex-1 flex items-center gap-2 overflow-x-auto [scrollbar-width:thin]">
             {isStep7 ? (
               <div className="w-full flex items-center justify-center">
                 <img
                   src="/samples/step7_sequence_strip.jpg"
                   alt="Detection Frame Sequence"
-                  className="w-full h-20 object-cover rounded border border-slate-700"
+                  className="w-full h-20 object-cover rounded border border-slate-200 dark:border-slate-700"
                 />
               </div>
             ) : (
@@ -1049,7 +1059,7 @@ export const ScannerPage: React.FC = () => {
                   className={`relative shrink-0 w-24 h-20 rounded-md overflow-hidden border-2 cursor-pointer transition-all ${
                     selectedSampleId === sample.id
                       ? "border-emerald-500 ring-2 ring-emerald-500/30 scale-102"
-                      : "border-slate-800 opacity-65 hover:opacity-100 hover:border-slate-600"
+                      : "border-slate-200 dark:border-slate-800 opacity-65 hover:opacity-100 hover:border-slate-400 dark:hover:border-slate-600"
                   }`}
                 >
                   <img
@@ -1069,13 +1079,15 @@ export const ScannerPage: React.FC = () => {
       </div>
 
       {/* 5. Bottom Hardware & Edge Deployment Profile Banner */}
-      <div className="bg-sky-950/40 border border-sky-500/30 rounded-lg p-2.5 px-4 flex items-center justify-between text-xs text-sky-200 font-mono shadow-sm">
+      <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 px-4 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-mono shadow-sm">
         <div className="flex items-center gap-2.5">
-          <Cpu className="w-4 h-4 text-sky-400" />
-          <span>Potholes detected with high accuracy using YOLOv8 on Raspberry Pi 5</span>
+          <Cpu className="w-4 h-4 text-blue-500" />
+          <span>Inference benchmarked on Raspberry Pi 5 ARM64 edge runtime</span>
         </div>
-        <div className="flex items-center gap-2 text-rose-400 font-semibold">
-          <span>🍓 Raspberry Pi 5 Edge Engine</span>
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-200/70 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-semibold">
+            Raspberry Pi 5 · YOLOv8 INT8
+          </span>
         </div>
       </div>
 

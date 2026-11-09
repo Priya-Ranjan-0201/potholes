@@ -17,7 +17,6 @@ import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { useReducedMotion } from "../motion/motion";
 import { ThemeToggleWipe } from "../ui/atmosphere/ThemeToggleWipe";
-import { JaaliLattice } from "../ui/atmosphere/JaaliLattice";
 import { Logo } from "./Logo";
 
 export const Navbar: React.FC = () => {
@@ -57,7 +56,6 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-[#070b14]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
-        <JaaliLattice className="absolute inset-0 pointer-events-none" opacity={0.03} />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
             {/* Brand Logo & Name */}
@@ -116,7 +114,7 @@ export const Navbar: React.FC = () => {
                 className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-500/35 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-medium"
                 title="PostgreSQL & YOLO11n INT8 Inference Engine Online"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0" />
                 <span>LIVE</span>
                 <span className="text-slate-300 dark:text-slate-600">|</span>
                 <span className="text-slate-600 dark:text-slate-400 text-[11px]">74ms</span>
