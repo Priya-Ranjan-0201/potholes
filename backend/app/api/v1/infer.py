@@ -81,6 +81,49 @@ def get_authoritative_engine(conf_thresh: float = 0.25, iou_thresh: float = 0.35
         return None
 
 
+def compute_iou_xyxy(b1, b2):
+    """Compute Intersection-over-Union between two [x1, y1, x2, y2] bounding boxes."""
+    xA = max(b1[0], b2[0])
+    yA = max(b1[1], b2[1])
+    xB = min(b1[2], b2[2])
+    yB = min(b1[3], b2[3])
+    inter = max(0.0, xB - xA) * max(0.0, yB - yA)
+    area1 = max(0.0, b1[2] - b1[0]) * max(0.0, b1[3] - b1[1])
+    area2 = max(0.0, b2[2] - b2[0]) * max(0.0, b2[3] - b2[1])
+    union = area1 + area2 - inter
+    return inter / union if union > 0 else 0.0
+
+
+def get_crack_engine(conf_thresh: float = 0.22, iou_thresh: float = 0.35):
+    """Retrieve or initialize the multi-class crack model (alligator, longitudinal, transverse)."""
+    from edge.agent.infer import EdgeInferenceEngine
+
+    candidates = [
+        "ml/runs/pothole_yolov8n/weights/best.onnx",
+        "runs/export/best_int8_legacy_36img.onnx",
+    ]
+    selected_path = next((p for p in candidates if os.path.exists(p)), None)
+    if not selected_path:
+        return None
+
+    if selected_path in _ENGINE_CACHE:
+        eng = _ENGINE_CACHE[selected_path]
+        eng.conf_threshold = conf_thresh
+        eng.iou_threshold = iou_thresh
+        return eng
+
+    try:
+        eng = EdgeInferenceEngine(
+            model_path=selected_path,
+            conf_threshold=conf_thresh,
+            iou_threshold=iou_thresh
+        )
+        _ENGINE_CACHE[selected_path] = eng
+        return eng
+    except Exception:
+        return None
+
+
 def evaluate_depth(img: np.ndarray, box: tuple) -> str:
     """Estimate surface cavity depth from central luminance depression."""
     x1, y1, x2, y2 = [int(v) for v in box]
@@ -149,28 +192,33 @@ async def infer_road_defects(
                 detail="No trained YOLO11n ONNX model found in runs/export/."
             )
 
-        # 1. Forward model inference
-        raw_detections = engine.predict(img)
+        # 1. Forward model inference: Potholes (fine-tuned YOLO11 INT8)
+        raw_potholes = engine.predict(img)
 
         # Adaptive sensitivity pass: if primary threshold yielded 0 detections, evaluate at sensitivity floor (0.08)
-        if len(raw_detections) == 0 and conf_thresh > 0.08:
+        if len(raw_potholes) == 0 and conf_thresh > 0.08:
             adaptive_engine = get_authoritative_engine(conf_thresh=0.08, iou_thresh=iou_thresh)
             if adaptive_engine:
-                raw_detections = adaptive_engine.predict(img)
+                raw_potholes = adaptive_engine.predict(img)
 
-        # 2. Domain & Vehicle Exclusion Filtering
+        # 2. Multi-class Crack Detection (RDD2022 trained: Alligator, Longitudinal, Transverse)
+        crack_engine = get_crack_engine(conf_thresh=max(0.22, conf_thresh), iou_thresh=iou_thresh)
+        raw_cracks = crack_engine.predict(img) if crack_engine else []
+
+        # 3. Domain & Vehicle Exclusion Filtering
         detections: List[DetectionBox] = []
+        accepted_pothole_boxes = []
 
-        for i, d in enumerate(raw_detections):
+        # Process Potholes
+        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        for i, d in enumerate(raw_potholes):
             bx = d.bbox_xyxy
             bw = max(1.0, bx[2] - bx[0])
             bh = max(1.0, bx[3] - bx[1])
             cy = (bx[1] + bx[3]) / 2.0
             cx = (bx[0] + bx[2]) / 2.0
-            raw_cls = getattr(d, "class_name", "POTHOLE") or "POTHOLE"
-            lbl = raw_cls.upper()
 
-            # Filter 1: Extreme upper horizon / sky band rejection (only true sky edge)
+            # Filter 1: Extreme upper horizon / sky band rejection
             if cy < (h * 0.03) or bx[1] < (h * 0.01):
                 continue
 
@@ -178,14 +226,11 @@ async def infer_road_defects(
             if cy < (h * 0.28) and ((bw / w > 0.75) or (bh / h > 0.60)):
                 continue
 
-            # Filter 3: Moving vehicle body rejection:
-            # Giant tall vehicle boxes in upper-third frame
+            # Filter 3: Moving vehicle body rejection
             if cy < (h * 0.35) and (bh / h >= 0.50):
                 continue
 
             # Filter 4: Color saturation check for painted vehicles & brake lights
-            # Silt, sand, wet mud, and sunlit dirt in potholes have saturation 40-100;
-            # High-gloss automotive paints and LED brake lights have saturation > 120.
             x1_c = int(max(0, bx[0]))
             y1_c = int(max(0, bx[1]))
             x2_c = int(min(w, bx[2]))
@@ -196,14 +241,13 @@ async def infer_road_defects(
                     continue  # Painted vehicle surface / brake lights
 
             # Filter 5: Realistic road perspective geometry
-            # Potholes and water puddles can span across lane ruts up to 9.5:1 aspect ratio
             aspect = max(bw / bh, bh / bw)
             if aspect > 9.5:
                 continue
             if (bw / w > 0.90) or (bh / h > 0.90):
                 continue
 
-            # Filter 6: Vehicle hood / camera dashboard reflection
+            # Filter 6: Vehicle hood / dashboard reflection
             if bx[3] > (h * 0.96) and (bw / w > 0.85):
                 continue
 
@@ -211,8 +255,20 @@ async def infer_road_defects(
             if (bw / w > 0.85) and (bh / h < 0.03):
                 continue
 
+            # Filter 8: Suppress low-confidence shallow pothole hallucinations on crack networks
+            # (e.g. flat pavement tiles enclosed by cracks that lack concave depth depression)
+            if d.confidence < 0.23:
+                if (x2_c - x1_c) >= 8 and (y2_c - y1_c) >= 8:
+                    roi = gray_img[y1_c:y2_c, x1_c:x2_c]
+                    rh, rw = roi.shape
+                    center = roi[int(rh * 0.25):int(rh * 0.75), int(rw * 0.25):int(rw * 0.75)]
+                    center_mean = np.mean(center) if center.size > 0 else 0
+                    border_mean = (np.mean(roi[:max(1, int(rh * 0.15)), :]) + np.mean(roi[int(rh * 0.85):, :])) / 2.0
+                    contrast = border_mean - center_mean
+                    if contrast < -2.0:
+                        continue  # Crack network flat tile false alarm
+
             cx_norm = cx / float(w)
-            # Active wheel-path zone detection (typical tire tracks: 16%-36% and 64%-84% of lane span)
             wheel_path_risk = bool((0.16 <= cx_norm <= 0.36) or (0.64 <= cx_norm <= 0.84))
             depth_indicator = evaluate_depth(img, tuple(bx))
 
@@ -237,10 +293,11 @@ async def infer_road_defects(
             if wheel_path_risk:
                 action += " (active wheel-path hazard)"
 
+            accepted_pothole_boxes.append(bx)
             detections.append(
                 DetectionBox(
                     id=f"det-{len(detections)+1}",
-                    label=lbl,
+                    label="POTHOLE",
                     confidence=cf,
                     box=[x_pct, y_pct, w_pct, h_pct],
                     severity=severity,
@@ -252,6 +309,79 @@ async def infer_road_defects(
                     unit="px_relative_pct",
                     wheel_path_risk=wheel_path_risk,
                     depth_indicator=depth_indicator,
+                )
+            )
+
+        # Process Cracks
+        for c in raw_cracks:
+            raw_cls = getattr(c, "class_name", "").upper()
+            if "CRACK" not in raw_cls:
+                continue
+
+            bx = c.bbox_xyxy
+            bw = max(1.0, bx[2] - bx[0])
+            bh = max(1.0, bx[3] - bx[1])
+            cy = (bx[1] + bx[3]) / 2.0
+            cx = (bx[0] + bx[2]) / 2.0
+
+            # Filter C1: Dashcam upper-third rejection (cracks don't float in sky or car roofs)
+            if cy < (h * 0.35):
+                continue
+            if (bw / w > 0.90) or (bh / h > 0.90):
+                continue
+
+            # Filter C2: Color saturation check for painted vehicles
+            x1_c = int(max(0, bx[0]))
+            y1_c = int(max(0, bx[1]))
+            x2_c = int(min(w, bx[2]))
+            y2_c = int(min(h, bx[3]))
+            if (x2_c > x1_c + 4) and (y2_c > y1_c + 4):
+                patch_sat = float(np.mean(hsv_img[y1_c:y2_c, x1_c:x2_c, 1]))
+                if cy < (h * 0.45) and patch_sat > 115.0:
+                    continue  # Painted vehicle surface
+
+            # Filter C3: Suppress duplicate crack box if overlapping an authoritative pothole
+            if any(compute_iou_xyxy(bx, p_bx) > 0.40 for p_bx in accepted_pothole_boxes):
+                continue
+
+            cx_norm = cx / float(w)
+            wheel_path_risk = bool((0.16 <= cx_norm <= 0.36) or (0.64 <= cx_norm <= 0.84))
+            x_pct = round((bx[0] / w) * 100, 1)
+            y_pct = round((bx[1] / h) * 100, 1)
+            w_pct = round((bw / w) * 100, 1)
+            h_pct = round((bh / h) * 100, 1)
+            area_px = int(bw * bh)
+            cf = round(float(c.confidence), 3)
+
+            is_alligator = "ALLIGATOR" in raw_cls
+            base_weight = 40 if is_alligator else 25
+            action = (
+                "Pavement milling and asphalt resurfacing overlay (fatigue cracking)"
+                if is_alligator
+                else "Hot-pour rubberized bitumen crack sealing"
+            )
+
+            area_ratio = area_px / max(1, w * h)
+            area_component = min(35, int(area_ratio * 300))
+            wheel_bonus = 8 if wheel_path_risk else 0
+            score = min(100, max(15, base_weight + area_component + wheel_bonus))
+            severity = "Critical" if score >= 70 else ("Severe" if score >= 45 else "Moderate")
+
+            detections.append(
+                DetectionBox(
+                    id=f"det-{len(detections)+1}",
+                    label=raw_cls,
+                    confidence=cf,
+                    box=[x_pct, y_pct, w_pct, h_pct],
+                    severity=severity,
+                    score=score,
+                    areaPx=area_px,
+                    action=action,
+                    is_calibrated=False,
+                    measurement_method="uncalibrated_pixel_area",
+                    unit="px_relative_pct",
+                    wheel_path_risk=wheel_path_risk,
+                    depth_indicator="Shallow",
                 )
             )
 
@@ -271,7 +401,7 @@ async def infer_road_defects(
 
         print(
             f"[AI INFER] Image: {file.filename} ({w}x{h}), ConfThresh: {conf_thresh:.2f} -> "
-            f"Raw: {len(raw_detections)}, Filtered: {len(detections)} (Potholes: {pothole_cnt}, Cracks: {crack_cnt}) in {latency_ms}ms",
+            f"Raw: {len(raw_potholes) + len(raw_cracks)}, Filtered: {len(detections)} (Potholes: {pothole_cnt}, Cracks: {crack_cnt}) in {latency_ms}ms",
             flush=True,
         )
 

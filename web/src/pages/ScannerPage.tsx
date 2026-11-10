@@ -190,7 +190,7 @@ export const ScannerPage: React.FC = () => {
           ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, 240, 160);
           newCrops.push({
             id: `crop-${b.id}`,
-            label: "pothole",
+            label: b.label.includes("CRACK") ? (b.label.includes("ALLIGATOR") ? "Alligator Crack" : "Crack") : "Pothole",
             conf: b.confidence,
             dataUrl: canvas.toDataURL("image/jpeg", 0.9),
           });
@@ -626,7 +626,7 @@ export const ScannerPage: React.FC = () => {
                       className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                     />
                     <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-900/85 text-white font-medium">
-                      Pothole {Math.round(crop.conf * 100)}%
+                      {crop.label} {Math.round(crop.conf * 100)}%
                     </div>
                     <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[9px] bg-black/70 text-slate-300 font-mono">
                       #{idx + 1}
@@ -654,9 +654,16 @@ export const ScannerPage: React.FC = () => {
 
             <div className="p-3.5 space-y-2.5 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
-                <span className="text-slate-600 dark:text-slate-400">Total Potholes Detected</span>
+                <span className="text-slate-600 dark:text-slate-400">Total Hazards Detected</span>
                 <span className="font-bold text-slate-900 dark:text-white font-mono text-sm">
                   {inspection.boxes.length}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
+                <span className="text-slate-600 dark:text-slate-400">Potholes / Cracks</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono text-xs">
+                  {inspection.potholeCount} Potholes · {inspection.crackCount} Cracks
                 </span>
               </div>
 
@@ -742,8 +749,18 @@ export const ScannerPage: React.FC = () => {
                       <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="py-2 px-3 text-center font-bold text-slate-400">{idx + 1}</td>
                         <td className="py-2 px-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                            Pothole
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                              b.label.includes("CRACK")
+                                ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                                : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                            }`}
+                          >
+                            {b.label.includes("ALLIGATOR")
+                              ? "Alligator Crack"
+                              : b.label.includes("CRACK")
+                              ? "Crack"
+                              : "Pothole"}
                           </span>
                         </td>
                         <td className="py-2 px-3 text-center font-semibold font-mono text-emerald-600 dark:text-emerald-400">

@@ -37,13 +37,27 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   // Sort by confidence descending
   const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
 
-  const getColor = (sev?: string) => {
+  const getDefectName = (rawLabel: string) => {
+    const upper = (rawLabel || "").toUpperCase();
+    if (upper.includes("ALLIGATOR") || upper.includes("CROCODILE")) return "Alligator Crack";
+    if (upper.includes("LONGITUDINAL") || upper.includes("LONG")) return "Longitudinal Crack";
+    if (upper.includes("TRANSVERSE") || upper.includes("TRANS")) return "Transverse Crack";
+    if (upper.includes("CRACK")) return "Asphalt Crack";
+    return "Pothole";
+  };
+
+  const getColor = (rawLabel: string, sev?: string) => {
+    const isCrack = (rawLabel || "").toUpperCase().includes("CRACK");
+    if (sev?.toLowerCase() === "critical") {
+      return "#991b1b"; // Deep Crimson Red
+    }
+    if (isCrack) {
+      return "#b45309"; // Dark Amber Bronze for cracks
+    }
     if (colorScheme === "emerald") {
       return "#065f46"; // Dark, authoritative forest emerald (high-contrast, deep tone)
     }
     switch (sev?.toLowerCase()) {
-      case "critical":
-        return "#991b1b"; // Deep Crimson Red
       case "severe":
         return "#92400e"; // Deep Amber Bronze
       case "moderate":
@@ -68,7 +82,8 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
         const [x, y, w, h] = d.box;
         const isActive = activeId === d.id;
         const isDimmed = activeId !== null && !isActive;
-        const color = getColor(d.severity);
+        const color = getColor(d.label, d.severity);
+        const defectName = getDefectName(d.label);
 
         const shouldAnimate = !isReduced && index < 12;
         const delayMs = index * 25;
@@ -76,7 +91,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
         // Position label above the box; if too close to top edge, place inside top of box
         const labelHeight = 3.0;
         const labelY = y < 3.8 ? y + 0.4 : y - labelHeight - 0.2;
-        const labelWidth = Math.max(16, Math.min(w, 28));
+        const labelWidth = Math.max(defectName.length > 8 ? 22 : 16, Math.min(w, 32));
 
         return (
           <g
@@ -149,7 +164,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
                 fontFamily="system-ui, -apple-system, sans-serif"
                 fontWeight="700"
               >
-                Pothole {Math.round(d.confidence * 100)}%
+                {defectName} {Math.round(d.confidence * 100)}%
               </text>
             </g>
           </g>

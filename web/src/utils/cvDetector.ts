@@ -94,8 +94,8 @@ export async function detectDefects(
       return {
         source: "neural_api",
         totalDefects: data.total_defects ?? boxes.length,
-        potholeCount: data.pothole_count ?? boxes.length,
-        crackCount: 0,
+        potholeCount: data.pothole_count ?? boxes.filter((b) => (b.label || "").includes("POTHOLE")).length,
+        crackCount: data.crack_count ?? boxes.filter((b) => (b.label || "").includes("CRACK")).length,
         maxSeverity: data.max_severity || (boxes.length > 0 ? boxes[0].severity : "Minor"),
         overallScore: data.overall_health_score ?? (boxes.length > 0 ? boxes[0].score : 100),
         boxes,
