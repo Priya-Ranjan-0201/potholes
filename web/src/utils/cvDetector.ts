@@ -1,18 +1,20 @@
 /**
  * Real-Time ScamRoad Computer Vision Edge & API Detector
- * Automatically connects to the local YOLO11n backend inference engine.
- * Includes resilient in-browser surface depression and edge gradient fallback.
+ * Automatically connects to the local YOLO / Ensemble backend inference engine.
+ * Supports Single-Model INT8, Multi-Class Distress, and Dual-Engine Ensemble with TTA.
  */
 
 export interface DefectBox {
   id: string;
-  label: "POTHOLE" | "CRACK_LONG" | "CRACK_TRANS" | "CRACK_ALLIGATOR";
+  label: "POTHOLE" | "CRACK_LONG" | "CRACK_TRANS" | "CRACK_ALLIGATOR" | string;
   confidence: number;
   box: [number, number, number, number]; // [x%, y%, w%, h%]
   severity: "Critical" | "Severe" | "Moderate" | "Minor";
   score: number; // 0 - 100
   areaPx: number;
   action?: string;
+  wheelPathRisk?: boolean;
+  depthIndicator?: "Shallow" | "Medium" | "Deep";
 }
 
 export interface InspectionResult {
@@ -26,6 +28,8 @@ export interface InspectionResult {
   latencyMs: number;
   imageWidth?: number;
   imageHeight?: number;
+  engine?: string;
+  useTta?: boolean;
 }
 
 /**
@@ -33,8 +37,10 @@ export interface InspectionResult {
  */
 export async function detectDefects(
   imageSource: File | Blob | string,
-  confThresh: number = 0.15,
-  onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void
+  confThresh: number = 0.20,
+  onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void,
+  modelMode: "ensemble" | "yolo11n" | "multiclass" = "ensemble",
+  useTta: boolean = false
 ): Promise<InspectionResult> {
   const startTime = performance.now();
 
@@ -54,12 +60,13 @@ export async function detectDefects(
     formData.append("file", blob, "upload.jpg");
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     // 2. Active Model Inference Stage
     onStageChange?.("inference");
 
-    const apiRes = await fetch(`/api/v1/infer?conf_thresh=${confThresh}`, {
+    const url = `/api/v1/infer?conf_thresh=${confThresh}&model_mode=${modelMode}&use_tta=${useTta}`;
+    const apiRes = await fetch(url, {
       method: "POST",
       body: formData,
       signal: controller.signal,
@@ -71,7 +78,7 @@ export async function detectDefects(
 
     if (apiRes.ok) {
       const data = await apiRes.json();
-      const latency = Math.round(performance.now() - startTime);
+      const latency = data.latency_ms ?? Math.round(performance.now() - startTime);
 
       const boxes: DefectBox[] = (data.detections || []).map((d: any) => ({
         id: d.id,
@@ -82,19 +89,23 @@ export async function detectDefects(
         score: d.score,
         areaPx: d.areaPx,
         action: d.action,
+        wheelPathRisk: d.wheel_path_risk,
+        depthIndicator: d.depth_indicator,
       }));
 
       return {
         source: "neural_api",
         totalDefects: data.total_defects ?? boxes.length,
-        potholeCount: data.pothole_count ?? boxes.filter((b) => b.label === "POTHOLE").length,
-        crackCount: data.crack_count ?? boxes.filter((b) => b.label !== "POTHOLE").length,
+        potholeCount: data.pothole_count ?? boxes.filter((b) => b.label.includes("POTHOLE")).length,
+        crackCount: data.crack_count ?? boxes.filter((b) => !b.label.includes("POTHOLE")).length,
         maxSeverity: data.max_severity || (boxes.length > 0 ? boxes[0].severity : "Minor"),
         overallScore: data.overall_health_score ?? (boxes.length > 0 ? boxes[0].score : 100),
         boxes,
         latencyMs: latency,
         imageWidth: data.image_width,
         imageHeight: data.image_height,
+        engine: data.engine,
+        useTta: data.use_tta,
       };
     } else {
       console.error("[ScamRoad AI] Inference API error:", apiRes.status, await apiRes.text());
@@ -116,6 +127,3 @@ export async function detectDefects(
     latencyMs: latency,
   };
 }
-
-
-
