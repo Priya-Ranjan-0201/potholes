@@ -141,8 +141,6 @@ export const ScannerPage: React.FC = () => {
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
   const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
-  const [modelMode, setModelMode] = useState<"ensemble" | "yolo11n" | "multiclass">("ensemble");
-  const [useTta, setUseTta] = useState<boolean>(false);
   const { success } = useToast();
 
   const [crops, setCrops] = useState<ZoomCrop[]>([]);
@@ -189,15 +187,9 @@ export const ScannerPage: React.FC = () => {
 
     setIsScanning(true);
     try {
-      const result = await detectDefects(
-        source,
-        confThresh,
-        (stage) => {
-          setScanStage(stage);
-        },
-        modelMode,
-        useTta
-      );
+      const result = await detectDefects(source, confThresh, (stage) => {
+        setScanStage(stage);
+      });
       setInspection(result);
       if (result.boxes.length > 0) {
         setSelectedBoxId(result.boxes[0].id);
@@ -216,7 +208,7 @@ export const ScannerPage: React.FC = () => {
     if (inputMode === "image" && activeImageSrc) {
       runDetection(activeImageSrc);
     }
-  }, [activeImageSrc, confThresh, inputMode, selectedSampleId, modelMode, useTta]);
+  }, [activeImageSrc, confThresh, inputMode, selectedSampleId]);
 
   // Generate 2x2 close-up zoom crops whenever active image or detections change
   useEffect(() => {
@@ -501,42 +493,7 @@ export const ScannerPage: React.FC = () => {
         </div>
       )}
 
-      {/* 2b. Neural Architecture & Precision Controls Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 px-3.5 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="font-semibold text-slate-700 dark:text-slate-300 shrink-0 flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-blue-500" />
-            <span>Neural Engine:</span>
-          </span>
-          <SegmentedControl<"ensemble" | "yolo11n" | "multiclass">
-            name="scanner-model-mode"
-            size="sm"
-            value={modelMode}
-            onChange={(m) => setModelMode(m)}
-            options={[
-              { id: "ensemble", label: "Ensemble (Recommended)" },
-              { id: "yolo11n", label: "YOLO11n INT8 (Fast Potholes)" },
-              { id: "multiclass", label: "Multi-Class (Potholes & Cracks)" },
-            ]}
-          />
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setUseTta(!useTta)}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-md border transition-all cursor-pointer ${
-              useTta
-                ? "bg-blue-600 text-white border-blue-600 font-semibold shadow-sm"
-                : "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
-            title="Test-Time Augmentation: Runs dual-angle consensus to detect difficult and occluded road hazards"
-          >
-            <Zap className={`w-3.5 h-3.5 ${useTta ? "text-amber-300 fill-amber-300" : "text-slate-500"}`} />
-            <span>TTA Precision Mode: {useTta ? "Active" : "Standard"}</span>
-          </button>
-        </div>
-      </div>
 
       {/* 3. Top Main Grid: Left Canvas (7 cols) + Right Zoom-In Gallery & Telemetry (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -689,12 +646,11 @@ export const ScannerPage: React.FC = () => {
                 {/* 3. Bottom-Left Floating HUD Card */}
                 {!isStep7 && (
                   <div className="absolute bottom-3 left-3 z-20 p-2.5 rounded-md bg-black/85 backdrop-blur-md border border-slate-700/80 text-[11px] font-mono space-y-1 text-slate-300 shadow-xl pointer-events-none">
-                    <div>Model: <span className="text-cyan-400 font-bold">{inspection.engine || "Ensemble Dual-ONNX"}</span></div>
-                    <div>Classes: <span className="text-white">{inspection.crackCount > 0 ? "4 (pothole + cracks)" : "1 (pothole)"}</span></div>
+                    <div>Model: <span className="text-cyan-400 font-bold">YOLO11n-INT8</span></div>
+                    <div>Classes: <span className="text-white">1 (pothole)</span></div>
                     <div>Resolution: <span className="text-white">{`${inspection.imageWidth || 640}x${inspection.imageHeight || 480}`}</span></div>
                     <div>Inference Time: <span className="text-cyan-400 font-bold">{`${inspection.latencyMs.toFixed(1)} ms`}</span></div>
                     <div>FPS: <span className="text-cyan-400 font-bold">{fps}</span></div>
-                    {inspection.useTta && <div>TTA: <span className="text-amber-400 font-bold">Consensus ON</span></div>}
                   </div>
                 )}
 
@@ -849,8 +805,8 @@ export const ScannerPage: React.FC = () => {
                   <Cpu className="w-4 h-4 text-slate-400 shrink-0" />
                   <span>Model</span>
                 </span>
-                <span className="text-slate-800 dark:text-amber-300 font-bold text-xs truncate max-w-[200px] text-right">
-                  {isStep7 ? "YOLOv8 (best.pt)" : (inspection.engine || "Ensemble Dual-ONNX")}
+                <span className="text-slate-800 dark:text-amber-300 font-bold text-xs">
+                  {isStep7 ? "YOLOv8 (best.pt)" : "YOLO11n (best_yolo11_int8.onnx)"}
                 </span>
               </div>
             </div>
