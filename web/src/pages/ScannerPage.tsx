@@ -141,6 +141,7 @@ export const ScannerPage: React.FC = () => {
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
   const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
+  const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number } | null>(null);
   const { success } = useToast();
 
   const [crops, setCrops] = useState<ZoomCrop[]>([]);
@@ -620,28 +621,45 @@ export const ScannerPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Road Image */}
-                <img
-                  src={activeImageSrc}
-                  alt={activeRoadName}
-                  className={`w-full h-full max-h-[440px] object-contain select-none transition-all duration-200 ${
-                    privacyMask ? "filter blur-sm" : ""
-                  }`}
-                />
-
-                {/* S1: Active Inference Scan Line */}
-                <ScanLine isScanning={isScanning} stage={scanStage} />
-
-                {/* S2 & S3: Green Bounding Box Overlay with YOLOv8 visual styling */}
-                {showBoxes && !isStep7 && (
-                  <BoxOverlay
-                    detections={inspection.boxes}
-                    activeId={selectedBoxId || hoveredBoxId}
-                    onHover={(id) => setHoveredBoxId(id)}
-                    onSelect={(id) => setSelectedBoxId(id)}
-                    colorScheme="emerald"
+                {/* Dedicated Stage: Locks BoxOverlay and ScanLine exactly to the rendered image bounds */}
+                <div
+                  className="relative flex items-center justify-center max-w-full max-h-full"
+                  style={{
+                    aspectRatio: (inspection.imageWidth && inspection.imageHeight)
+                      ? `${inspection.imageWidth} / ${inspection.imageHeight}`
+                      : (imgDimensions ? `${imgDimensions.width} / ${imgDimensions.height}` : undefined),
+                    maxHeight: "440px",
+                    height: "100%",
+                  }}
+                >
+                  <img
+                    src={activeImageSrc}
+                    alt={activeRoadName}
+                    onLoad={(e) => {
+                      const t = e.currentTarget;
+                      if (t.naturalWidth && t.naturalHeight) {
+                        setImgDimensions({ width: t.naturalWidth, height: t.naturalHeight });
+                      }
+                    }}
+                    className={`w-full h-full object-contain select-none block transition-all duration-200 ${
+                      privacyMask ? "filter blur-sm" : ""
+                    }`}
                   />
-                )}
+
+                  {/* S1: Active Inference Scan Line strictly bounded to the image */}
+                  <ScanLine isScanning={isScanning} stage={scanStage} />
+
+                  {/* S2 & S3: Bounding Box Overlay strictly pinned to the image */}
+                  {showBoxes && !isStep7 && (
+                    <BoxOverlay
+                      detections={inspection.boxes}
+                      activeId={selectedBoxId || hoveredBoxId}
+                      onHover={(id) => setHoveredBoxId(id)}
+                      onSelect={(id) => setSelectedBoxId(id)}
+                      colorScheme="emerald"
+                    />
+                  )}
+                </div>
 
                 {/* 3. Bottom-Left Floating HUD Card */}
                 {!isStep7 && (
@@ -1136,21 +1154,31 @@ export const ScannerPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="relative flex-1 w-full h-full flex items-center justify-center mt-3 overflow-hidden">
-            <img
-              src={activeImageSrc}
-              alt="Full Screen View"
-              className="max-w-full max-h-full object-contain"
-            />
-            {showBoxes && (
-              <BoxOverlay
-                detections={inspection.boxes}
-                activeId={selectedBoxId || hoveredBoxId}
-                onHover={(id) => setHoveredBoxId(id)}
-                onSelect={(id) => setSelectedBoxId(id)}
-                colorScheme="emerald"
+          <div className="relative flex-1 w-full h-full flex items-center justify-center mt-3 overflow-hidden bg-black">
+            <div
+              className="relative flex items-center justify-center max-w-full max-h-full"
+              style={{
+                aspectRatio: (inspection.imageWidth && inspection.imageHeight)
+                  ? `${inspection.imageWidth} / ${inspection.imageHeight}`
+                  : (imgDimensions ? `${imgDimensions.width} / ${imgDimensions.height}` : undefined),
+                height: "100%",
+              }}
+            >
+              <img
+                src={activeImageSrc}
+                alt="Full Screen View"
+                className="max-w-full max-h-full object-contain select-none block"
               />
-            )}
+              {showBoxes && (
+                <BoxOverlay
+                  detections={inspection.boxes}
+                  activeId={selectedBoxId || hoveredBoxId}
+                  onHover={(id) => setHoveredBoxId(id)}
+                  onSelect={(id) => setSelectedBoxId(id)}
+                  colorScheme="emerald"
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
