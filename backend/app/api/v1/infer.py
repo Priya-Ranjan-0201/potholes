@@ -313,6 +313,7 @@ async def infer_road_defects(
             )
 
         # Process Cracks
+        valid_cracks = []
         for c in raw_cracks:
             raw_cls = getattr(c, "class_name", "").upper()
             if "CRACK" not in raw_cls:
@@ -322,10 +323,12 @@ async def infer_road_defects(
             bw = max(1.0, bx[2] - bx[0])
             bh = max(1.0, bx[3] - bx[1])
             cy = (bx[1] + bx[3]) / 2.0
-            cx = (bx[0] + bx[2]) / 2.0
 
             # Filter C1: Dashcam upper-third rejection (cracks don't float in sky or car roofs)
             if cy < (h * 0.35):
+                continue
+            # Suppress giant full-frame background artifacts (>85% width and >55% height)
+            if (bw / w > 0.85) and (bh / h > 0.55):
                 continue
             if (bw / w > 0.98) and (bh / h > 0.98):
                 continue
@@ -344,16 +347,77 @@ async def infer_road_defects(
             if any(compute_iou_xyxy(bx, p_bx) > 0.40 for p_bx in accepted_pothole_boxes):
                 continue
 
+            valid_cracks.append({
+                "label": raw_cls,
+                "confidence": float(c.confidence),
+                "box": [float(bx[0]), float(bx[1]), float(bx[2]), float(bx[3])],
+            })
+
+        # Helper for crack clustering: compute IoM and IoU
+        def compute_iom_box(b1, b2):
+            xA = max(b1[0], b2[0])
+            yA = max(b1[1], b2[1])
+            xB = min(b1[2], b2[2])
+            yB = min(b1[3], b2[3])
+            inter = max(0.0, xB - xA) * max(0.0, yB - yA)
+            area1 = max(0.0, b1[2] - b1[0]) * max(0.0, b1[3] - b1[1])
+            area2 = max(0.0, b2[2] - b2[0]) * max(0.0, b2[3] - b2[1])
+            min_area = min(area1, area2)
+            return inter / min_area if min_area > 0 else 0.0
+
+        # Iterative clustering for crack distress zones
+        crack_clusters = [[vc] for vc in valid_cracks]
+        merged = True
+        while merged:
+            merged = False
+            new_clusters = []
+            used = [False] * len(crack_clusters)
+            for i in range(len(crack_clusters)):
+                if used[i]:
+                    continue
+                c1 = crack_clusters[i]
+                for j in range(i + 1, len(crack_clusters)):
+                    if used[j]:
+                        continue
+                    c2 = crack_clusters[j]
+                    has_overlap = any(
+                        compute_iou_xyxy(b1["box"], b2["box"]) > 0.15
+                        or compute_iom_box(b1["box"], b2["box"]) > 0.30
+                        for b1 in c1 for b2 in c2
+                    )
+                    if has_overlap:
+                        c1.extend(c2)
+                        used[j] = True
+                        merged = True
+                new_clusters.append(c1)
+            crack_clusters = new_clusters
+
+        # Consolidate each cluster into an authoritative, clean distress detection
+        for cl in crack_clusters:
+            min_x = min(m["box"][0] for m in cl)
+            min_y = min(m["box"][1] for m in cl)
+            max_x = max(m["box"][2] for m in cl)
+            max_y = max(m["box"][3] for m in cl)
+            max_conf = max(m["confidence"] for m in cl)
+
+            # ASTM D6433: Interconnected crack networks or any alligator component = ALLIGATOR CRACKING
+            has_alligator = any("ALLIGATOR" in m["label"] for m in cl) or len(cl) >= 2
+            final_label = "CRACK_ALLIGATOR" if has_alligator else cl[0]["label"]
+
+            bw = max(1.0, max_x - min_x)
+            bh = max(1.0, max_y - min_y)
+            cx = (min_x + max_x) / 2.0
             cx_norm = cx / float(w)
             wheel_path_risk = bool((0.16 <= cx_norm <= 0.36) or (0.64 <= cx_norm <= 0.84))
-            x_pct = round((bx[0] / w) * 100, 1)
-            y_pct = round((bx[1] / h) * 100, 1)
+
+            x_pct = round((min_x / w) * 100, 1)
+            y_pct = round((min_y / h) * 100, 1)
             w_pct = round((bw / w) * 100, 1)
             h_pct = round((bh / h) * 100, 1)
             area_px = int(bw * bh)
-            cf = round(float(c.confidence), 3)
+            cf = round(float(max_conf), 3)
 
-            is_alligator = "ALLIGATOR" in raw_cls
+            is_alligator = "ALLIGATOR" in final_label
             base_weight = 40 if is_alligator else 25
             action = (
                 "Pavement milling and asphalt resurfacing overlay (fatigue cracking)"
@@ -370,7 +434,7 @@ async def infer_road_defects(
             detections.append(
                 DetectionBox(
                     id=f"det-{len(detections)+1}",
-                    label=raw_cls,
+                    label=final_label,
                     confidence=cf,
                     box=[x_pct, y_pct, w_pct, h_pct],
                     severity=severity,
