@@ -97,7 +97,7 @@ const AppShell: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#070B14] transition-colors">
+    <div className="relative min-h-screen flex flex-col font-sans antialiased text-slate-900 dark:text-slate-100 bg-[var(--bg)] transition-colors">
       <CommandPalette />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
 

@@ -48,7 +48,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       } ${className}`}
     >
       <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-        <span className="truncate pr-2">{label}</span>
+        <span className="font-semibold text-slate-700 dark:text-slate-300 pr-1">{label}</span>
         <div className="flex items-center gap-1.5 shrink-0">
           {badge}
           {icon && <span className="text-slate-500 dark:text-slate-400">{icon}</span>}

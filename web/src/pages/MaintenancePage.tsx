@@ -40,7 +40,7 @@ export const MaintenancePage: React.FC = () => {
 
   // Tab & View States
   const [subTab, setSubTab] = useState<SubTab>("work-orders");
-  const [viewMode, setViewMode] = useState<ViewMode>("kanban");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -452,7 +452,7 @@ export const MaintenancePage: React.FC = () => {
             </div>
           )}
 
-          {viewMode === "kanban" ? (
+          {workOrders.length === 0 && !loadingWo ? null : viewMode === "kanban" ? (
             /* Kanban Board View */
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
               {kanbanColumns.map((col) => {
@@ -646,7 +646,8 @@ export const MaintenancePage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredWorkOrders.map((wo) => {
+                  {filteredWorkOrders.length > 0 ? (
+                    filteredWorkOrders.map((wo) => {
                     const contractor = contractors?.find((c) => c.id === wo.contractor_id);
                     const deadlineDate = wo.deadline ? new Date(wo.deadline) : null;
                     const isOverdue =
@@ -724,7 +725,14 @@ export const MaintenancePage: React.FC = () => {
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="py-8 text-center text-slate-500 text-xs">
+                      No work orders in queue.
+                    </td>
+                  </tr>
+                )}
                 </tbody>
               </table>
             </div>

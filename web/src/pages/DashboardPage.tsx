@@ -349,7 +349,7 @@ export const DashboardPage: React.FC = () => {
         />
 
         <StatCard
-          label={activeWard ? "Severe / Critical in Ward" : "Severe & Critical Defects"}
+          label={activeWard ? "Severe / Critical in Ward" : "Severe & Critical"}
           value={highPriorityTotal}
           subtext={
             activeWard

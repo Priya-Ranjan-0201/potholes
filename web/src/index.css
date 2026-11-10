@@ -3,83 +3,84 @@
 @tailwind utilities;
 
 @layer base {
-  /* DARK "Night highway" (Default theme) */
+  /* DARK "Modern Slate" - Human-designed, clean, high-contrast, zero-neon */
   html.dark {
-    --bg: #070B14;
-    --bg-raised: #151D2E;
-    --surface: rgba(17, 26, 44, 0.90);
-    --surface-solid: #111A2C;
-    --border: #23314B;
-    --border-strong: #3B4E73;
-    --text: #F8FAFC; /* Clean high-contrast white */
-    --muted: #A0AEC0; /* Clear visible slate */
-    --faint: #718096; /* Visible secondary slate */
+    --bg: #0b0f19;
+    --bg-raised: #111827;
+    --surface: rgba(17, 24, 39, 0.95);
+    --surface-solid: #111827;
+    --border: #1f2937;
+    --border-strong: #374151;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --faint: #6b7280;
     
-    --primary: #FFB020; /* road-sign amber */
-    --primary-hover: #FFC24D;
-    --primary-contrast: #070B14;
+    --primary: #3b82f6; /* Clean solid blue */
+    --primary-hover: #2563eb;
+    --primary-contrast: #ffffff;
     
-    --accent-teal: #19D3C5; /* reflector */
-    --accent-indigo: #6366F1;
-    --accent-magenta: #F43F8E;
+    --accent-teal: #0d9488;
+    --accent-indigo: #6366f1;
+    --accent-magenta: #ec4899;
+    --accent-saffron: #f59e0b;
     
-    --success: #34D399;
-    --warn: #FBBF24;
-    --danger: #F87171;
-    --focus: #FFD166;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --focus: #3b82f6;
 
-    /* Severity road-sign tokens */
-    --sev-minor: #0EA5A4;
-    --sev-moderate: #D97706;
-    --sev-severe: #EA580C;
-    --sev-critical: #DC2626;
+    /* Severity tokens */
+    --sev-minor: #0d9488;
+    --sev-moderate: #f59e0b;
+    --sev-severe: #ea580c;
+    --sev-critical: #ef4444;
 
     /* Semantic aliases */
     --theme-bg: var(--bg);
     --theme-surface: var(--surface-solid);
-    --theme-surface-2: var(--bg-raised);
+    --theme-surface-2: #1f2937;
     --theme-border: var(--border);
     --theme-text: var(--text);
     --theme-muted: var(--muted);
     --theme-primary: var(--primary);
   }
 
-  /* LIGHT "Morning India" */
+  /* LIGHT "Clean Neutral" - Crisp, modern, human enterprise SaaS */
   :root {
-    --bg: #F8FAFC;
-    --bg-raised: #FFFFFF;
-    --bg-sky: linear-gradient(to bottom, #F8FAFC, #EDF2F7);
-    --surface: #FFFFFF;
-    --surface-solid: #FFFFFF;
-    --border: #CBD5E1;
-    --border-strong: #94A3B8;
-    --text: #0F172A;
+    --bg: #f8fafc;
+    --bg-raised: #ffffff;
+    --bg-sky: #f8fafc;
+    --surface: #ffffff;
+    --surface-solid: #ffffff;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
     --muted: #475569;
-    --faint: #64748B;
+    --faint: #64748b;
     
-    --primary: #2563EB; /* robust deep blue */
-    --primary-hover: #1D4ED8;
-    --primary-contrast: #FFFFFF;
+    --primary: #2563eb; /* Modern royal blue */
+    --primary-hover: #1d4ed8;
+    --primary-contrast: #ffffff;
     
-    --accent-saffron: #F59E0B;
-    --accent-teal: #0D9488;
-    --accent-magenta: #DB2777;
+    --accent-saffron: #d97706;
+    --accent-teal: #0f766e;
+    --accent-magenta: #be185d;
     
-    --success: #15803D;
-    --warn: #B45309;
-    --danger: #B91C1C;
-    --focus: #2563EB;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --focus: #2563eb;
 
-    /* Severity road-sign tokens */
-    --sev-minor: #0EA5A4;
-    --sev-moderate: #D97706;
-    --sev-severe: #EA580C;
-    --sev-critical: #DC2626;
+    /* Severity tokens */
+    --sev-minor: #0d9488;
+    --sev-moderate: #d97706;
+    --sev-severe: #ea580c;
+    --sev-critical: #dc2626;
 
     /* Semantic aliases */
     --theme-bg: var(--bg);
     --theme-surface: var(--surface-solid);
-    --theme-surface-2: #F1F5F9;
+    --theme-surface-2: #f1f5f9;
     --theme-border: var(--border);
     --theme-text: var(--text);
     --theme-muted: var(--muted);
@@ -103,66 +104,54 @@
   }
 }
 
-/* Data Zone Cards: Flat, solid, 1px border, 10px radius */
+/* Cards: Flat, clean, 1px border, subtle shadow */
 .card {
   background-color: var(--surface-solid);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease;
 }
 
 .card:hover {
   border-color: var(--border-strong);
 }
 
-/* Atmosphere Zone Glass: Glass blur 12-16px, 1px border, inner top highlight (SPEC v12) */
-.glass-atmosphere {
-  background-color: var(--surface);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-}
-
-/* Primary Button: Highway Amber (Dark) / Deep Indigo (Light) */
+/* Primary Button: Solid, reliable, accessible */
 .btn-primary {
   background-color: var(--primary);
   color: var(--primary-contrast);
   font-family: "Plus Jakarta Sans", sans-serif;
   font-weight: 600;
   font-size: 0.8125rem;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  padding: 0.5rem 0.875rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   cursor: pointer;
   border: 1px solid transparent;
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  box-shadow: 0 2px 8px rgba(255, 176, 32, 0.25);
 }
 
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
-/* Secondary Button: Restrained, flat */
+/* Secondary Button: Subtle neutral */
 .btn-secondary {
   background-color: transparent;
   color: var(--text);
   border: 1px solid var(--border);
   font-weight: 500;
   font-size: 0.8125rem;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 0.5rem 0.875rem;
   display: inline-flex;
   align-items: center;
@@ -177,7 +166,7 @@
   border-color: var(--border-strong);
 }
 
-/* Data Table: 40px rows, 1px borders, quiet and readable */
+/* Data Table: Crisp, readable, enterprise-grade */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -189,9 +178,9 @@
   text-align: left;
   font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
   background-color: var(--theme-surface-2);
@@ -209,17 +198,17 @@
   background-color: var(--bg-raised);
 }
 
-/* Functional Scanner S1 Scanline Animation */
+/* Functional Scanner Sweep Animation */
 @keyframes scanline-sweep {
   0% {
     transform: translateY(-2px);
     opacity: 0;
   }
   15% {
-    opacity: 1;
+    opacity: 0.8;
   }
   85% {
-    opacity: 1;
+    opacity: 0.8;
   }
   100% {
     transform: translateY(100%);
@@ -227,7 +216,6 @@
   }
 }
 
-/* Functional S2 Detection Draw */
 @keyframes detection-box-draw {
   to {
     stroke-dashoffset: 0;
@@ -243,7 +231,7 @@
   }
 }
 
-/* Accessibility: Honour reduced motion strictly */
+/* Accessibility: Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -253,7 +241,7 @@
   }
 }
 
-/* Explicit High-Contrast Theme Utilities */
+/* High-contrast Theme Utilities */
 .text-text {
   color: var(--text) !important;
 }

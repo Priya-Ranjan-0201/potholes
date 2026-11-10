@@ -20,9 +20,9 @@ interface BoxOverlayProps {
 }
 
 /**
- * Scanner S2 "detection-draw" & S3 "box-list linking".
- * Draws bounding boxes with stroke-dashoffset (200ms) in confidence order.
- * Dims non-hovered boxes to 40% and highlights corresponding list item.
+ * Clean, Professional Bounding Box Overlay.
+ * Transparent inner fill (asphalt is 100% visible), clean 1.5px border,
+ * and high-contrast corner label chip.
  */
 export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   detections,
@@ -34,52 +34,44 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
 }) => {
   const isReduced = useReducedMotion();
 
-  // Sort by confidence descending to draw highest confidence first
+  // Sort by confidence descending
   const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
 
-  const getSeverityColor = (sev?: string) => {
+  const getColor = (sev?: string) => {
     if (colorScheme === "emerald") {
-      return "#22C55E"; // Bright neon green matching YOLOv8/YOLO11 visual standard
+      return "#10b981"; // Clean, readable emerald green
     }
     switch (sev?.toLowerCase()) {
       case "critical":
-        return "#EF4444"; // Red
+        return "#ef4444"; // Red
       case "severe":
-        return "#F97316"; // Orange
+        return "#f59e0b"; // Amber
       case "moderate":
-        return "#F59E0B"; // Amber
+        return "#3b82f6"; // Blue
       default:
-        return "#22C55E"; // Emerald
+        return "#10b981";
     }
   };
 
   return (
     <svg
-      className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
+      className={`absolute inset-0 w-full h-full pointer-events-none select-none ${className}`}
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
     >
-      <defs>
-        {sorted.map((d) => {
-          const color = getSeverityColor(d.severity);
-          return (
-            <linearGradient key={`grad-${d.id}`} id={`grad-${d.id}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.05" />
-            </linearGradient>
-          );
-        })}
-      </defs>
-
       {sorted.map((d, index) => {
         const [x, y, w, h] = d.box;
         const isActive = activeId === d.id;
         const isDimmed = activeId !== null && !isActive;
-        const color = getSeverityColor(d.severity);
+        const color = getColor(d.severity);
 
-        // Cap animation at first 10 items
-        const shouldAnimate = !isReduced && index < 10;
-        const delayMs = index * 30; // 30ms stagger
+        const shouldAnimate = !isReduced && index < 12;
+        const delayMs = index * 25;
+
+        // Position label above the box; if too close to top edge, place inside top of box
+        const labelHeight = 2.8;
+        const labelY = y < 3.5 ? y + 0.3 : y - labelHeight - 0.2;
+        const labelWidth = Math.max(14, Math.min(w, 24));
 
         return (
           <g
@@ -92,24 +84,19 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
             role="button"
             tabIndex={0}
             aria-label={`${d.label} with confidence ${(d.confidence * 100).toFixed(0)}%`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onSelect(d.id);
-              }
-            }}
           >
-            {/* Box Fill */}
+            {/* Box fill: transparent by default, subtle highlight when hovered */}
             <rect
               x={x}
               y={y}
               width={w}
               height={h}
-              fill={`url(#grad-${d.id})`}
-              rx={0.5}
+              fill={isActive ? color : "transparent"}
+              fillOpacity={isActive ? 0.12 : 0}
+              rx={0.3}
             />
 
-            {/* Box Stroke (with stroke-dashoffset draw on appearance) */}
+            {/* Box Stroke: Crisp 1.5px equivalent */}
             <rect
               x={x}
               y={y}
@@ -117,47 +104,44 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
               height={h}
               fill="none"
               stroke={color}
-              strokeWidth={isActive ? 0.75 : 0.45}
-              rx={0.5}
+              strokeWidth={isActive ? 0.6 : 0.35}
+              rx={0.3}
               style={{
                 strokeDasharray: shouldAnimate ? "400" : "none",
                 strokeDashoffset: shouldAnimate ? "400" : "0",
                 animation: shouldAnimate
-                  ? `detection-box-draw 200ms cubic-bezier(0, 0, 0.2, 1) ${delayMs}ms forwards`
+                  ? `detection-box-draw 180ms ease-out ${delayMs}ms forwards`
                   : "none",
               }}
             />
 
-            {/* Top Label Tag */}
+            {/* Corner Label Chip */}
             <g
-              transform={`translate(${x}, ${Math.max(2, y - 0.5)})`}
+              transform={`translate(${x}, ${labelY})`}
               style={{
                 opacity: shouldAnimate ? 0 : 1,
                 animation: shouldAnimate
-                  ? `fade-in 150ms ease-out ${delayMs + 100}ms forwards`
+                  ? `fade-in 120ms ease-out ${delayMs + 60}ms forwards`
                   : "none",
               }}
             >
               <rect
                 x={0}
-                y={-3.2}
-                width={Math.max(w * 0.9, 16)}
-                height={3.4}
-                fill={colorScheme === "emerald" ? "#16A34A" : "#0F172A"}
-                fillOpacity={0.95}
-                stroke={color}
-                strokeWidth={0.2}
-                rx={0.4}
+                y={0}
+                width={labelWidth}
+                height={labelHeight}
+                fill={color}
+                rx={0.3}
               />
               <text
-                x={0.8}
-                y={-1.0}
-                fill="#FFFFFF"
-                fontSize={2.1}
-                fontFamily="monospace"
-                fontWeight="bold"
+                x={0.7}
+                y={labelHeight * 0.72}
+                fill="#ffffff"
+                fontSize={1.7}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                fontWeight="600"
               >
-                {d.label.toLowerCase()} {d.confidence.toFixed(2)}
+                Pothole {Math.round(d.confidence * 100)}%
               </text>
             </g>
           </g>
