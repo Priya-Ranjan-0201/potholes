@@ -36,7 +36,7 @@ export interface InspectionResult {
  */
 export async function detectDefects(
   imageSource: File | Blob | string,
-  confThresh: number = 0.25,
+  confThresh: number = 0.15,
   onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void
 ): Promise<InspectionResult> {
   const startTime = performance.now();

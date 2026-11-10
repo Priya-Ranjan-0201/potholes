@@ -40,6 +40,18 @@ const SAMPLE_IMAGES: SampleImage[] = [
     road: "NH-44 Sector 12 Arterial",
   },
   {
+    id: "capture-mumbai",
+    label: "Mumbai Monsoon (40+ Potholes)",
+    src: "/samples/mumbai_monsoon.jpg",
+    road: "SV Road Monsoon Corridor (Mumbai)",
+  },
+  {
+    id: "capture-bengaluru",
+    label: "Bengaluru Arterial (Multi-Pothole)",
+    src: "/samples/bengaluru_arterial.jpg",
+    road: "Outer Ring Road Arterial (Bengaluru)",
+  },
+  {
     id: "capture-multi",
     label: "Unpaved Corridor (Sector 4)",
     src: "/samples/unpaved_craters.jpg",
@@ -68,7 +80,7 @@ export const ScannerPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("boxes");
   const [showBoxes, setShowBoxes] = useState<boolean>(true);
   const [privacyMask, setPrivacyMask] = useState<boolean>(false);
-  const [confThresh, setConfThresh] = useState<number>(0.25);
+  const [confThresh, setConfThresh] = useState<number>(0.15);
   const [selectedSampleId, setSelectedSampleId] = useState<string>("capture-pothole");
   const [activeImageSrc, setActiveImageSrc] = useState<string>("/samples/asphalt_crater.jpg");
   const [activeRoadName, setActiveRoadName] = useState<string>("NH-44 Sector 12 Arterial");
@@ -544,7 +556,7 @@ export const ScannerPage: React.FC = () => {
               <span>Sensitivity:</span>
               <input
                 type="range"
-                min="0.10"
+                min="0.05"
                 max="0.80"
                 step="0.05"
                 value={confThresh}

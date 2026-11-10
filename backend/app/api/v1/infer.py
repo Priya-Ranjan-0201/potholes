@@ -109,7 +109,7 @@ def evaluate_depth(img: np.ndarray, box: tuple) -> str:
 @router.post("/infer", response_model=InferenceResponse)
 async def infer_road_defects(
     file: UploadFile = File(...),
-    conf_thresh: float = Query(0.25, ge=0.05, le=0.95),
+    conf_thresh: float = Query(0.15, ge=0.01, le=0.95),
     iou_thresh: float = Query(0.35, ge=0.1, le=0.9),
 ):
     """Run real-time road defect detection using authoritative fine-tuned YOLO11n INT8.
@@ -119,6 +119,7 @@ async def infer_road_defects(
     - Zero vehicle false-positives: eliminates crack hallucinations on car bodies
     - Road plane geometric validation and duplicate suppression
     - Active wheel-path vehicular hazard impact scoring
+    - Universal image decoder fallback (AVIF, WebP, JPEG, PNG, TIFF)
     """
     start_t = time.perf_counter()
     try:
@@ -126,7 +127,17 @@ async def infer_road_defects(
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if img is None:
-            raise HTTPException(status_code=400, detail="Invalid image file format")
+            # Fallback for modern container formats (e.g. AVIF, WebP, HEIC) where OpenCV lacks native codecs
+            try:
+                import io
+                from PIL import Image
+                pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
+                img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Unsupported image file format: {str(e)}")
+
+        if img is None or img.size == 0:
+            raise HTTPException(status_code=400, detail="Invalid or unreadable image file format")
 
         h, w = img.shape[:2]
         hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -141,7 +152,7 @@ async def infer_road_defects(
         # 1. Forward model inference
         raw_detections = engine.predict(img)
 
-        # 2. Strict Domain & Vehicle Exclusion Filtering
+        # 2. Domain & Vehicle Exclusion Filtering
         detections: List[DetectionBox] = []
         pothole_cnt = 0
 
@@ -153,39 +164,41 @@ async def infer_road_defects(
             cx = (bx[0] + bx[2]) / 2.0
             lbl = "POTHOLE"  # YOLO11n is the dedicated pothole detector
 
-            # Filter 1: Extreme upper horizon / sky band rejection
-            if cy < (h * 0.12) or bx[1] < (h * 0.05):
+            # Filter 1: Extreme upper horizon / sky band rejection (only true sky edge)
+            if cy < (h * 0.03) or bx[1] < (h * 0.01):
                 continue
 
             # Filter 2: Distant giant obstacle / billboard / overpass rejection
-            if cy < (h * 0.28) and ((bw / w > 0.40) or (bh / h > 0.35)):
+            if cy < (h * 0.28) and ((bw / w > 0.75) or (bh / h > 0.60)):
                 continue
 
             # Filter 3: Moving vehicle body rejection:
-            # Vehicles occupy upper-middle frame and have high saturation or large vertical profile
-            if cy < (h * 0.40) and (bh / h >= 0.45):
+            # Giant tall vehicle boxes in upper-third frame
+            if cy < (h * 0.35) and (bh / h >= 0.50):
                 continue
 
-            # Filter 4: Color saturation check for painted vehicles & foliage
+            # Filter 4: Color saturation check for painted vehicles & brake lights
+            # Silt, sand, wet mud, and sunlit dirt in potholes have saturation 40-100;
+            # High-gloss automotive paints and LED brake lights have saturation > 120.
             x1_c = int(max(0, bx[0]))
             y1_c = int(max(0, bx[1]))
             x2_c = int(min(w, bx[2]))
             y2_c = int(min(h, bx[3]))
             if (x2_c > x1_c + 4) and (y2_c > y1_c + 4):
                 patch_sat = float(np.mean(hsv_img[y1_c:y2_c, x1_c:x2_c, 1]))
-                if cy < (h * 0.40) and patch_sat > 70.0:
+                if cy < (h * 0.35) and patch_sat > 120.0:
                     continue  # Painted vehicle surface / brake lights
 
             # Filter 5: Realistic road perspective geometry
-            # Potholes and water puddles can span across lane ruts up to 6:1 aspect ratio
+            # Potholes and water puddles can span across lane ruts up to 9.5:1 aspect ratio
             aspect = max(bw / bh, bh / bw)
-            if aspect > 6.0:
+            if aspect > 9.5:
                 continue
-            if (bw / w > 0.88) or (bh / h > 0.88):
+            if (bw / w > 0.90) or (bh / h > 0.90):
                 continue
 
             # Filter 6: Vehicle hood / camera dashboard reflection
-            if bx[3] > (h * 0.96) and (bw / w > 0.80):
+            if bx[3] > (h * 0.96) and (bw / w > 0.85):
                 continue
 
             # Filter 7: Thin horizontal sensor line artifacts
