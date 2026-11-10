@@ -152,9 +152,27 @@ async def infer_road_defects(
         # 1. Forward model inference
         raw_detections = engine.predict(img)
 
+        # Adaptive sensitivity pass: if primary threshold yielded 0 detections, evaluate at sensitivity floor (0.08)
+        if len(raw_detections) == 0 and conf_thresh > 0.08:
+            adaptive_engine = get_authoritative_engine(conf_thresh=0.08, iou_thresh=iou_thresh)
+            if adaptive_engine:
+                raw_detections = adaptive_engine.predict(img)
+
+        # Multi-class crack fallback: if zero potholes detected, check for asphalt cracks
+        if len(raw_detections) == 0 and os.path.exists("runs/export/best_int8_legacy_36img.onnx"):
+            try:
+                from edge.agent.infer import EdgeInferenceEngine
+                crack_engine = EdgeInferenceEngine(
+                    model_path="runs/export/best_int8_legacy_36img.onnx",
+                    conf_threshold=0.15,
+                    iou_threshold=iou_thresh,
+                )
+                raw_detections = crack_engine.predict(img)
+            except Exception:
+                pass
+
         # 2. Domain & Vehicle Exclusion Filtering
         detections: List[DetectionBox] = []
-        pothole_cnt = 0
 
         for i, d in enumerate(raw_detections):
             bx = d.bbox_xyxy
@@ -162,7 +180,8 @@ async def infer_road_defects(
             bh = max(1.0, bx[3] - bx[1])
             cy = (bx[1] + bx[3]) / 2.0
             cx = (bx[0] + bx[2]) / 2.0
-            lbl = "POTHOLE"  # YOLO11n is the dedicated pothole detector
+            raw_cls = getattr(d, "class_name", "POTHOLE") or "POTHOLE"
+            lbl = raw_cls.upper()
 
             # Filter 1: Extreme upper horizon / sky band rejection (only true sky edge)
             if cy < (h * 0.03) or bx[1] < (h * 0.01):
@@ -210,7 +229,6 @@ async def infer_road_defects(
             wheel_path_risk = bool((0.16 <= cx_norm <= 0.36) or (0.64 <= cx_norm <= 0.84))
             depth_indicator = evaluate_depth(img, tuple(bx))
 
-            pothole_cnt += 1
             x_pct = round((bx[0] / w) * 100, 1)
             y_pct = round((bx[1] / h) * 100, 1)
             w_pct = round((bw / w) * 100, 1)
@@ -250,6 +268,9 @@ async def infer_road_defects(
                 )
             )
 
+        pothole_cnt = sum(1 for d in detections if "POTHOLE" in d.label)
+        crack_cnt = sum(1 for d in detections if "CRACK" in d.label)
+
         max_severity = "Minor"
         if any(d.severity == "Critical" for d in detections):
             max_severity = "Critical"
@@ -261,13 +282,19 @@ async def infer_road_defects(
         overall_health = max(10, 100 - len(detections) * 12) if detections else 100
         latency_ms = round((time.perf_counter() - start_t) * 1000, 1)
 
+        print(
+            f"[AI INFER] Image: {file.filename} ({w}x{h}), ConfThresh: {conf_thresh:.2f} -> "
+            f"Raw: {len(raw_detections)}, Filtered: {len(detections)} (Potholes: {pothole_cnt}, Cracks: {crack_cnt}) in {latency_ms}ms",
+            flush=True,
+        )
+
         return InferenceResponse(
             status="success",
             image_width=w,
             image_height=h,
             total_defects=len(detections),
             pothole_count=pothole_cnt,
-            crack_count=0,
+            crack_count=crack_cnt,
             max_severity=max_severity,
             overall_health_score=overall_health,
             detections=detections,

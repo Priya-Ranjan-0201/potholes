@@ -53,15 +53,21 @@ const SAMPLE_IMAGES: SampleImage[] = [
   },
   {
     id: "capture-multi",
-    label: "Unpaved Corridor (Sector 4)",
-    src: "/samples/unpaved_craters.jpg",
-    road: "Gill Road Industrial Bypass",
+    label: "Multi-Crater Cluster (20+ Hazards)",
+    src: "/samples/user_tested_potholes.jpg",
+    road: "Gill Road Industrial Corridor",
   },
   {
-    id: "capture-nh44",
-    label: "Expressway (NH-44)",
+    id: "capture-unpaved",
+    label: "Unpaved Rural (Sector 4)",
+    src: "/samples/unpaved_craters.jpg",
+    road: "Sector 4 Unpaved Bypass",
+  },
+  {
+    id: "capture-clean",
+    label: "Smooth Pavement (Zero-Defect Baseline)",
     src: "/samples/pothole_nh44.jpg",
-    road: "NH-44 GT Road Expressway",
+    road: "NH-44 GT Road Expressway (Re-paved Baseline)",
   },
 ];
 
@@ -244,9 +250,11 @@ export const ScannerPage: React.FC = () => {
 
   const handleFileUpload = (file: File) => {
     const url = URL.createObjectURL(file);
+    setInputMode("image");
     setActiveImageSrc(url);
     setSelectedSampleId("");
     setActiveRoadName(`Uploaded: ${file.name}`);
+    runDetection(file);
   };
 
   const handleLogDefect = async (box: DefectBox) => {
@@ -343,9 +351,11 @@ export const ScannerPage: React.FC = () => {
               <button
                 key={sample.id}
                 onClick={() => {
+                  setInputMode("image");
                   setActiveImageSrc(sample.src);
                   setActiveRoadName(sample.road);
                   setSelectedSampleId(sample.id);
+                  runDetection(sample.src);
                 }}
                 className={`px-3 py-1 rounded-md text-xs font-medium border transition-colors shrink-0 cursor-pointer ${
                   selectedSampleId === sample.id
@@ -366,6 +376,9 @@ export const ScannerPage: React.FC = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).value = "";
+                }}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) handleFileUpload(f);
@@ -444,7 +457,19 @@ export const ScannerPage: React.FC = () => {
           </div>
 
           {/* Canvas Presentation Area */}
-          <div className="relative min-h-[420px] max-h-[460px] bg-slate-950 rounded-md overflow-hidden flex items-center justify-center border border-slate-800">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const f = e.dataTransfer.files?.[0];
+              if (f) handleFileUpload(f);
+            }}
+            className="relative min-h-[420px] max-h-[460px] bg-slate-950 rounded-md overflow-hidden flex items-center justify-center border border-slate-800"
+          >
             {inputMode === "camera" ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
                 <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/80 border border-rose-500/50 text-xs font-mono text-rose-300 backdrop-blur-sm">
