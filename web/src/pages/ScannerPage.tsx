@@ -223,7 +223,9 @@ export const ScannerPage: React.FC = () => {
     }
 
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!activeImageSrc.startsWith("blob:") && !activeImageSrc.startsWith("data:")) {
+      img.crossOrigin = "anonymous";
+    }
     img.src = activeImageSrc;
     img.onload = () => {
       const iw = img.naturalWidth || inspection.imageWidth || 640;

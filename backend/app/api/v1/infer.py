@@ -112,59 +112,56 @@ async def infer_road_defects(
             bh = max(1.0, bx[3] - bx[1])
             lbl = d.class_name.upper()
 
-            # 1. Road Horizon & Perspective Vanishing Plane Constraint:
-            # Road distress (potholes/cracks) cannot exist in the sky, trees, or distant skyline.
+            # 1. Sky / Extreme Upper Horizon Rejection:
+            # Real road surface almost never exists in the top 10% of dashboard or mobile frames.
             cy = (bx[1] + bx[3]) / 2.0
-            if cy < (h * 0.28) or bx[1] < (h * 0.16):
+            if cy < (h * 0.10) or (bx[1] < (h * 0.04) and cy < (h * 0.15)):
                 continue
 
-            # 2. Distant Horizon Obstacle / Vehicle Rejection:
-            # On a perspective road plane, distant road defects are optically small.
-            # Large boxes in the upper-mid field (cy < 0.48*h) are vehicles, oncoming cars, or roadside structures.
-            if cy < (h * 0.48) and ((bw / w > 0.16) or (bh / h > 0.12)):
+            # 2. Distant Horizon Giant Obstacle / Skyline Rejection:
+            # Giant boxes near the extreme top horizon are buildings, overpasses, or distant billboard structures.
+            if cy < (h * 0.25) and ((bw / w > 0.60) or (bh / h > 0.45)):
                 continue
 
             # 3. Upright 3D Obstacle / Vehicle Body Rejection:
-            # An upright vehicle (van, ambulance, SUV, motorcycle rider) standing on the road plane has large vertical
-            # height spanning into the mid/upper ground. Real road distress lying flat on asphalt has bh/h < 0.18
-            # when starting in the midground (y1 < 0.50*h) due to perspective foreshortening.
-            if cy < (h * 0.50) and (bh / h >= 0.18):
+            # An upright vehicle (van, bus, utility truck) spanning more than half the upper vertical height.
+            if cy < (h * 0.35) and (bh / h >= 0.50):
                 continue
 
             # 4. Color Saturation Filter for Painted Vehicles & Vegetation:
-            # Natural asphalt road surfaces have low saturation (matte gray/charcoal, S < 40).
-            # Painted vehicles (cars, buses, auto-rickshaws) and trees have high saturation (S > 50).
+            # Natural asphalt and muddy road puddles have low/medium saturation. Bright neon/painted vehicle surfaces
+            # and bright foliage in the upper half have saturation > 85.
             x1_c = int(max(0, bx[0]))
             y1_c = int(max(0, bx[1]))
             x2_c = int(min(w, bx[2]))
             y2_c = int(min(h, bx[3]))
             if (x2_c > x1_c + 4) and (y2_c > y1_c + 4):
                 patch_sat = float(np.mean(hsv_img[y1_c:y2_c, x1_c:x2_c, 1]))
-                if cy < (h * 0.55) and patch_sat > 52.0:
-                    continue  # Reject vehicle / foliage
+                if cy < (h * 0.35) and patch_sat > 85.0:
+                    continue  # Reject bright vehicle paint / vivid foliage
 
             # 5. Crack Vertical Boundary:
-            # Cracks cannot appear on overhead structures, trees, or vehicle roofs/windshields.
-            if "CRACK" in lbl and bx[1] < (h * 0.35):
+            # Cracks cannot appear on overhead structures, sky, or trees.
+            if "CRACK" in lbl and cy < (h * 0.20):
                 continue
 
             # 6. Pothole Geometric & Morphology Constraint:
-            # Potholes are localized craters on the asphalt surface. They are roughly circular or elliptical.
-            # Extreme aspect ratios (e.g. 9:1 horizontal banner lines or thin vertical strips) are camera/sensor artifacts.
+            # Road depressions, water-filled potholes, and compound craters can span across lanes
+            # and naturally have elongated elliptical aspect ratios (up to 6:1 due to road plane perspective).
             if "POTHOLE" in lbl:
                 aspect = max(bw / bh, bh / bw)
-                if aspect > 2.8:
+                if aspect > 6.0:
                     continue
-                if (bw / w > 0.65) or (bh / h > 0.65):
+                if (bw / w > 0.88) or (bh / h > 0.88):
                     continue
 
             # 7. Dashcam Hood / Bumper Reflection Filter:
-            # Boxes touching the very bottom edge (y2 > 0.94*h) spanning >65% width are vehicle hood reflections.
-            if bx[3] > (h * 0.94) and (bw / w > 0.65):
+            # Boxes touching the very bottom edge (y2 > 0.96*h) spanning >80% width are vehicle hood reflections.
+            if bx[3] > (h * 0.96) and (bw / w > 0.80):
                 continue
 
-            # 8. Discard horizontal scanner line artifacts
-            if (bw / w > 0.80) and (bh / h < 0.04):
+            # 8. Discard thin horizontal sensor line artifacts
+            if (bw / w > 0.85) and (bh / h < 0.03):
                 continue
 
             x_pct = round((bx[0] / w) * 100, 1)
