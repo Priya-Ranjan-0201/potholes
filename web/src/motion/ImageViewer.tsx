@@ -87,12 +87,14 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
           transformOrigin: "center center",
         }}
       >
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-auto block max-h-[560px] object-contain mx-auto pointer-events-none"
-        />
-        {children}
+        <div className="relative inline-block leading-none max-w-full max-h-full">
+          <img
+            src={src}
+            alt={alt}
+            className="block max-w-full max-h-[560px] w-auto h-auto select-none pointer-events-none"
+          />
+          {children}
+        </div>
       </div>
 
       {/* Zoom Controls Overlay */}

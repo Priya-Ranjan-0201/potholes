@@ -98,7 +98,6 @@ export const ScannerPage: React.FC = () => {
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
   const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
-  const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number } | null>(null);
   const { success } = useToast();
 
   const [crops, setCrops] = useState<ZoomCrop[]>([]);
@@ -326,15 +325,30 @@ export const ScannerPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-3">
+            <label className="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs">
+              <Camera className="w-3.5 h-3.5" />
+              <span>Upload Road Photo</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onClick={(e) => {
+                  (e.target as HTMLInputElement).value = "";
+                }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFileUpload(f);
+                }}
+              />
+            </label>
             <SegmentedControl<InputMode>
               name="scanner-inputmode"
               size="sm"
               value={inputMode}
               onChange={(mode) => setInputMode(mode)}
               options={[
-                { id: "image", label: "Upload Image" },
-                { id: "video", label: "Upload Video" },
+                { id: "image", label: "Photo Inspection" },
                 { id: "camera", label: "Live Camera" },
               ]}
             />
@@ -509,36 +523,26 @@ export const ScannerPage: React.FC = () => {
                 className="w-full h-full"
               />
             ) : (
-              <div className="relative w-full h-full flex items-center justify-center bg-slate-950 overflow-hidden">
+              <div className="relative w-full h-[440px] flex items-center justify-center bg-slate-950 overflow-hidden select-none">
                 {/* Status Indicator Chip in Top-Right */}
-                <div className="absolute top-3 right-3 z-20 flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80 text-white text-xs font-medium backdrop-blur-sm shadow-xs">
+                <div className="absolute top-3 right-3 z-20 flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900/90 border border-slate-700/80 text-white text-xs font-medium backdrop-blur-sm shadow-xs pointer-events-none">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   <span>{inspection.boxes.length} {inspection.boxes.length === 1 ? "Hazard" : "Hazards"} Identified</span>
                 </div>
 
-                {/* Aspect-Ratio Locked Stage: Bounding boxes strictly pinned to image geometry */}
-                <div
-                  className="relative flex items-center justify-center max-w-full max-h-full"
-                  style={{
-                    aspectRatio: (inspection.imageWidth && inspection.imageHeight)
-                      ? `${inspection.imageWidth} / ${inspection.imageHeight}`
-                      : (imgDimensions ? `${imgDimensions.width} / ${imgDimensions.height}` : undefined),
-                    maxHeight: "440px",
-                    height: "100%",
-                  }}
-                >
+                {/* Intrinsically Sized Wrapper: Overlay is strictly pinned to the rendered image bounds */}
+                <div className="relative inline-block leading-none max-w-full max-h-full">
                   <img
                     src={activeImageSrc}
                     alt={activeRoadName}
-                    onLoad={(e) => {
-                      const t = e.currentTarget;
-                      if (t.naturalWidth && t.naturalHeight) {
-                        setImgDimensions({ width: t.naturalWidth, height: t.naturalHeight });
-                      }
-                    }}
-                    className={`w-full h-full object-contain select-none block transition-all duration-200 ${
+                    className={`block max-w-full select-none transition-all duration-200 ${
                       privacyMask ? "filter blur-sm" : ""
                     }`}
+                    style={{
+                      maxHeight: "440px",
+                      width: "auto",
+                      height: "auto",
+                    }}
                   />
 
                   {/* S1: Active Inference Scan Line */}
@@ -838,20 +842,18 @@ export const ScannerPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="relative flex-1 w-full h-full flex items-center justify-center mt-3 overflow-hidden bg-slate-950">
-            <div
-              className="relative flex items-center justify-center max-w-full max-h-full"
-              style={{
-                aspectRatio: (inspection.imageWidth && inspection.imageHeight)
-                  ? `${inspection.imageWidth} / ${inspection.imageHeight}`
-                  : (imgDimensions ? `${imgDimensions.width} / ${imgDimensions.height}` : undefined),
-                height: "100%",
-              }}
-            >
+          <div className="relative flex-1 w-full h-full flex items-center justify-center mt-3 overflow-hidden bg-slate-950 select-none">
+            <div className="relative inline-block leading-none max-w-full max-h-full">
               <img
                 src={activeImageSrc}
                 alt="Full Screen View"
-                className="max-w-full max-h-full object-contain select-none block"
+                className="block select-none"
+                style={{
+                  maxHeight: "calc(100vh - 120px)",
+                  maxWidth: "calc(100vw - 60px)",
+                  width: "auto",
+                  height: "auto",
+                }}
               />
               {showBoxes && (
                 <BoxOverlay

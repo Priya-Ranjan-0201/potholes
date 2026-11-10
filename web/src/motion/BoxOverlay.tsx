@@ -39,17 +39,17 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
 
   const getColor = (sev?: string) => {
     if (colorScheme === "emerald") {
-      return "#10b981"; // Clean, readable emerald green
+      return "#065f46"; // Dark, authoritative forest emerald (high-contrast, deep tone)
     }
     switch (sev?.toLowerCase()) {
       case "critical":
-        return "#ef4444"; // Red
+        return "#991b1b"; // Deep Crimson Red
       case "severe":
-        return "#f59e0b"; // Amber
+        return "#92400e"; // Deep Amber Bronze
       case "moderate":
-        return "#3b82f6"; // Blue
+        return "#1e40af"; // Deep Royal Navy
       default:
-        return "#10b981";
+        return "#065f46";
     }
   };
 
@@ -59,6 +59,11 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
     >
+      <defs>
+        <filter id="box-dark-contrast" x="-15%" y="-15%" width="130%" height="130%">
+          <feDropShadow dx="0" dy="0.3" stdDeviation="0.4" floodColor="#000000" floodOpacity="0.85" />
+        </filter>
+      </defs>
       {sorted.map((d, index) => {
         const [x, y, w, h] = d.box;
         const isActive = activeId === d.id;
@@ -69,9 +74,9 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
         const delayMs = index * 25;
 
         // Position label above the box; if too close to top edge, place inside top of box
-        const labelHeight = 2.8;
-        const labelY = y < 3.5 ? y + 0.3 : y - labelHeight - 0.2;
-        const labelWidth = Math.max(14, Math.min(w, 24));
+        const labelHeight = 3.0;
+        const labelY = y < 3.8 ? y + 0.4 : y - labelHeight - 0.2;
+        const labelWidth = Math.max(16, Math.min(w, 28));
 
         return (
           <g
@@ -83,20 +88,21 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
             onClick={() => onSelect(d.id)}
             role="button"
             tabIndex={0}
+            filter="url(#box-dark-contrast)"
             aria-label={`${d.label} with confidence ${(d.confidence * 100).toFixed(0)}%`}
           >
-            {/* Box fill: transparent by default, subtle highlight when hovered */}
+            {/* Box fill: subtle dark tint over pothole, darker highlight when hovered */}
             <rect
               x={x}
               y={y}
               width={w}
               height={h}
-              fill={isActive ? color : "transparent"}
-              fillOpacity={isActive ? 0.12 : 0}
+              fill={color}
+              fillOpacity={isActive ? 0.28 : 0.08}
               rx={0.3}
             />
 
-            {/* Box Stroke: Crisp 1.5px equivalent */}
+            {/* Box Stroke: Darker, bolder outline */}
             <rect
               x={x}
               y={y}
@@ -104,7 +110,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
               height={h}
               fill="none"
               stroke={color}
-              strokeWidth={isActive ? 0.6 : 0.35}
+              strokeWidth={isActive ? 0.95 : 0.68}
               rx={0.3}
               style={{
                 strokeDasharray: shouldAnimate ? "400" : "none",
@@ -115,7 +121,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
               }}
             />
 
-            {/* Corner Label Chip */}
+            {/* Corner Label Chip: Dark, solid, crisp */}
             <g
               transform={`translate(${x}, ${labelY})`}
               style={{
@@ -131,15 +137,17 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
                 width={labelWidth}
                 height={labelHeight}
                 fill={color}
+                stroke="#000000"
+                strokeWidth={0.15}
                 rx={0.3}
               />
               <text
-                x={0.7}
+                x={0.8}
                 y={labelHeight * 0.72}
                 fill="#ffffff"
-                fontSize={1.7}
+                fontSize={1.75}
                 fontFamily="system-ui, -apple-system, sans-serif"
-                fontWeight="600"
+                fontWeight="700"
               >
                 Pothole {Math.round(d.confidence * 100)}%
               </text>

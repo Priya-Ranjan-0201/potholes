@@ -158,19 +158,6 @@ async def infer_road_defects(
             if adaptive_engine:
                 raw_detections = adaptive_engine.predict(img)
 
-        # Multi-class crack fallback: if zero potholes detected, check for asphalt cracks
-        if len(raw_detections) == 0 and os.path.exists("runs/export/best_int8_legacy_36img.onnx"):
-            try:
-                from edge.agent.infer import EdgeInferenceEngine
-                crack_engine = EdgeInferenceEngine(
-                    model_path="runs/export/best_int8_legacy_36img.onnx",
-                    conf_threshold=0.15,
-                    iou_threshold=iou_thresh,
-                )
-                raw_detections = crack_engine.predict(img)
-            except Exception:
-                pass
-
         # 2. Domain & Vehicle Exclusion Filtering
         detections: List[DetectionBox] = []
 

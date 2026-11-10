@@ -53,8 +53,9 @@ export async function detectDefects(
       blob = imageSource;
     }
 
+    const fileName = (imageSource instanceof File && imageSource.name) ? imageSource.name : "upload.jpg";
     const formData = new FormData();
-    formData.append("file", blob, "upload.jpg");
+    formData.append("file", blob, fileName);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
