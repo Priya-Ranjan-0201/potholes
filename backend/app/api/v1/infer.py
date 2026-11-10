@@ -244,7 +244,7 @@ async def infer_road_defects(
             aspect = max(bw / bh, bh / bw)
             if aspect > 9.5:
                 continue
-            if (bw / w > 0.90) or (bh / h > 0.90):
+            if (bw / w > 0.98) and (bh / h > 0.98):
                 continue
 
             # Filter 6: Vehicle hood / dashboard reflection
@@ -327,7 +327,7 @@ async def infer_road_defects(
             # Filter C1: Dashcam upper-third rejection (cracks don't float in sky or car roofs)
             if cy < (h * 0.35):
                 continue
-            if (bw / w > 0.90) or (bh / h > 0.90):
+            if (bw / w > 0.98) and (bh / h > 0.98):
                 continue
 
             # Filter C2: Color saturation check for painted vehicles
