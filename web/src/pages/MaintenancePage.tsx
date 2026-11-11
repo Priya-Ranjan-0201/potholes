@@ -1170,7 +1170,7 @@ export const MaintenancePage: React.FC = () => {
               <div className="h-44 w-full rounded border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-950">
                 <CompareSlider
                   beforeImage={`/api/v1/media/${verifyModalWo.defect_id}.jpg`}
-                  afterImage="/samples/pothole_repaired.jpg"
+                  afterImage="/samples/benchmark_pairs/pothole_repaired.jpg"
                   beforeLabel="Original Defect"
                   afterLabel="Post-Repair Patch"
                   className="w-full h-full"

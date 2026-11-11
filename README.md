@@ -27,7 +27,7 @@
 
 | Maintenance & Work Orders (`/maintenance`) | Model Benchmarks & Validation (`/benchmarks`) |
 | :---: | :---: |
-| ![Maintenance](docs/screenshots/live_07_maintenance_board.png) | ![Model Benchmarks](docs/screenshots/live_13b_evaluation_benchmarks.png) |
+| ![Maintenance](docs/screenshots/live_10_work_orders.png) | ![Model Benchmarks](docs/screenshots/live_13b_evaluation_benchmarks.png) |
 | *Defect queue, citizen reports, work orders, and engineer sign-off workflow.* | *Held-out test split metrics, 5x5 confusion matrix, and failure gallery.* |
 
 ---

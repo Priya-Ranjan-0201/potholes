@@ -46,11 +46,12 @@ scam_road/
 │   ├── privacy/             # On-device face and license plate redactor
 │   └── tests/               # 28 Edge pipeline tests
 │
-├── scripts/                  # Platform Utilities, Launchers, and Verification Tools
+├── scripts/                  # Curated Platform Utilities, Launchers & Verification Tools
 │   ├── serve_inference.py   # Standalone AI server launcher for fast edge execution
-│   ├── test_live_poly.py    # Benchmark verification script across all 5 test scenarios
-│   ├── capture_ui_pages.py  # Headless browser automated screenshot capture
-│   └── README.md            # Complete index of all 50+ utility and test scripts
+│   ├── test_live_poly.py    # Live 70/30 ensemble benchmark test across all 5 samples
+│   ├── capture_ui_matrix.py # Headless browser visual matrix capture
+│   ├── seed/                # Canonical municipal database demo & benchmark seeders
+│   └── README.md            # Complete categorized index of repository utility scripts
 │
 ├── data/                     # Calibration benchmarks and edge test media
 ├── docs/                     # Engineering documentation, architectural decisions, screenshots
@@ -104,3 +105,4 @@ Unmatched candidates are scaled appropriately:
 | **📦 Build Frontend** | `cd web && npm run build` | Compiles TypeScript and builds production assets |
 | **🔍 Verify Models** | `python scripts/test_live_poly.py` | Runs live inference across all 5 benchmark road scenarios |
 | **🧹 Check Code Quality** | `.\make.bat lint` | Runs Ruff linter and Black formatting checks |
+

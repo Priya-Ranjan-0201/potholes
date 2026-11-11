@@ -102,7 +102,6 @@ def get_crack_engine(conf_thresh: float = 0.22, iou_thresh: float = 0.35):
 
     candidates = [
         "ml/runs/pothole_yolov8n/weights/best.onnx",
-        "runs/export/best_int8_legacy_36img.onnx",
     ]
     selected_path = next((p for p in candidates if os.path.exists(p)), None)
     if not selected_path:
@@ -268,7 +267,6 @@ def get_segmentation_engine():
     candidates = [
         "ml/weights/yolov8n_seg_pothole.onnx",
         "ml/weights/yolov8n_seg_pothole.pt",
-        "ml/eval_hf/keremberke_yolov8n_seg.pt",
     ]
     selected = next((p for p in candidates if os.path.exists(p)), None)
     if not selected:
