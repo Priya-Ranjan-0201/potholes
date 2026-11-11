@@ -38,7 +38,7 @@ def main() -> None:
     print("=" * 40)
     for name, host, port in SERVICES:
         ok = check_port(host, port)
-        status = "✓ reachable" if ok else "✗ unreachable"
+        status = "reachable" if ok else "unreachable"
         print(f"  {name:.<20s} {host}:{port}  {status}")
         if not ok:
             all_ok = False

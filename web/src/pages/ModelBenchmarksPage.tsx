@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, ModelEvaluationResponse } from "../api/client";
 import {
@@ -10,8 +10,7 @@ import {
   Smartphone,
   ShieldCheck,
 } from "../components/Icons";
-import { StatCard, SegmentedControl } from "../ui";
-import { ModelDriftMonitoringWorkbench } from "../components/ModelDriftMonitoringWorkbench";
+import { StatCard } from "../ui";
 
 // Authentic fallback data matching runs/baselines/yolov8n/eval/metrics.json and edge_benchmark_report.json
 const BENCHMARK_DATA: ModelEvaluationResponse = {
@@ -264,8 +263,6 @@ const pct = (v: number | undefined | null, decimals = 1): string =>
   `${((typeof v === "number" && !isNaN(v) ? v : 0) * 100).toFixed(decimals)}%`;
 
 export const ModelBenchmarksPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"benchmarks" | "drift">("benchmarks");
-
   const { data: apiEval } = useQuery({
     queryKey: ["modelEvaluationReport"],
     queryFn: api.getModelEvaluation,
@@ -281,7 +278,6 @@ export const ModelBenchmarksPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-3">
@@ -296,25 +292,7 @@ export const ModelBenchmarksPage: React.FC = () => {
             Test evaluation on {evaluation.dataset_name} ({evaluation.test_images_count} test images, {evaluation.test_instances_total} instances)
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <SegmentedControl<"benchmarks" | "drift">
-            name="benchmarks-subtab"
-            size="sm"
-            value={activeTab}
-            onChange={(tab) => setActiveTab(tab)}
-            options={[
-              { id: "benchmarks", label: "Evaluation Metrics" },
-              { id: "drift", label: "Drift Monitoring" },
-            ]}
-          />
-        </div>
       </div>
-
-      {activeTab === "drift" ? (
-        <ModelDriftMonitoringWorkbench />
-      ) : (
-        <>
 
       {/* 2. Top Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -576,7 +554,7 @@ export const ModelBenchmarksPage: React.FC = () => {
               <tbody>
                 {comparisons.map((c) => {
                   const isSelected = c.name.includes("YOLOv8 Nano");
-                  const latencyVal = c.latency_ms ?? (c as any).mean_latency_ms;
+                  const latencyVal = c.latency_ms ?? c.mean_latency_ms;
                   return (
                     <tr key={c.name} className={isSelected ? "bg-blue-50/30 dark:bg-blue-950/20" : ""}>
                       <td className="font-semibold text-slate-900 dark:text-slate-100">
@@ -638,8 +616,6 @@ export const ModelBenchmarksPage: React.FC = () => {
             "Student research project evaluated on RDD2022-India dataset subset. Not an official government benchmark. Severity rubric is a project method, not an official standard."}
         </p>
       </div>
-      </>
-      )}
     </div>
   );
 };

@@ -13,15 +13,15 @@ web/
 │   │   ├── ScannerPage.tsx          # Defect scanner UI connected to /api/v1/infer
 │   │   ├── DashboardPage.tsx        # Ward summary and corridor defect counts
 │   │   ├── MaintenancePage.tsx      # Defect table, work orders, reports, repair verification
-│   │   ├── ModelBenchmarksPage.tsx  # Evaluation metrics, confusion matrix, drift checks
+│   │   ├── ModelBenchmarksPage.tsx  # Evaluation metrics, confusion matrix, hardware table
 │   │   ├── LandingPage.tsx          # Project overview and capabilities summary
 │   │   └── LoginPage.tsx            # Engineer / staff login form
 │   ├── motion/
 │   │   ├── BoxOverlay.tsx           # SVG bounding boxes, polygons, and labels
 │   │   ├── CompareSlider.tsx        # Before/after split image slider
 │   │   ├── ImageViewer.tsx          # Zoom and pan image viewer
-│   │   └── ScanLine.tsx             # Active scan progress indicator
-│   ├── components/                  # Navbar, Footer, CommandPalette, icons, verification views
+│   │   └── ScanLine.tsx             # Active scan indicator
+│   ├── components/                  # Navbar, Footer, ThemeToggle, CommandPalette, Icons, RepairVerification
 │   ├── ui/                          # Reusable buttons, badges, stat cards, and modals
 │   ├── utils/cvDetector.ts          # Client wrapper for POST /api/v1/infer
 │   ├── context/                     # Theme, Toast, Auth, and Language contexts

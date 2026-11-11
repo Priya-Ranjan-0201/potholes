@@ -163,8 +163,8 @@ class PipelineState:
         if not stages:
             print(" Active Stages   : None recorded yet (fresh pipeline initialization).")
         for stg, meta in stages.items():
-            status_symbol = "✔ COMPLETED" if meta.get("status") == "completed" else "⏳ PENDING"
-            print(f" • {stg:<20}: {status_symbol}")
+            status_symbol = "COMPLETED" if meta.get("status") == "completed" else "PENDING"
+            print(f" - {stg:<20}: {status_symbol}")
         print("=" * 65 + "\n")
 
 

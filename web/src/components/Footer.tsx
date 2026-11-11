@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { api } from "../api/client";
+import { useLanguage } from "../context/LanguageContext";
 
 export const Footer: React.FC = () => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     let mounted = true;
@@ -31,9 +33,7 @@ export const Footer: React.FC = () => {
           <span className="font-medium text-slate-700 dark:text-slate-300">ScamRoad</span>
         </div>
 
-        <p className="text-[11px] text-center">
-          Student research project. Not an official government system. Not safety-certified.
-        </p>
+        <p className="text-[11px] text-center">{t("footerNotice")}</p>
       </div>
     </footer>
   );

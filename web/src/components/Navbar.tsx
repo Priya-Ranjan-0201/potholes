@@ -10,12 +10,12 @@ import {
   Globe,
 } from "./Icons";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
-import { ThemeToggleWipe } from "../ui/atmosphere/ThemeToggleWipe";
+import { ThemeToggle } from "./ThemeToggle";
 import { Logo } from "./Logo";
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
-  const { language, setLanguage, currentOption } = useLanguage();
+  const { language, setLanguage, currentOption, t } = useLanguage();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -36,10 +36,10 @@ export const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { to: "/", label: "Overview", icon: Compass },
-    { to: "/scanner", label: "Scanner", icon: Camera },
-    { to: "/maintenance", label: "Maintenance", icon: ClipboardList },
-    { to: "/benchmarks", label: "Benchmarks", icon: BarChart3 },
+    { to: "/", label: t("navOverview"), icon: Compass },
+    { to: "/scanner", label: t("navScanner"), icon: Camera },
+    { to: "/maintenance", label: t("navMaintenance"), icon: ClipboardList },
+    { to: "/benchmarks", label: t("navBenchmarks"), icon: BarChart3 },
   ];
 
   return (
@@ -117,7 +117,7 @@ export const Navbar: React.FC = () => {
               )}
             </div>
 
-            <ThemeToggleWipe />
+            <ThemeToggle />
 
             <button
               type="button"

@@ -1,12 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ThemePreset } from "../ui/tokens";
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark";
 
 interface ThemeContextType {
-  themePreset: ThemePreset;
-  setThemePreset: (preset: ThemePreset) => void;
-  theme: ThemeMode; // Compatibility with v8 components
+  theme: ThemeMode;
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
@@ -17,12 +14,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const themePreset: ThemePreset = "default" as any;
-
   const [mode, setModeState] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem("scamroad_theme");
     if (saved === "light" || saved === "dark") return saved;
-    return "dark"; // Default to dark mode for civil engineering portal
+    return "dark";
   });
 
   const [reducedMotion, setReducedMotionState] = useState<boolean>(() => {
@@ -31,11 +26,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const root = document.documentElement;
-
-    root.setAttribute("data-theme", "professional");
-    localStorage.setItem("scamroad_theme_preset", "professional");
-
-    // Apply dark/light class
     if (mode === "dark") {
       root.classList.add("dark");
     } else {
@@ -43,7 +33,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     localStorage.setItem("scamroad_theme", mode);
 
-    // Apply reduced motion class
     if (reducedMotion) {
       root.classList.add("reduce-motion");
     } else {
@@ -56,29 +45,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setModeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  const setThemePreset = (_preset: ThemePreset) => {
-    // Single theme locked
-  };
-
-  const setMode = (newMode: ThemeMode) => {
-    setModeState(newMode);
-  };
-
-  const setReducedMotion = (reduce: boolean) => {
-    setReducedMotionState(reduce);
-  };
-
   return (
     <ThemeContext.Provider
       value={{
-        themePreset,
-        setThemePreset,
         theme: mode,
         mode,
-        setMode,
+        setMode: setModeState,
         toggleTheme,
         reducedMotion,
-        setReducedMotion,
+        setReducedMotion: setReducedMotionState,
       }}
     >
       {children}

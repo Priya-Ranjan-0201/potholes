@@ -217,7 +217,8 @@ export interface ModelEvaluationResponse {
     tier: string;
     params_m: number;
     size_mb: number;
-    latency_ms: number;
+    latency_ms?: number;
+    mean_latency_ms?: number;
     fps: number;
     precision: number;
     recall: number;
@@ -304,13 +305,13 @@ export interface SlaPolicy {
 export interface VerificationAssessment {
   id: string;
   status:
-    | "successfully_repaired"
-    | "partially_repaired"
-    | "incomplete_repair"
-    | "damage_recurring"
-    | "new_damage_detected"
-    | "verification_inconclusive"
-    | string;
+  | "successfully_repaired"
+  | "partially_repaired"
+  | "incomplete_repair"
+  | "damage_recurring"
+  | "new_damage_detected"
+  | "verification_inconclusive"
+  | string;
   effectiveness_pct: number;
   explanation: string;
   alignment_confidence: number;

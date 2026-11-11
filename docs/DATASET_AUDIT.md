@@ -44,7 +44,7 @@
 
 ## 3. Data Leakage Verification
 
-- **Leakage Detected:** ✅ NONE (PASSED)
+- **Leakage Detected:** NONE (PASSED)
 - **Train Samples:** 21
 - **Val Samples:** 9
 - **Test Samples:** 0

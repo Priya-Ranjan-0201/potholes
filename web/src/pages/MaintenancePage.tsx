@@ -23,7 +23,7 @@ import { useToast } from "../context/ToastContext";
 import { CompareSlider } from "../motion/CompareSlider";
 import { NumberTransition } from "../motion/NumberTransition";
 import { useReducedMotion } from "../motion/motion";
-import { RepairVerificationWorkbench } from "../components/RepairVerificationWorkbench";
+import { RepairVerification } from "../components/RepairVerification";
 
 type SubTab = "work-orders" | "defects" | "reports" | "verification";
 type ViewMode = "table" | "kanban";
@@ -962,7 +962,7 @@ export const MaintenancePage: React.FC = () => {
 
       {/* Repair Verification Sub-Tab */}
       {subTab === "verification" && (
-        <RepairVerificationWorkbench
+        <RepairVerification
           initialWorkOrderId={searchParams.get("woId")}
           initialDefectId={searchParams.get("defectId")}
         />

@@ -10,9 +10,9 @@ export const SEVERITY_COLORS: Record<SeverityLevel, string> = {
 };
 
 export function getSeverityFromScore(score: number): SeverityLevel {
-  if (score >= 75) return "Critical";
-  if (score >= 50) return "Severe";
-  if (score >= 25) return "Moderate";
+  if (score >= 76) return "Critical";
+  if (score >= 51) return "Severe";
+  if (score >= 26) return "Moderate";
   return "Minor";
 }
 

@@ -82,13 +82,13 @@ if __name__ == "__main__":
     violations = scan_files(target)
     
     if violations:
-        print(f"❌ Found {len(violations)} anti-slop copy/styling violations in {target}:")
+        print(f"[FAIL] Found {len(violations)} banned copy/styling violation(s) in {target}:")
         for path, line_no, content, rule in violations[:30]:
             print(f"  {path}:{line_no} [{rule}] -> {content}")
         if len(violations) > 30:
             print(f"  ... and {len(violations) - 30} more violations.")
         sys.exit(1)
     else:
-        print(f"✅ Anti-slop copy check passed with 0 violations in {target}!")
+        print(f"[PASS] Copy check passed with 0 violations in {target}.")
         sys.exit(0)
 

@@ -7,8 +7,8 @@
 ### Road Defect Detection & Municipal Maintenance Prototype (Student Research Project)
 
 [![Python Tests](https://img.shields.io/badge/Python%20Tests-167%20Passing-brightgreen.svg)](backend/tests/)
-[![Web Tests](https://img.shields.io/badge/Web%20Tests-13%20Passing-brightgreen.svg)](web/)
-[![i18n Parity](https://img.shields.io/badge/i18n-6%20Languages%20(137%20keys)-blue.svg)](scripts/check_i18n_keys.py)
+[![Web Tests](https://img.shields.io/badge/Web%20Tests-10%20Passing-brightgreen.svg)](web/)
+[![i18n Parity](https://img.shields.io/badge/i18n-6%20Languages%20(23%20keys)-blue.svg)](scripts/check_i18n_keys.py)
 [![ONNX Benchmarks](https://img.shields.io/badge/RDD2022--India-85.75%25%20mAP%4050-purple.svg)](ml/runs/metrics.json)
 [![License: AGPL-3.0 / CC BY-SA 4.0](https://img.shields.io/badge/License-AGPL--3.0%20%2F%20CC%20BY--SA%204.0-lightgrey.svg)](docs/DECISIONS.md)
 
@@ -84,7 +84,7 @@ ScamRoad detects road surface defects (**potholes, longitudinal cracks, transver
 2. **Quality & Privacy Gates:** Laplacian sharpness filtering and face/plate blurring before storage (`bench/privacy_blur_report.json`).
 3. **Deduplication Pipeline:** Track association (`edge/agent/track.py`), edge outbox consolidation (`edge/outbox/`), and backend spatial matching.
 4. **Maintenance Workflows:** Defect inspection drawer, citizen grievance state machine, work order SLA tracking, and ORB/RANSAC before-and-after repair image comparison.
-5. **Model Benchmarks Page (`/benchmarks`):** Displays `ml/runs/metrics.json` confusion matrix, per-class metrics, ablation runs, and PSI/KS drift checks.
+5. **Model Benchmarks Page (`/benchmarks`):** Displays `ml/runs/metrics.json` confusion matrix, per-class metrics, and hardware comparison tables.
 
 ### Known Limitations
 
@@ -224,7 +224,7 @@ pytest backend/tests shared/tests ml/tests edge/tests
 # Live inference regression check (requires backend running on :8000)
 python scripts/test_live_poly.py
 
-# Web test suite (13 tests) & TypeScript/Vite build
+# Web test suite (10 tests) & TypeScript/Vite build
 cd web && npm test -- --run && npm run build && cd ..
 ```
 

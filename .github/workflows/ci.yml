@@ -51,11 +51,11 @@ jobs:
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
 
-      - name: Verify Claims Honesty Gate (Rule R1, R7-R11)
+      - name: Verify Claims & Traceability
         run: |
           python scripts/check_claims.py
 
-      - name: Verify Multilingual i18n 100% Key Parity
+      - name: Verify Multilingual i18n Key Parity
         run: |
           python scripts/check_i18n_keys.py
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           ruff check backend ml edge shared --config pyproject.toml
 
-      - name: Run Pytest Full Test Suite (146 Tests)
+      - name: Run Pytest Suite
         env:
           POSTGRES_SERVER: localhost
           POSTGRES_PORT: 5432
@@ -71,7 +71,7 @@ jobs:
           REDIS_PORT: 6379
           SECRET_KEY: test-ci-secret-key-at-least-32-chars-long!
         run: |
-          pytest -v
+          pytest backend/tests shared/tests ml/tests edge/tests -v
 
   frontend-quality:
     runs-on: ubuntu-latest

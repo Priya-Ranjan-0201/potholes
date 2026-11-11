@@ -281,7 +281,7 @@ def generate_markdown_audit_report(audit_result: dict, output_md_path: Path) -> 
         lines.append(f"| `{cls_name}` | {count} | {pct:.1f}% |")
 
     boxes_cat = lbl_data.get("box_size_categories", {})
-    leak_status = "❌ YES (FAILED)" if leakage_data.get("has_leakage") else "✅ NONE (PASSED)"
+    leak_status = "YES (FAILED)" if leakage_data.get("has_leakage") else "NONE (PASSED)"
     lines.extend(
         [
             "",

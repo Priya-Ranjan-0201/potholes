@@ -111,35 +111,35 @@ export const CommandPalette: React.FC = () => {
     // Municipal Wards
     {
       id: "ward-1",
-      title: "Ward 1 — Clock Tower Central (13 defects)",
+      title: "Ward 1 — Clock Tower Central",
       category: "Wards",
       icon: <Compass className="w-4 h-4 text-slate-500" />,
       action: () => { navigate("/maintenance?tab=defects&ward=W-01"); setIsOpen(false); },
     },
     {
       id: "ward-2",
-      title: "Ward 2 — Focal Point Industrial (13 defects)",
+      title: "Ward 2 — Focal Point Industrial",
       category: "Wards",
       icon: <Compass className="w-4 h-4 text-slate-500" />,
       action: () => { navigate("/maintenance?tab=defects&ward=W-02"); setIsOpen(false); },
     },
     {
       id: "ward-3",
-      title: "Ward 3 — Civil Lines & Mall Road (17 defects)",
+      title: "Ward 3 — Civil Lines & Mall Road",
       category: "Wards",
       icon: <Compass className="w-4 h-4 text-rose-500" />,
       action: () => { navigate("/maintenance?tab=defects&ward=W-03"); setIsOpen(false); },
     },
     {
       id: "ward-4",
-      title: "Ward 4 — Model Town Residential (15 defects)",
+      title: "Ward 4 — Model Town Residential",
       category: "Wards",
       icon: <Compass className="w-4 h-4 text-amber-500" />,
       action: () => { navigate("/maintenance?tab=defects&ward=W-04"); setIsOpen(false); },
     },
     {
       id: "ward-10",
-      title: "Central GT Ward (15 defects)",
+      title: "Central GT Ward",
       category: "Wards",
       icon: <Compass className="w-4 h-4 text-slate-500" />,
       action: () => { navigate("/maintenance?tab=defects&ward=W-10"); setIsOpen(false); },
@@ -159,7 +159,7 @@ export const CommandPalette: React.FC = () => {
       id: `lang-${lang.code}`,
       title: `Language: ${lang.nativeName} (${lang.label})`,
       category: "Language" as const,
-      icon: <span className="text-xs">{lang.flag}</span>,
+      icon: <span className="text-[10px] font-mono uppercase text-slate-500">{lang.code}</span>,
       action: () => { setLanguage(lang.code); setIsOpen(false); },
     })),
   ];
@@ -226,11 +226,10 @@ export const CommandPalette: React.FC = () => {
                   key={item.id}
                   onClick={item.action}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer text-xs transition-colors ${
-                    isSelected
+                  className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer text-xs transition-colors ${isSelected
                       ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-medium"
                       : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="shrink-0">{item.icon}</div>

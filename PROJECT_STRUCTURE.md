@@ -23,8 +23,8 @@ scam_road/
 │   ├── src/
 │   │   ├── pages/            # ScannerPage, DashboardPage, MaintenancePage, ModelBenchmarksPage, LandingPage, LoginPage
 │   │   ├── motion/           # BoxOverlay, CompareSlider, ImageViewer, ScanLine
-│   │   ├── components/       # Navbar, Footer, CommandPalette, Icons, Verification & Drift views
-│   │   ├── ui/               # StatCard, EmptyState, DemoBadge, SeverityBadge, ThemeToggleWipe
+│   │   ├── components/       # Navbar, Footer, ThemeToggle, CommandPalette, Icons, RepairVerification
+│   │   ├── ui/               # StatCard, EmptyState, DemoBadge, SeverityBadge, SegmentedControl, StatusChip
 │   │   └── utils/            # cvDetector.ts (/api/v1/infer client)
 │   ├── public/               # Static assets and /samples/ test images
 │   └── dist/                 # Production build output (`npm run build`)
@@ -51,14 +51,13 @@ scam_road/
 ├── scripts/                  # Launchers, benchmarks, seeders, and verification scripts
 │   ├── serve_inference.py    # FastAPI server launcher for local development
 │   ├── test_live_poly.py     # Live inference check across benchmark samples
-│   ├── capture_ui_matrix.py  # Headless Chrome screenshot capture
 │   ├── seed/                 # Demo database seeders
 │   └── README.md             # Categorized index of scripts
 │
 ├── config/                   # Runtime rate card (`rate_card.json`) & severity thresholds (`severity_thresholds.json`)
 ├── configs/                  # YAML path & taxonomy configuration
 ├── data/                     # Calibration benchmarks and local test media
-├── docs/                     # Architecture docs, screenshots, and audit records
+├── docs/                     # Architecture docs, dataset artifacts, decisions log, previews
 ├── run.bat                   # Windows launcher (starts backend on :8000 and frontend on :3000)
 ├── make.bat                  # Task runner (`make dev`, `make test`, `make lint`)
 ├── pyproject.toml            # Python project, pytest, ruff, and black configuration
@@ -98,7 +97,7 @@ $$C_{\text{fused}} = 0.70 \times C_{\text{new}} + 0.30 \times C_{\text{base}}$$
 | :--- | :--- | :--- |
 | Start App | `.\run.bat` | Starts backend (`:8000`) and frontend (`:3000`) and opens the browser |
 | Run Python Tests | `pytest backend/tests shared/tests ml/tests edge/tests` | Runs all 167 Python tests |
-| Run Web Tests | `cd web && npm test -- --run` | Runs the 13 Vitest specs |
+| Run Web Tests | `cd web && npm test -- --run` | Runs the 10 Vitest specs |
 | Build Frontend | `cd web && npm run build` | Type-checks with `tsc` and builds Vite production bundle |
 | Verify Live Inference | `python scripts/test_live_poly.py` | Runs `/api/v1/infer` checks across sample images |
-| Check Claims & UI Copy | `python scripts/check_claims.py && python scripts/check_ui_copy.py web/src` | Runs repository honesty and UI copy checks |
+| Check Claims & UI Copy | `python scripts/check_claims.py && python scripts/check_ui_copy.py web/src` | Runs repository claims and UI copy checks |

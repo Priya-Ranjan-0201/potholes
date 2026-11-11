@@ -18,14 +18,14 @@ import {
 import { CompareSlider } from "../motion/CompareSlider";
 import { useToast } from "../context/ToastContext";
 
-interface RepairVerificationWorkbenchProps {
+interface RepairVerificationProps {
   initialWorkOrderId?: string | null;
   initialDefectId?: string | null;
 }
 
 type ViewMode = "slider" | "side-by-side" | "matches" | "diff";
 
-export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchProps> = ({
+export const RepairVerification: React.FC<RepairVerificationProps> = ({
   initialWorkOrderId,
   initialDefectId,
 }) => {
@@ -105,8 +105,9 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
         info("Verification Result", data.explanation);
       }
     },
-    onError: (err: any) => {
-      toastError("Verification Failed", err?.message || "Execution error.");
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : "Request failed.";
+      toastError("Verification Failed", msg);
     },
   });
 
@@ -211,13 +212,13 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
         <div className="card p-3.5 flex items-center justify-between border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">
-              Audits Conducted
+              Checks Run
             </div>
             <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-0.5">
               {records.length}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Official verification runs
+              Saved verification runs
             </div>
           </div>
           <div className="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 dark:text-blue-400">
@@ -320,7 +321,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
         {/* Preset Benchmark Pair Bar */}
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-            Benchmark Test Cases & Evaluation Presets
+            Sample Pairs
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
             {benchmarks.map((b) => (
@@ -461,7 +462,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                   className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium text-xs inline-flex items-center gap-1.5 transition-colors border border-slate-300 dark:border-slate-700"
                 >
                   <FileCheck2 className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                  <span>Download Official Certificate (PDF)</span>
+                  <span>Download PDF Report</span>
                 </a>
               </div>
             )}
@@ -667,10 +668,10 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
-              Historical Repair Verification Audit Records
+              Verification Records
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Structured database of municipal inspection comparisons, recurrence tracking, and certification
+              Stored before/after inspection comparisons and recurrence flags
             </p>
           </div>
 

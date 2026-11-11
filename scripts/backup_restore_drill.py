@@ -94,7 +94,7 @@ def execute_backup_drill():
     print("      Rule R5 verified: zero unauthorized work order closures.")
 
     print("\n" + "=" * 60)
-    print("✅ Backup and Restore Drill PASSED cleanly.")
+    print("[PASS] Backup and Restore Drill passed cleanly.")
     print("=" * 60)
     return True
 

@@ -1,7 +1,4 @@
-"""Automated honesty, claim verification, and banned phrase checker for ScamRoad.
-
-Adheres strictly to Phase 2 Gate requirements and Rules R1, R2, R4, R7, R8, R9, R10, R11.
-"""
+"""Automated claim verification and banned phrase checker for ScamRoad."""
 
 import os
 import re
@@ -39,16 +36,9 @@ MAP_BANNED_PATTERNS = [
     (r"(?i)GIS\s+map", "GIS map mention (Phase 1: Map feature removed completely)"),
 ]
 
-# Exception files in docs that explain why the map was removed or preserve prompt/changelog history
+# Docs that document the removal of the map feature or historical release notes
 DOCS_MAP_EXCEPTIONS = [
     "CHANGELOG.md",
-    "migration",
-    "FIX_AND_REDESIGN.md",
-    "V7_PLAN.md",
-    "V7_STATE.md",
-    "STATUS_AUDIT.md",
-    "FIX_STATE.md",
-    "PHASE_REPORTS",
 ]
 
 def check_banned_phrases():
@@ -150,7 +140,7 @@ def check_traceability():
 
 def main():
     print("=" * 60)
-    print("ScamRoad Phase 2 Gate: Honesty & Claims Verification")
+    print("ScamRoad Claims & Asset Traceability Check")
     print("=" * 60)
 
     banned_violations = check_banned_phrases()
@@ -159,23 +149,23 @@ def main():
     if banned_violations:
         print(f"\n[FAIL] Found {len(banned_violations)} banned phrase violation(s):")
         for v in banned_violations:
-            print(f"  ❌ {v}")
+            print(f"  - {v}")
     else:
         print("\n[PASS] Zero banned phrases found across scanned targets.")
 
     if traceability_issues:
         print(f"\n[FAIL] Found {len(traceability_issues)} traceability issue(s):")
         for iss in traceability_issues:
-            print(f"  ❌ {iss}")
+            print(f"  - {iss}")
     else:
-        print("[PASS] All claims, rate cards, benchmarks, and notebooks traced to real files.")
+        print("[PASS] All claims, rate cards, and artifacts traced to real files.")
 
     total_errors = len(banned_violations) + len(traceability_issues)
     if total_errors > 0:
-        print(f"\n❌ Phase 2 Gate FAILED with {total_errors} issue(s).")
+        print(f"\n[FAIL] Check failed with {total_errors} issue(s).")
         sys.exit(1)
     else:
-        print("\n✅ Phase 2 Gate PASSED: System is honest, verified, and free of false claims.")
+        print("\n[PASS] System claims and assets verified.")
         sys.exit(0)
 
 if __name__ == "__main__":

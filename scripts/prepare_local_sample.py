@@ -128,7 +128,7 @@ def prepare_local_sample():
 
         cv2.imwrite(str(img_dest), img)
 
-    print(f"✅ Prepared 10 verified local sample frames in {LOCAL_SAMPLE_DIR}")
+    print(f"Prepared 10 local sample frames in {LOCAL_SAMPLE_DIR}")
 
 if __name__ == "__main__":
     prepare_local_sample()

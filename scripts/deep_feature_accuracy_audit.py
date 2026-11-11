@@ -52,7 +52,7 @@ def record_accuracy(feature_name: str, passed: bool, accuracy_metric: str, detai
         "accuracy_metric": accuracy_metric,
         "details": details
     })
-    icon = "✅ ACCURATE" if passed else "❌ INACCURATE"
+    icon = "ACCURATE" if passed else "INACCURATE"
     print(f"[{icon}] {feature_name}")
     print(f"    Metric: {accuracy_metric}")
     print(f"    Detail: {details}")
@@ -431,13 +431,13 @@ def main():
     failed = audit_results["features_failed"]
 
     print("\n" + "=" * 70)
-    print(f"🏁 AUDIT SUMMARY: {accurate}/{total} Features 100% ACCURATE ({failed} Inaccurate)")
+    print(f"AUDIT SUMMARY: {accurate}/{total} Features Accurate ({failed} Failed)")
     print("=" * 70)
 
-    # Save detailed JSON report to artifacts
-    artifact_path = Path(r"C:\Users\PRIYE RANJAN\.gemini\antigravity\brain\0e20c874-7353-488a-adc2-7caefedb3d34\deep_accuracy_audit_report.json")
+    artifact_path = REPO_ROOT / "ml" / "runs" / "audit" / "deep_accuracy_audit_report.json"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
     artifact_path.write_text(json.dumps(audit_results, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"📄 Detailed Accuracy Audit saved to: {artifact_path}")
+    print(f"Detailed Accuracy Audit saved to: {artifact_path}")
 
     sys.exit(0 if failed == 0 else 1)
 
