@@ -126,6 +126,138 @@ def get_crack_engine(conf_thresh: float = 0.22, iou_thresh: float = 0.35):
         return None
 
 
+def get_dfine_engine():
+    """Retrieve or initialize the Kodjaoglanian D-FINE Large transformer ONNX engine."""
+    if "dfine_large" in _ENGINE_CACHE:
+        return _ENGINE_CACHE["dfine_large"]
+
+    path = "ml/weights/pavimentos_dfine_l.onnx"
+    if not os.path.exists(path):
+        return None
+    try:
+        import onnxruntime as ort
+        sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+        _ENGINE_CACHE["dfine_large"] = sess
+        return sess
+    except Exception as e:
+        print(f"[AI ENGINE] Error loading D-FINE Large engine: {e}", flush=True)
+        return None
+
+
+def get_pyresearch_engine():
+    """Retrieve or initialize the PyResearch YOLOv12s ONNX engine."""
+    if "pyresearch_yolo" in _ENGINE_CACHE:
+        return _ENGINE_CACHE["pyresearch_yolo"]
+
+    path = "ml/weights/pyresearch_pothole_best.onnx"
+    if not os.path.exists(path):
+        return None
+    try:
+        import onnxruntime as ort
+        sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+        _ENGINE_CACHE["pyresearch_yolo"] = sess
+        return sess
+    except Exception as e:
+        print(f"[AI ENGINE] Error loading PyResearch YOLO engine: {e}", flush=True)
+        return None
+
+
+def predict_dfine_potholes(img: np.ndarray, conf_thresh: float = 0.20) -> List[dict]:
+    """Run inference using the D-FINE Large Transformer with Platt scaling calibration."""
+    sess = get_dfine_engine()
+    if sess is None:
+        return []
+    h, w = img.shape[:2]
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    resized = cv2.resize(rgb, (640, 640))
+    inp = resized.astype(np.float32) / 255.0
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    inp = (inp - mean) / std
+    inp = np.transpose(inp, (2, 0, 1))[None, ...]
+
+    try:
+        logits, boxes = sess.run(None, {"pixel_values": inp})
+        probs = 1.0 / (1.0 + np.exp(-logits[0, :, 0]))
+        indices = np.where(probs >= conf_thresh)[0]
+        results = []
+        for idx in indices:
+            cx, cy, bw, bh = boxes[0, idx]
+            x1 = max(0.0, (cx - bw / 2.0) * w)
+            y1 = max(0.0, (cy - bh / 2.0) * h)
+            x2 = min(float(w), (cx + bw / 2.0) * w)
+            y2 = min(float(h), (cy + bh / 2.0) * h)
+
+            box_w = x2 - x1
+            box_h = y2 - y1
+            if box_w < 4 or box_h < 4:
+                continue
+            aspect = box_w / max(1.0, box_h)
+            if aspect < 0.12 or aspect > 7.0:
+                continue
+            if (box_w / w > 0.60) or (box_h / h > 0.50):
+                continue
+
+            results.append({
+                "box": [float(x1), float(y1), float(x2), float(y2)],
+                "conf": float(probs[idx]),
+                "poly": extract_defect_polygon(img, [x1, y1, x2, y2]),
+                "source": "D-FINE Large (70% Weight)",
+            })
+        return results
+    except Exception as e:
+        print(f"[AI INFER] D-FINE inference warning: {e}", flush=True)
+        return []
+
+
+def predict_pyresearch_potholes(img: np.ndarray, conf_thresh: float = 0.20) -> List[dict]:
+    """Run inference using the PyResearch YOLOv12s ONNX engine with jhasuman NMS."""
+    sess = get_pyresearch_engine()
+    if sess is None:
+        return []
+    h, w = img.shape[:2]
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    resized = cv2.resize(rgb, (640, 640))
+    inp = resized.astype(np.float32) / 255.0
+    inp = np.transpose(inp, (2, 0, 1))[None, ...]
+
+    try:
+        out = sess.run(None, {"images": inp})[0][0]
+        cx, cy, bw, bh, confs = out[0], out[1], out[2], out[3], out[4]
+        sx, sy = w / 640.0, h / 640.0
+        indices = np.where(confs >= conf_thresh)[0]
+
+        sorted_indices = indices[np.argsort(-confs[indices])]
+        selected = []
+        for idx in sorted_indices:
+            x1 = max(0.0, (cx[idx] - bw[idx] / 2.0) * sx)
+            y1 = max(0.0, (cy[idx] - bh[idx] / 2.0) * sy)
+            x2 = min(float(w), (cx[idx] + bw[idx] / 2.0) * sx)
+            y2 = min(float(h), (cy[idx] + bh[idx] / 2.0) * sy)
+
+            box_w = x2 - x1
+            box_h = y2 - y1
+            if box_w < 4 or box_h < 4:
+                continue
+            if (box_w / w > 0.60) or (box_h / h > 0.50):
+                continue
+
+            bx = [x1, y1, x2, y2]
+            if any(compute_iou_xyxy(bx, s["box"]) > 0.40 for s in selected):
+                continue
+
+            selected.append({
+                "box": bx,
+                "conf": float(confs[idx]),
+                "poly": extract_defect_polygon(img, bx),
+                "source": "PyResearch YOLOv12 (70% Weight)",
+            })
+        return selected
+    except Exception as e:
+        print(f"[AI INFER] PyResearch inference warning: {e}", flush=True)
+        return []
+
+
 def get_segmentation_engine():
     """Retrieve or initialize the YOLOv8n pothole segmentation engine (keremberke/yolov8n-pothole-segmentation)."""
     if "yolov8n_seg" in _ENGINE_CACHE:
@@ -261,7 +393,11 @@ async def infer_road_defects(
                 detail="No trained YOLO11n ONNX model found in runs/export/."
             )
 
-        # 1. Primary Segmentation Pass: YOLOv8n-Seg (70% weightage)
+        # 1. New 70% Models Inference:
+        # Kodjaoglanian D-FINE Large (DETR) + PyResearch YOLOv12s + keremberke YOLOv8-Seg
+        dfine_boxes = predict_dfine_potholes(img, conf_thresh=max(0.18, conf_thresh * 0.9))
+        pyres_boxes = predict_pyresearch_potholes(img, conf_thresh=max(0.20, conf_thresh * 0.9))
+
         seg_engine = get_segmentation_engine()
         seg_boxes = []
         if seg_engine is not None:
@@ -272,7 +408,6 @@ async def infer_road_defects(
                     confs_np = seg_res.boxes.conf.cpu().numpy()
                     masks_xy = seg_res.masks.xy if seg_res.masks is not None else []
                     for i, bx in enumerate(boxes_np):
-                        # Filter out oversized seg boxes (hallucinations on text banners or entire lower frame)
                         seg_bw = bx[2] - bx[0]
                         seg_bh = bx[3] - bx[1]
                         if (seg_bw / w > 0.60) or (seg_bh / h > 0.45):
@@ -289,9 +424,27 @@ async def infer_road_defects(
                             "conf": float(confs_np[i]),
                             "poly": poly,
                             "matched": False,
+                            "source": "YOLOv8-Seg (70% Weight)",
                         })
             except Exception as e:
                 print(f"[AI INFER] Warning: Segmentation pass error: {e}", flush=True)
+
+        # Intra-fuse the 70% candidate group (D-FINE, PyResearch, YOLOv8-Seg)
+        new_70_candidates = []
+        for cand in dfine_boxes + pyres_boxes + seg_boxes:
+            matched = False
+            for ec in new_70_candidates:
+                if compute_iou_xyxy(cand["box"], ec["box"]) > 0.35:
+                    ec["conf"] = max(ec["conf"], cand["conf"], (ec["conf"] + cand["conf"]) / 2.0)
+                    if cand.get("poly") and not ec.get("poly"):
+                        ec["poly"] = cand["poly"]
+                    ec["source"] = "Ensemble (70% D-FINE/PyResearch/Seg)"
+                    matched = True
+                    break
+            if not matched:
+                cand_copy = dict(cand)
+                cand_copy["matched"] = False
+                new_70_candidates.append(cand_copy)
 
         # 2. Base Forward Inference: YOLO11n INT8 (30% weightage)
         raw_potholes = engine.predict(img)
@@ -310,56 +463,54 @@ async def infer_road_defects(
 
         # 3. 70/30 Ensemble Fusion
         fused_potholes = []
-        for sb in seg_boxes:
+        for nb in new_70_candidates:
             best_b, best_iou = None, 0.0
             for bb in base_boxes:
                 if bb["matched"]:
                     continue
-                iou = compute_iou_xyxy(sb["box"], bb["box"])
+                iou = compute_iou_xyxy(nb["box"], bb["box"])
                 if iou > best_iou:
                     best_iou, best_b = iou, bb
 
             if best_b and best_iou > 0.20:
-                sb["matched"] = True
+                nb["matched"] = True
                 best_b["matched"] = True
-                cf = 0.70 * sb["conf"] + 0.30 * best_b["conf"]
+                cf = 0.70 * nb["conf"] + 0.30 * best_b["conf"]
 
-                # Use compact base bounds if seg box is disproportionately bloated
-                sb_w = sb["box"][2] - sb["box"][0]
+                nb_w = nb["box"][2] - nb["box"][0]
                 bb_w = best_b["box"][2] - best_b["box"][0]
-                sb_h = sb["box"][3] - sb["box"][1]
+                nb_h = nb["box"][3] - nb["box"][1]
                 bb_h = best_b["box"][3] - best_b["box"][1]
-                if sb_w > 1.6 * bb_w or sb_h > 1.6 * bb_h:
+                if nb_w > 1.6 * bb_w or nb_h > 1.6 * bb_h:
                     bx = best_b["box"]
                 else:
                     bx = [
-                        min(sb["box"][0], best_b["box"][0]),
-                        min(sb["box"][1], best_b["box"][1]),
-                        max(sb["box"][2], best_b["box"][2]),
-                        max(sb["box"][3], best_b["box"][3]),
+                        min(nb["box"][0], best_b["box"][0]),
+                        min(nb["box"][1], best_b["box"][1]),
+                        max(nb["box"][2], best_b["box"][2]),
+                        max(nb["box"][3], best_b["box"][3]),
                     ]
                 fused_potholes.append({
                     "box": bx,
                     "conf": cf,
-                    "poly": sb["poly"] or extract_defect_polygon(img, bx),
-                    "source": "Ensemble (70% Seg + 30% Base)",
+                    "poly": nb.get("poly") or extract_defect_polygon(img, bx),
+                    "source": "Ensemble (70% D-FINE/PyResearch/Seg + 30% Base)",
                 })
             else:
-                cf = 0.70 * sb["conf"]
-                # Must meet confidence threshold and valid defect proportion
-                sb_w = sb["box"][2] - sb["box"][0]
-                sb_h = sb["box"][3] - sb["box"][1]
-                if cf >= conf_thresh and (sb_w / w <= 0.45) and (sb_h / h <= 0.40):
+                cf = 0.70 * nb["conf"]
+                nb_w = nb["box"][2] - nb["box"][0]
+                nb_h = nb["box"][3] - nb["box"][1]
+                if cf >= conf_thresh and (nb_w / w <= 0.50) and (nb_h / h <= 0.40):
                     fused_potholes.append({
-                        "box": sb["box"],
+                        "box": nb["box"],
                         "conf": cf,
-                        "poly": sb["poly"] or extract_defect_polygon(img, sb["box"]),
-                        "source": "YOLOv8-Seg (70% Weight)",
+                        "poly": nb.get("poly") or extract_defect_polygon(img, nb["box"]),
+                        "source": nb.get("source", "70% New Models"),
                     })
 
         for bb in base_boxes:
             if not bb["matched"]:
-                cf = 0.30 * bb["conf"] + 0.70 * (bb["conf"] * 0.9)
+                cf = 0.30 * bb["conf"] + 0.70 * (bb["conf"] * 0.85)
                 fused_potholes.append({
                     "box": bb["box"],
                     "conf": cf,
@@ -655,7 +806,7 @@ async def infer_road_defects(
             max_severity=max_severity,
             overall_health_score=overall_health,
             detections=detections,
-            engine="Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)",
+            engine="Ensemble Hybrid (70% D-FINE + PyResearch + Seg / 30% YOLO11n-INT8)",
             latency_ms=latency_ms,
         )
 

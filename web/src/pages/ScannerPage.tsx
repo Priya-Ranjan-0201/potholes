@@ -112,7 +112,7 @@ export const ScannerPage: React.FC = () => {
     latencyMs: 78.4,
     imageWidth: 667,
     imageHeight: 363,
-    engine: "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)",
+    engine: "Ensemble Hybrid (70% D-FINE + PyResearch + Seg / 30% YOLO11n-INT8)",
   });
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -594,7 +594,7 @@ export const ScannerPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
                 <Cpu className="w-3.5 h-3.5 text-emerald-500" />
-                <span>{inspection.engine || "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n)"}</span>
+                <span>{inspection.engine || "Ensemble Hybrid (70% D-FINE + PyResearch + Seg / 30% YOLO11n-INT8)"}</span>
               </span>
               <span>·</span>
               <span>
@@ -710,7 +710,7 @@ export const ScannerPage: React.FC = () => {
               <div className="flex items-center justify-between py-1">
                 <span className="text-slate-600 dark:text-slate-400">Model Engine</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                  {inspection.engine || "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)"}
+                  {inspection.engine || "Ensemble Hybrid (70% D-FINE + PyResearch + Seg / 30% YOLO11n-INT8)"}
                 </span>
               </div>
             </div>
@@ -865,7 +865,7 @@ export const ScannerPage: React.FC = () => {
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 m-3 rounded-md border border-slate-200 dark:border-slate-700/80 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-              Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8) active with polygon mask segmentation.
+              Ensemble Hybrid (70% D-FINE + PyResearch + Seg / 30% YOLO11n-INT8) active with polygon mask segmentation.
             </span>
           </div>
         </div>
