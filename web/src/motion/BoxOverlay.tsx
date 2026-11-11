@@ -21,8 +21,7 @@ interface BoxOverlayProps {
 }
 
 /**
- * Clean, High-Contrast Defect Bounding Box & Mask Overlay.
- * Prevents stacked label collisions on dense scenes while always revealing hovered/selected labels cleanly.
+ * High-contrast dark bounding box overlay with non-overlapping label badges.
  */
 export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   detections,
@@ -45,9 +44,9 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
 
   const getColor = (rawLabel: string, sev?: string) => {
     const upper = (rawLabel || "").toUpperCase();
-    if (upper.includes("CRACK")) return "#d97706"; // Clean Warm Amber
-    if (sev?.toLowerCase() === "critical") return "#dc2626"; // Clean Red
-    return "#047857"; // Deep Crisp Emerald
+    if (upper.includes("CRACK")) return "#78350f"; // Deep Dark Amber Brown
+    if (sev?.toLowerCase() === "critical") return "#7f1d1d"; // Deep Dark Crimson
+    return "#052e16"; // Ultra-Deep Dark Forest Green
   };
 
   const labelHeight = 2.4;
@@ -89,7 +88,6 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
     }
 
     const isActive = activeId === d.id;
-    // Show non-colliding labels automatically (up to 15 clearest), and always show hovered/selected
     const showLabel = isActive || (bestPos !== null && index < 15);
     const finalPos = bestPos ?? candidates[0];
     if (bestPos !== null) {
@@ -111,7 +109,6 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
     };
   });
 
-  // Render active item last so its highlight sits cleanly on top
   const ordered = [
     ...items.filter((i) => activeId !== i.d.id),
     ...items.filter((i) => activeId === i.d.id),
@@ -132,7 +129,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
           <g
             key={d.id}
             className="pointer-events-auto cursor-pointer transition-opacity duration-150"
-            style={{ opacity: isDimmed ? 0.35 : 1 }}
+            style={{ opacity: isDimmed ? 0.65 : 1 }}
             onMouseEnter={() => onHover(d.id)}
             onMouseLeave={() => onHover(null)}
             onClick={() => onSelect(d.id)}
@@ -146,25 +143,38 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
                 <polygon
                   points={d.polygon.map(([px, py]) => `${px},${py}`).join(" ")}
                   fill={color}
-                  fillOpacity={isActive ? 0.36 : 0.22}
+                  fillOpacity={isActive ? 0.42 : 0.28}
                   stroke={color}
-                  strokeWidth={isActive ? 0.75 : 0.5}
+                  strokeWidth={isActive ? 1.05 : 0.78}
                   strokeLinejoin="round"
                 />
               )}
 
             {(viewMode === "boxes" || viewMode === "both" || !d.polygon || d.polygon.length < 3) && (
-              <rect
-                x={x}
-                y={y}
-                width={w}
-                height={h}
-                fill={color}
-                fillOpacity={isActive ? 0.22 : 0.08}
-                stroke={color}
-                strokeWidth={isActive ? 0.85 : 0.55}
-                rx={0.35}
-              />
+              <>
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  fill="none"
+                  stroke="#000000"
+                  strokeOpacity={0.7}
+                  strokeWidth={isActive ? 1.55 : 1.25}
+                  rx={0.35}
+                />
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  fill={color}
+                  fillOpacity={isActive ? 0.42 : 0.28}
+                  stroke={color}
+                  strokeWidth={isActive ? 1.15 : 0.9}
+                  rx={0.35}
+                />
+              </>
             )}
 
             {showLabel && (
@@ -176,8 +186,8 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
                   height={labelHeight}
                   fill={color}
                   stroke="#000000"
-                  strokeOpacity={0.35}
-                  strokeWidth={0.18}
+                  strokeOpacity={0.55}
+                  strokeWidth={0.22}
                   rx={0.35}
                 />
                 <text

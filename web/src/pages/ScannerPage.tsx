@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { api } from "../api/client";
 import {
-  Sliders,
   CheckCircle,
   RefreshCw,
   Maximize2,
   Minimize2,
   Camera,
   UploadCloud,
+  Eye,
+  EyeOff,
 } from "../components/Icons";
-import { detectDefects, InspectionResult, DefectBox } from "../utils/cvDetector";
+import { detectDefects, InspectionResult } from "../utils/cvDetector";
 import { useToast } from "../context/ToastContext";
 import { ScanLine, BoxOverlay } from "../motion";
 
@@ -23,44 +24,43 @@ interface SampleImage {
 const SAMPLE_IMAGES: SampleImage[] = [
   {
     id: "capture-bengaluru",
-    label: "Bengaluru Road",
+    label: "Bengaluru",
     src: "/samples/bengaluru_potholes.jpg",
     road: "Bengaluru Arterial Road",
   },
   {
     id: "capture-mumbai",
-    label: "Mumbai Monsoon",
+    label: "Mumbai",
     src: "/samples/mumbai_potholes.avif",
-    road: "Mumbai Monsoon Corridor",
+    road: "Mumbai Monsoon Road",
   },
   {
     id: "capture-cracks",
-    label: "Alligator Cracks",
+    label: "Cracks",
     src: "/samples/alligator_cracks.jpg",
-    road: "Alligator Fatigue Cracking",
+    road: "Alligator Fatigue Cracks",
   },
   {
     id: "capture-diagram",
-    label: "Distress Diagram",
+    label: "Diagram",
     src: "/samples/civil_distress_diagram.jpg",
-    road: "Road Distress Benchmark",
+    road: "Road Distress Diagram",
   },
   {
     id: "capture-pothole",
-    label: "Asphalt Crater",
+    label: "Crater",
     src: "/samples/asphalt_crater.jpg",
-    road: "Asphalt Crater Sample",
+    road: "Asphalt Crater",
   },
   {
     id: "capture-clean",
     label: "Clean Road",
     src: "/samples/pothole_nh44.jpg",
-    road: "Smooth Pavement Baseline",
+    road: "Clean Road",
   },
 ];
 
 type InputMode = "image" | "camera";
-type DisplayMode = "boxes" | "masks" | "off";
 
 const formatDefectTitle = (label: string) => {
   const upper = (label || "").toUpperCase();
@@ -73,7 +73,7 @@ const formatDefectTitle = (label: string) => {
 
 export const ScannerPage: React.FC = () => {
   const [inputMode, setInputMode] = useState<InputMode>("image");
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("boxes");
+  const [showBoxes, setShowBoxes] = useState<boolean>(true);
   const [confThresh, setConfThresh] = useState<number>(0.30);
   const [selectedSampleId, setSelectedSampleId] = useState<string>("capture-bengaluru");
   const [activeImageSrc, setActiveImageSrc] = useState<string>("/samples/bengaluru_potholes.jpg");
@@ -83,9 +83,8 @@ export const ScannerPage: React.FC = () => {
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
   const [hoveredBoxId, setHoveredBoxId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
-  const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
-  const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
+  const [allSaved, setAllSaved] = useState<boolean>(false);
+  const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
   const { success } = useToast();
 
   const [inspection, setInspection] = useState<InspectionResult>({
@@ -106,25 +105,53 @@ export const ScannerPage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const uploadedFileRef = useRef<File | null>(null);
+  const scanIdRef = useRef<number>(0);
+  const abortRef = useRef<AbortController | null>(null);
 
   const runDetection = async (source: string | Blob) => {
+    const scanId = ++scanIdRef.current;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setIsScanning(true);
-    setLoggedDefects({});
+    setAllSaved(false);
+    setSelectedBoxId(null);
+    setHoveredBoxId(null);
+    setInspection((prev) => ({
+      ...prev,
+      totalDefects: 0,
+      potholeCount: 0,
+      crackCount: 0,
+      boxes: [],
+      latencyMs: 0,
+    }));
+
     try {
-      const result = await detectDefects(source, confThresh, (stage) => setScanStage(stage));
+      const result = await detectDefects(
+        source,
+        confThresh,
+        (stage) => {
+          if (scanIdRef.current === scanId) setScanStage(stage);
+        },
+        controller.signal
+      );
+      if (scanIdRef.current !== scanId) return;
       setInspection(result);
-      setSelectedBoxId(result.boxes.length > 0 ? result.boxes[0].id : null);
     } catch (err) {
-      console.error("Inference failed", err);
+      if ((err as Error)?.name !== "AbortError") {
+        console.error("Inference failed", err);
+      }
     } finally {
-      setIsScanning(false);
+      if (scanIdRef.current === scanId) {
+        setIsScanning(false);
+      }
     }
   };
 
   useEffect(() => {
     if (inputMode === "image" && activeImageSrc) {
-      const source: string | Blob = uploadedFileRef.current ?? activeImageSrc;
-      runDetection(source);
+      runDetection(uploadedFileRef.current ?? activeImageSrc);
     }
   }, [activeImageSrc, confThresh, inputMode, selectedSampleId]);
 
@@ -171,27 +198,9 @@ export const ScannerPage: React.FC = () => {
     }
   };
 
-  const handleLogDefect = async (box: DefectBox) => {
-    setIsCreatingOrder((prev) => ({ ...prev, [box.id]: true }));
-    try {
-      await api.createDefect({
-        class_code: box.label.includes("CRACK") ? "CRACK_ALLIGATOR" : "POTHOLE",
-        confidence: box.confidence,
-        severity_level: box.severity,
-        normalized_score: box.severity === "Critical" ? 85 : box.severity === "Severe" ? 65 : 40,
-      });
-    } catch {
-      // Fallback toast when running standalone AI inference without DB
-    } finally {
-      setLoggedDefects((prev) => ({ ...prev, [box.id]: true }));
-      setIsCreatingOrder((prev) => ({ ...prev, [box.id]: false }));
-      success("Saved", `${formatDefectTitle(box.label)} added to Maintenance.`);
-    }
-  };
-
-  const handleLogAllDefects = async () => {
+  const handleSaveAll = async () => {
     if (!inspection.boxes.length) return;
-    setIsLoggingAll(true);
+    setIsSavingAll(true);
     try {
       for (const box of inspection.boxes) {
         await api.createDefect({
@@ -202,34 +211,30 @@ export const ScannerPage: React.FC = () => {
         });
       }
     } catch {
-      // Ignore if running standalone inference server
+      // Standalone mode without DB
     } finally {
-      const done: Record<string, boolean> = {};
-      inspection.boxes.forEach((b) => {
-        done[b.id] = true;
-      });
-      setLoggedDefects(done);
-      setIsLoggingAll(false);
-      success("All Saved", `${inspection.boxes.length} defects saved to Maintenance.`);
+      setAllSaved(true);
+      setIsSavingAll(false);
+      success("Saved", `${inspection.boxes.length} defects added to Maintenance.`);
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* 1. Simple Top Header & Primary Upload Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3.5">
+    <div className="space-y-3.5">
+      {/* 1. Clean Top Action Row */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-            Road Defect Scanner
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+            Road Scanner
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Upload any road photo or pick a sample below to detect potholes and cracks.
+            Upload a road photo or select a sample to detect potholes and cracks.
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <label className="px-3.5 py-2 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1.5">
-            <UploadCloud className="w-3.5 h-3.5" />
+          <label className="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1.5">
+            <UploadCloud className="w-4 h-4" />
             <span>Upload Photo</span>
             <input
               type="file"
@@ -248,21 +253,21 @@ export const ScannerPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setInputMode(inputMode === "camera" ? "image" : "camera")}
-            className={`px-3 py-2 rounded-md text-xs font-medium border transition-colors cursor-pointer flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer flex items-center gap-1.5 ${
               inputMode === "camera"
                 ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent"
-                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >
-            <Camera className="w-3.5 h-3.5" />
-            <span>{inputMode === "camera" ? "Back to Photo" : "Camera"}</span>
+            <Camera className="w-4 h-4" />
+            <span>{inputMode === "camera" ? "Photo Mode" : "Camera"}</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Quick Sample Strip */}
+      {/* 2. Simple Sample Switcher */}
       {inputMode !== "camera" && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:thin]">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:thin]">
           {SAMPLE_IMAGES.map((sample) => (
             <button
               key={sample.id}
@@ -286,33 +291,24 @@ export const ScannerPage: React.FC = () => {
         </div>
       )}
 
-      {/* 3. Main 2-Column Workspace: Image Viewer + Simple Defect List */}
+      {/* 3. Main 2-Column View: Photo Canvas + Simple Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* Left Column: Road Photo & Detections */}
-        <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 space-y-3">
-          {/* Viewer Toolbar */}
+        {/* Photo Viewer */}
+        <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 space-y-2.5">
           <div className="flex items-center justify-between gap-2 text-xs">
             <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
               {activeRoadName}
             </span>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-0.5">
-                {(["boxes", "masks", "off"] as DisplayMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setDisplayMode(mode)}
-                    className={`px-2.5 py-1 rounded text-xs capitalize cursor-pointer transition-colors ${
-                      displayMode === mode
-                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowBoxes(!showBoxes)}
+                className="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer flex items-center gap-1.5"
+              >
+                {showBoxes ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{showBoxes ? "Hide Boxes" : "Show Boxes"}</span>
+              </button>
 
               <button
                 type="button"
@@ -325,7 +321,6 @@ export const ScannerPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Photo Canvas */}
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -355,12 +350,11 @@ export const ScannerPage: React.FC = () => {
                   className="mt-3 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold cursor-pointer flex items-center gap-1.5"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>Capture &amp; Scan</span>
+                  <span>Scan Frame</span>
                 </button>
               </div>
             ) : (
               <div className="relative w-full h-[460px] flex items-center justify-center select-none">
-                {/* Clean Corner Summary Pill */}
                 <div className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-md bg-slate-900/90 border border-slate-700 text-white text-xs font-medium pointer-events-none flex items-center gap-1.5">
                   <span
                     className={`w-2 h-2 rounded-full ${
@@ -384,13 +378,13 @@ export const ScannerPage: React.FC = () => {
                     style={{ maxHeight: "460px", width: "auto", height: "auto" }}
                   />
                   <ScanLine isScanning={isScanning} stage={scanStage} />
-                  {displayMode !== "off" && (
+                  {showBoxes && (
                     <BoxOverlay
                       detections={inspection.boxes}
-                      activeId={selectedBoxId || hoveredBoxId}
+                      activeId={hoveredBoxId ?? selectedBoxId}
                       onHover={(id) => setHoveredBoxId(id)}
-                      onSelect={(id) => setSelectedBoxId(id)}
-                      viewMode={displayMode}
+                      onSelect={(id) => setSelectedBoxId((prev) => (prev === id ? null : id))}
+                      viewMode="boxes"
                     />
                   )}
                 </div>
@@ -398,10 +392,8 @@ export const ScannerPage: React.FC = () => {
             )}
           </div>
 
-          {/* Simple Controls Footer */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <Sliders className="w-3.5 h-3.5" />
               <span>Sensitivity</span>
               <input
                 type="range"
@@ -418,14 +410,13 @@ export const ScannerPage: React.FC = () => {
             </div>
 
             <span className="font-mono">
-              {inspection.latencyMs > 0 ? `${Math.round(inspection.latencyMs)} ms` : "Ready"}
+              {inspection.latencyMs > 0 ? `${(inspection.latencyMs / 1000).toFixed(2)}s` : "Ready"}
             </span>
           </div>
         </div>
 
-        {/* Right Column: Simple Results Card */}
+        {/* Results Panel */}
         <div className="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col">
-          {/* 3 Clean Numbers */}
           <div className="grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-800 border-b border-slate-200 dark:border-slate-800 text-center py-3">
             <div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400">Potholes</div>
@@ -440,7 +431,7 @@ export const ScannerPage: React.FC = () => {
               </div>
             </div>
             <div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400">Condition</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">Status</div>
               <div
                 className={`text-sm font-bold mt-0.5 ${
                   inspection.boxes.length === 0
@@ -455,86 +446,76 @@ export const ScannerPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Detected Defects List */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-800 dark:text-white">
-              Detected Defects ({inspection.boxes.length})
-            </span>
-            {inspection.boxes.length > 0 && (
-              <button
-                type="button"
-                onClick={handleLogAllDefects}
-                disabled={isLoggingAll}
-                className="px-2.5 py-1 rounded text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white cursor-pointer disabled:opacity-50 flex items-center gap-1"
-              >
-                {isLoggingAll ? <RefreshCw className="w-3 h-3 animate-spin" /> : "Save All"}
-              </button>
-            )}
-          </div>
-
-          <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[395px] overflow-y-auto [scrollbar-width:thin]">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[385px] overflow-y-auto [scrollbar-width:thin]">
             {inspection.boxes.length > 0 ? (
               inspection.boxes.map((b, idx) => {
                 const isSelected = selectedBoxId === b.id;
                 const isCrack = b.label.includes("CRACK");
                 return (
-                  <div
+                  <button
                     key={b.id}
+                    type="button"
                     onMouseEnter={() => setHoveredBoxId(b.id)}
                     onMouseLeave={() => setHoveredBoxId(null)}
-                    onClick={() => setSelectedBoxId(b.id)}
-                    className={`px-3 py-2.5 flex items-center justify-between gap-2 text-xs cursor-pointer transition-colors ${
+                    onClick={() => setSelectedBoxId((prev) => (prev === b.id ? null : b.id))}
+                    className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs cursor-pointer transition-colors ${
                       isSelected
                         ? "bg-blue-50/70 dark:bg-blue-950/30"
                         : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <span className="text-slate-400 font-mono w-5 shrink-0">#{idx + 1}</span>
                       <span
-                        className={`w-2 h-2 rounded-full shrink-0 ${
+                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                           isCrack
-                            ? "bg-amber-600"
+                            ? "bg-amber-800"
                             : b.severity === "Critical"
-                            ? "bg-red-600"
-                            : "bg-emerald-700"
+                            ? "bg-red-900"
+                            : "bg-emerald-900"
                         }`}
                       />
-                      <div className="truncate">
-                        <div className="font-semibold text-slate-800 dark:text-slate-200 truncate">
-                          {formatDefectTitle(b.label)}
-                        </div>
-                        <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                          {Math.round(b.confidence * 100)}% · {b.severity}
-                        </div>
-                      </div>
+                      <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
+                        {formatDefectTitle(b.label)}
+                      </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLogDefect(b);
-                      }}
-                      disabled={loggedDefects[b.id] || isCreatingOrder[b.id]}
-                      className={`px-2 py-1 rounded text-[11px] font-medium shrink-0 cursor-pointer ${
-                        loggedDefects[b.id]
-                          ? "text-emerald-600 dark:text-emerald-400 cursor-default"
-                          : "border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      {loggedDefects[b.id] ? "Saved" : "Save"}
-                    </button>
-                  </div>
+                    <span className="font-mono text-slate-500 dark:text-slate-400 shrink-0">
+                      {Math.round(b.confidence * 100)}%
+                    </span>
+                  </button>
                 );
               })
             ) : (
               <div className="py-12 px-4 text-center text-slate-500 text-xs flex flex-col items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-emerald-500" />
-                <span>No potholes or cracks detected in this photo.</span>
+                <span>No potholes or cracks detected.</span>
               </div>
             )}
           </div>
+
+          {inspection.boxes.length > 0 && (
+            <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900">
+              <button
+                type="button"
+                onClick={handleSaveAll}
+                disabled={isSavingAll || allSaved}
+                className={`w-full py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
+                  allSaved
+                    ? "bg-emerald-700 text-white cursor-default"
+                    : "bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                }`}
+              >
+                {isSavingAll ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : allSaved ? (
+                  "Saved to Maintenance"
+                ) : (
+                  "Save to Maintenance"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -559,13 +540,13 @@ export const ScannerPage: React.FC = () => {
                 className="block select-none"
                 style={{ maxHeight: "calc(100vh - 100px)", maxWidth: "calc(100vw - 40px)" }}
               />
-              {displayMode !== "off" && (
+              {showBoxes && (
                 <BoxOverlay
                   detections={inspection.boxes}
-                  activeId={selectedBoxId || hoveredBoxId}
+                  activeId={hoveredBoxId ?? selectedBoxId}
                   onHover={(id) => setHoveredBoxId(id)}
-                  onSelect={(id) => setSelectedBoxId(id)}
-                  viewMode={displayMode}
+                  onSelect={(id) => setSelectedBoxId((prev) => (prev === id ? null : id))}
+                  viewMode="boxes"
                 />
               )}
             </div>

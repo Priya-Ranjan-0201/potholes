@@ -119,7 +119,7 @@ const AppShell: React.FC = () => {
 
       <Navbar />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4">
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
             <Routes location={location}>

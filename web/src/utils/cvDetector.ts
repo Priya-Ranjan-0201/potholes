@@ -38,7 +38,8 @@ export interface InspectionResult {
 export async function detectDefects(
   imageSource: File | Blob | string,
   confThresh: number = 0.30,
-  onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void
+  onStageChange?: (stage: "preprocess" | "inference" | "postprocess") => void,
+  externalSignal?: AbortSignal
 ): Promise<InspectionResult> {
   const startTime = performance.now();
   onStageChange?.("preprocess");
@@ -46,7 +47,7 @@ export async function detectDefects(
   try {
     let blob: Blob;
     if (typeof imageSource === "string") {
-      const res = await fetch(imageSource);
+      const res = await fetch(imageSource, { signal: externalSignal });
       blob = await res.blob();
     } else {
       blob = imageSource;
@@ -59,6 +60,13 @@ export async function detectDefects(
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 35000);
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        controller.abort();
+      } else {
+        externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+      }
+    }
 
     onStageChange?.("inference");
 
