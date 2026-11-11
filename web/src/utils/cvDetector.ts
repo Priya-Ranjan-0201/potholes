@@ -9,12 +9,14 @@ export interface DefectBox {
   label: "POTHOLE" | string;
   confidence: number;
   box: [number, number, number, number]; // [x%, y%, w%, h%]
+  polygon?: [number, number][]; // [[x%, y%], ...] segmentation polygon coordinates
   severity: "Critical" | "Severe" | "Moderate" | "Minor";
   score: number; // 0 - 100
   areaPx: number;
   action?: string;
   wheelPathRisk?: boolean;
   depthIndicator?: "Shallow" | "Medium" | "Deep";
+  modelSource?: string;
 }
 
 export interface InspectionResult {
@@ -83,12 +85,14 @@ export async function detectDefects(
         label: d.label,
         confidence: d.confidence,
         box: d.box as [number, number, number, number],
+        polygon: d.polygon as [number, number][] | undefined,
         severity: d.severity,
         score: d.score,
         areaPx: d.areaPx,
         action: d.action,
         wheelPathRisk: d.wheel_path_risk,
         depthIndicator: d.depth_indicator,
+        modelSource: d.model_source,
       }));
 
       return {

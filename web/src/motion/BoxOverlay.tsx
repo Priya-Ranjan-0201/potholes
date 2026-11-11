@@ -6,6 +6,7 @@ export interface BoundingBoxItem {
   label: string;
   confidence: number;
   box: [number, number, number, number]; // [x%, y%, w%, h%]
+  polygon?: [number, number][]; // [[x%, y%], ...] organic segmentation contour
   severity?: string;
   score?: number;
 }
@@ -17,12 +18,13 @@ interface BoxOverlayProps {
   onSelect: (id: string) => void;
   className?: string;
   colorScheme?: "emerald" | "severity";
+  viewMode?: "boxes" | "masks" | "both";
 }
 
 /**
- * Clean, Professional Bounding Box Overlay.
- * Transparent inner fill (asphalt is 100% visible), clean 1.5px border,
- * and high-contrast corner label chip.
+ * Clean, Professional Hybrid Bounding Box & Polygon Segmentation Mask Overlay.
+ * Renders deep learning instance segmentation contours alongside crisp bounding boxes
+ * with collision-free label badges.
  */
 export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   detections,
@@ -31,6 +33,7 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   onSelect,
   className = "",
   colorScheme = "emerald",
+  viewMode = "both",
 }) => {
   const isReduced = useReducedMotion();
 
@@ -189,35 +192,51 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
             filter="url(#box-dark-contrast)"
             aria-label={`${d.label} with confidence ${(d.confidence * 100).toFixed(0)}%`}
           >
-            {/* Box fill: subtle dark tint over pothole, darker highlight when hovered */}
-            <rect
-              x={x}
-              y={y}
-              width={w}
-              height={h}
-              fill={color}
-              fillOpacity={isActive ? 0.28 : 0.08}
-              rx={0.3}
-            />
+            {/* 1. Polygonal Instance Segmentation Mask */}
+            {(viewMode === "masks" || viewMode === "both") && d.polygon && d.polygon.length >= 3 && (
+              <polygon
+                points={d.polygon.map(([px, py]) => `${px},${py}`).join(" ")}
+                fill={color}
+                fillOpacity={isActive ? 0.38 : 0.22}
+                stroke={color}
+                strokeWidth={isActive ? 0.95 : 0.65}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                filter="url(#box-dark-contrast)"
+              />
+            )}
 
-            {/* Box Stroke: Darker, bolder outline */}
-            <rect
-              x={x}
-              y={y}
-              width={w}
-              height={h}
-              fill="none"
-              stroke={color}
-              strokeWidth={isActive ? 0.95 : 0.68}
-              rx={0.3}
-              style={{
-                strokeDasharray: shouldAnimate ? "400" : "none",
-                strokeDashoffset: shouldAnimate ? "400" : "0",
-                animation: shouldAnimate
-                  ? `detection-box-draw 180ms ease-out ${delayMs}ms forwards`
-                  : "none",
-              }}
-            />
+            {/* 2. Bounding Box Fill & Stroke */}
+            {(viewMode === "boxes" || viewMode === "both" || !d.polygon || d.polygon.length < 3) && (
+              <>
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  fill={color}
+                  fillOpacity={isActive ? 0.28 : (viewMode === "both" && d.polygon ? 0.04 : 0.08)}
+                  rx={0.3}
+                />
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={isActive ? 0.95 : 0.68}
+                  rx={0.3}
+                  style={{
+                    strokeDasharray: shouldAnimate ? "400" : "none",
+                    strokeDashoffset: shouldAnimate ? "400" : "0",
+                    animation: shouldAnimate
+                      ? `detection-box-draw 180ms ease-out ${delayMs}ms forwards`
+                      : "none",
+                  }}
+                />
+              </>
+            )}
 
             {/* Corner Label Chip: Dark, solid, crisp and collision-free */}
             <g

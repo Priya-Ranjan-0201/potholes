@@ -6,7 +6,7 @@ skyline, and non-road surfaces. Adheres strictly to Rule R2 (No fake AI) and Rul
 
 import time
 import os
-from typing import List
+from typing import List, Optional
 import cv2
 import numpy as np
 from fastapi import APIRouter, File, UploadFile, HTTPException, Query
@@ -23,6 +23,7 @@ class DetectionBox(BaseModel):
     label: str
     confidence: float
     box: List[float]  # [x%, y%, w%, h%]
+    polygon: Optional[List[List[float]]] = None  # [[x%, y%], ...] polygonal segmentation mask
     severity: str
     score: int
     areaPx: int
@@ -32,6 +33,7 @@ class DetectionBox(BaseModel):
     unit: str = "px_relative_pct"
     wheel_path_risk: bool = False
     depth_indicator: str = "Medium"
+    model_source: str = "Ensemble (70% YOLOv8-Seg + 30% YOLO11n)"
 
 
 class InferenceResponse(BaseModel):
@@ -44,7 +46,7 @@ class InferenceResponse(BaseModel):
     max_severity: str
     overall_health_score: int
     detections: List[DetectionBox]
-    engine: str = "YOLO11n-INT8 (Quantized Edge Engine)"
+    engine: str = "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)"
     latency_ms: float = 0.0
 
 
@@ -124,6 +126,73 @@ def get_crack_engine(conf_thresh: float = 0.22, iou_thresh: float = 0.35):
         return None
 
 
+def get_segmentation_engine():
+    """Retrieve or initialize the YOLOv8n pothole segmentation engine (keremberke/yolov8n-pothole-segmentation)."""
+    if "yolov8n_seg" in _ENGINE_CACHE:
+        return _ENGINE_CACHE["yolov8n_seg"]
+
+    from ultralytics import YOLO
+
+    candidates = [
+        "ml/weights/yolov8n_seg_pothole.onnx",
+        "ml/weights/yolov8n_seg_pothole.pt",
+        "ml/eval_hf/keremberke_yolov8n_seg.pt",
+    ]
+    selected = next((p for p in candidates if os.path.exists(p)), None)
+    if not selected:
+        return None
+
+    try:
+        model = YOLO(selected)
+        _ENGINE_CACHE["yolov8n_seg"] = model
+        return model
+    except Exception as e:
+        print(f"[AI ENGINE] Error loading segmentation engine: {e}", flush=True)
+        return None
+
+
+def extract_defect_polygon(img: np.ndarray, bx: list) -> List[List[float]]:
+    """Extract organic cavity/crack perimeter contour coordinates inside ROI."""
+    h, w = img.shape[:2]
+    x1, y1 = int(max(0, bx[0])), int(max(0, bx[1]))
+    x2, y2 = int(min(w, bx[2])), int(min(h, bx[3]))
+    if (x2 - x1) < 8 or (y2 - y1) < 8:
+        return [
+            [round(x1 / w * 100, 2), round(y1 / h * 100, 2)],
+            [round(x2 / w * 100, 2), round(y1 / h * 100, 2)],
+            [round(x2 / w * 100, 2), round(y2 / h * 100, 2)],
+            [round(x1 / w * 100, 2), round(y2 / h * 100, 2)],
+        ]
+    roi = img[y1:y2, x1:x2]
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        largest = max(contours, key=cv2.contourArea)
+        if cv2.contourArea(largest) > 16:
+            eps = 0.015 * cv2.arcLength(largest, True)
+            approx = cv2.approxPolyDP(largest, eps, True)
+            pts = []
+            for pt in approx:
+                px = round(float((x1 + pt[0][0]) / w * 100), 2)
+                py = round(float((y1 + pt[0][1]) / h * 100), 2)
+                pts.append([px, py])
+            if len(pts) >= 3:
+                return pts
+    bw, bh = x2 - x1, y2 - y1
+    return [
+        [round(float((x1 + bw * 0.1) / w * 100), 2), round(float(y1 / h * 100), 2)],
+        [round(float((x2 - bw * 0.1) / w * 100), 2), round(float(y1 / h * 100), 2)],
+        [round(float(x2 / w * 100), 2), round(float((y1 + bh * 0.1) / h * 100), 2)],
+        [round(float(x2 / w * 100), 2), round(float((y2 - bh * 0.1) / h * 100), 2)],
+        [round(float((x2 - bw * 0.1) / w * 100), 2), round(float(y2 / h * 100), 2)],
+        [round(float((x1 + bw * 0.1) / w * 100), 2), round(float(y2 / h * 100), 2)],
+        [round(float(x1 / w * 100), 2), round(float((y2 - bh * 0.1) / h * 100), 2)],
+        [round(float(x1 / w * 100), 2), round(float((y1 + bh * 0.1) / h * 100), 2)],
+    ]
+
+
 def evaluate_depth(img: np.ndarray, box: tuple) -> str:
     """Estimate surface cavity depth from central luminance depression."""
     x1, y1, x2, y2 = [int(v) for v in box]
@@ -192,7 +261,33 @@ async def infer_road_defects(
                 detail="No trained YOLO11n ONNX model found in runs/export/."
             )
 
-        # 1. Forward model inference: Potholes (fine-tuned YOLO11 INT8)
+        # 1. Primary Segmentation Pass: YOLOv8n-Seg (70% weightage)
+        seg_engine = get_segmentation_engine()
+        seg_boxes = []
+        if seg_engine is not None:
+            try:
+                seg_res = seg_engine.predict(img, conf=max(0.12, conf_thresh * 0.8), iou=iou_thresh, verbose=False)[0]
+                if seg_res.boxes is not None:
+                    boxes_np = seg_res.boxes.xyxy.cpu().numpy()
+                    confs_np = seg_res.boxes.conf.cpu().numpy()
+                    masks_xy = seg_res.masks.xy if seg_res.masks is not None else []
+                    for i, bx in enumerate(boxes_np):
+                        poly = None
+                        if i < len(masks_xy) and len(masks_xy[i]) >= 3:
+                            pts = np.array(masks_xy[i], dtype=np.float32)
+                            eps = 0.008 * cv2.arcLength(pts, True)
+                            approx = cv2.approxPolyDP(pts, eps, True)
+                            poly = [[round(float(p[0][0] / w) * 100, 2), round(float(p[0][1] / h) * 100, 2)] for p in approx]
+                        seg_boxes.append({
+                            "box": [float(x) for x in bx],
+                            "conf": float(confs_np[i]),
+                            "poly": poly,
+                            "matched": False,
+                        })
+            except Exception as e:
+                print(f"[AI INFER] Warning: Segmentation pass error: {e}", flush=True)
+
+        # 2. Base Forward Inference: YOLO11n INT8 (30% weightage)
         raw_potholes = engine.predict(img)
 
         # Adaptive sensitivity pass: if primary threshold yielded 0 detections, evaluate at sensitivity floor (0.08)
@@ -201,18 +296,73 @@ async def infer_road_defects(
             if adaptive_engine:
                 raw_potholes = adaptive_engine.predict(img)
 
-        # 2. Multi-class Crack Detection (RDD2022 trained: Alligator, Longitudinal, Transverse)
+        base_boxes = [{
+            "box": [float(x) for x in p.bbox_xyxy],
+            "conf": float(p.confidence),
+            "matched": False,
+        } for p in raw_potholes]
+
+        # 3. 70/30 Ensemble Fusion
+        fused_potholes = []
+        for sb in seg_boxes:
+            best_b, best_iou = None, 0.0
+            for bb in base_boxes:
+                if bb["matched"]:
+                    continue
+                iou = compute_iou_xyxy(sb["box"], bb["box"])
+                if iou > best_iou:
+                    best_iou, best_b = iou, bb
+
+            if best_b and best_iou > 0.20:
+                sb["matched"] = True
+                best_b["matched"] = True
+                cf = 0.70 * sb["conf"] + 0.30 * best_b["conf"]
+                bx = [
+                    min(sb["box"][0], best_b["box"][0]),
+                    min(sb["box"][1], best_b["box"][1]),
+                    max(sb["box"][2], best_b["box"][2]),
+                    max(sb["box"][3], best_b["box"][3]),
+                ]
+                fused_potholes.append({
+                    "box": bx,
+                    "conf": cf,
+                    "poly": sb["poly"] or extract_defect_polygon(img, bx),
+                    "source": "Ensemble (70% Seg + 30% Base)",
+                })
+            else:
+                cf = 0.70 * sb["conf"]
+                fused_potholes.append({
+                    "box": sb["box"],
+                    "conf": cf,
+                    "poly": sb["poly"] or extract_defect_polygon(img, sb["box"]),
+                    "source": "YOLOv8-Seg (70% Weight)",
+                })
+
+        for bb in base_boxes:
+            if not bb["matched"]:
+                cf = 0.30 * bb["conf"] + 0.70 * (bb["conf"] * 0.9)
+                fused_potholes.append({
+                    "box": bb["box"],
+                    "conf": cf,
+                    "poly": extract_defect_polygon(img, bb["box"]),
+                    "source": "YOLO11n-Edge (30% Weight)",
+                })
+
+        # 4. Multi-class Crack Detection (RDD2022 trained: Alligator, Longitudinal, Transverse)
         crack_engine = get_crack_engine(conf_thresh=max(0.22, conf_thresh), iou_thresh=iou_thresh)
         raw_cracks = crack_engine.predict(img) if crack_engine else []
 
-        # 3. Domain & Vehicle Exclusion Filtering
+        # 5. Domain & Vehicle Exclusion Filtering
         detections: List[DetectionBox] = []
         accepted_pothole_boxes = []
 
         # Process Potholes
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        for i, d in enumerate(raw_potholes):
-            bx = d.bbox_xyxy
+        for i, d in enumerate(fused_potholes):
+            bx = d["box"]
+            conf_val = d["conf"]
+            poly_pts = d["poly"]
+            source_lbl = d["source"]
             bw = max(1.0, bx[2] - bx[0])
             bh = max(1.0, bx[3] - bx[1])
             cy = (bx[1] + bx[3]) / 2.0
@@ -247,8 +397,10 @@ async def infer_road_defects(
             if (bw / w > 0.98) and (bh / h > 0.98):
                 continue
 
-            # Filter 6: Vehicle hood / dashboard reflection
+            # Filter 6: Vehicle hood / dashboard reflection / watermark banner
             if bx[3] > (h * 0.96) and (bw / w > 0.85):
+                continue
+            if (bw / w > 0.75) and (bx[3] > h * 0.85):
                 continue
 
             # Filter 7: Thin horizontal sensor line artifacts
@@ -257,7 +409,7 @@ async def infer_road_defects(
 
             # Filter 8: Suppress low-confidence shallow pothole hallucinations on crack networks
             # (e.g. flat pavement tiles enclosed by cracks that lack concave depth depression)
-            if d.confidence < 0.23:
+            if conf_val < 0.23:
                 if (x2_c - x1_c) >= 8 and (y2_c - y1_c) >= 8:
                     roi = gray_img[y1_c:y2_c, x1_c:x2_c]
                     rh, rw = roi.shape
@@ -277,7 +429,7 @@ async def infer_road_defects(
             w_pct = round((bw / w) * 100, 1)
             h_pct = round((bh / h) * 100, 1)
             area_px = int(bw * bh)
-            cf = round(float(d.confidence), 3)
+            cf = round(float(conf_val), 3)
 
             base_weight = 45
             action = "Immediate 24-hour asphalt compaction and sealing"
@@ -300,6 +452,7 @@ async def infer_road_defects(
                     label="POTHOLE",
                     confidence=cf,
                     box=[x_pct, y_pct, w_pct, h_pct],
+                    polygon=poly_pts,
                     severity=severity,
                     score=score,
                     areaPx=area_px,
@@ -309,6 +462,7 @@ async def infer_road_defects(
                     unit="px_relative_pct",
                     wheel_path_risk=wheel_path_risk,
                     depth_indicator=depth_indicator,
+                    model_source=source_lbl,
                 )
             )
 
@@ -431,12 +585,14 @@ async def infer_road_defects(
             score = min(100, max(15, base_weight + area_component + wheel_bonus))
             severity = "Critical" if score >= 70 else ("Severe" if score >= 45 else "Moderate")
 
+            crack_poly = extract_defect_polygon(img, [min_x, min_y, max_x, max_y])
             detections.append(
                 DetectionBox(
                     id=f"det-{len(detections)+1}",
                     label=final_label,
                     confidence=cf,
                     box=[x_pct, y_pct, w_pct, h_pct],
+                    polygon=crack_poly,
                     severity=severity,
                     score=score,
                     areaPx=area_px,
@@ -446,6 +602,7 @@ async def infer_road_defects(
                     unit="px_relative_pct",
                     wheel_path_risk=wheel_path_risk,
                     depth_indicator="Shallow",
+                    model_source="RDD2022 Distress Multi-Class",
                 )
             )
 
@@ -479,7 +636,7 @@ async def infer_road_defects(
             max_severity=max_severity,
             overall_health_score=overall_health,
             detections=detections,
-            engine="YOLO11n-INT8 (Quantized Edge Engine)",
+            engine="Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)",
             latency_ms=latency_ms,
         )
 

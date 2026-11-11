@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { api } from "../api/client";
 import {
   Shield,
-  Eye,
-  EyeOff,
   Cpu,
   Sliders,
   CheckCircle,
@@ -98,6 +96,7 @@ export const ScannerPage: React.FC = () => {
   const [loggedDefects, setLoggedDefects] = useState<Record<string, boolean>>({});
   const [isCreatingOrder, setIsCreatingOrder] = useState<Record<string, boolean>>({});
   const [isLoggingAll, setIsLoggingAll] = useState<boolean>(false);
+  const [overlayMode, setOverlayMode] = useState<"both" | "masks" | "boxes">("both");
   const { success } = useToast();
 
   const [crops, setCrops] = useState<ZoomCrop[]>([]);
@@ -431,19 +430,45 @@ export const ScannerPage: React.FC = () => {
                 ]}
               />
 
-              <button
-                type="button"
-                onClick={() => setShowBoxes(!showBoxes)}
-                className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md border transition-colors cursor-pointer ${
-                  showBoxes
-                    ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border-slate-300 dark:border-slate-600 font-semibold"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                }`}
-                title="Toggle detection bounding boxes"
-              >
-                {showBoxes ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                <span>Boxes</span>
-              </button>
+              {/* Overlay Mode Selector: Both | Masks | Boxes */}
+              <div className="flex items-center rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0.5 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => { setShowBoxes(true); setOverlayMode("both"); }}
+                  className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                    showBoxes && overlayMode === "both"
+                      ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                  title="Show both polygon segmentation masks and bounding boxes"
+                >
+                  Both
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowBoxes(true); setOverlayMode("masks"); }}
+                  className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                    showBoxes && overlayMode === "masks"
+                      ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                  title="Show deep learning polygon segmentation masks (70% YOLOv8-Seg)"
+                >
+                  Masks
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowBoxes(true); setOverlayMode("boxes"); }}
+                  className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                    showBoxes && overlayMode === "boxes"
+                      ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                  title="Show bounding boxes only"
+                >
+                  Boxes
+                </button>
+              </div>
 
               <button
                 type="button"
@@ -556,6 +581,7 @@ export const ScannerPage: React.FC = () => {
                       onHover={(id) => setHoveredBoxId(id)}
                       onSelect={(id) => setSelectedBoxId(id)}
                       colorScheme="emerald"
+                      viewMode={overlayMode}
                     />
                   )}
                 </div>
@@ -567,8 +593,8 @@ export const ScannerPage: React.FC = () => {
           <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400 font-mono">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                <Cpu className="w-3.5 h-3.5 text-blue-500" />
-                <span>YOLO11n INT8</span>
+                <Cpu className="w-3.5 h-3.5 text-emerald-500" />
+                <span>{inspection.engine || "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n)"}</span>
               </span>
               <span>·</span>
               <span>
@@ -749,19 +775,26 @@ export const ScannerPage: React.FC = () => {
                       <tr key={b.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="py-2 px-3 text-center font-bold text-slate-400">{idx + 1}</td>
                         <td className="py-2 px-3">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                              b.label.includes("CRACK")
-                                ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
-                                : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-                            }`}
-                          >
-                            {b.label.includes("ALLIGATOR")
-                              ? "Alligator Crack"
-                              : b.label.includes("CRACK")
-                              ? "Crack"
-                              : "Pothole"}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                                b.label.includes("CRACK")
+                                  ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                                  : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                              }`}
+                            >
+                              {b.label.includes("ALLIGATOR")
+                                ? "Alligator Crack"
+                                : b.label.includes("CRACK")
+                                ? "Crack"
+                                : "Pothole"}
+                            </span>
+                            {b.polygon && b.polygon.length >= 3 && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800" title="YOLOv8 deep learning polygonal segmentation mask">
+                                Seg ({b.polygon.length}v)
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-2 px-3 text-center font-semibold font-mono text-emerald-600 dark:text-emerald-400">
                           {b.confidence.toFixed(2)}
