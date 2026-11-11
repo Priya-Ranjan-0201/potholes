@@ -32,34 +32,34 @@ interface SampleImage {
 
 const SAMPLE_IMAGES: SampleImage[] = [
   {
+    id: "capture-bengaluru",
+    label: "Bengaluru Arterial (16 Potholes)",
+    src: "/samples/bengaluru_potholes.jpg",
+    road: "Bengaluru North Arterial (14,000 Potholes Survey)",
+  },
+  {
+    id: "capture-mumbai",
+    label: "Mumbai Monsoon (50+ Potholes)",
+    src: "/samples/mumbai_potholes.avif",
+    road: "SV Road Monsoon Corridor (Mumbai)",
+  },
+  {
+    id: "capture-cracks",
+    label: "Alligator Fatigue Cracks (6 Zones)",
+    src: "/samples/alligator_cracks.jpg",
+    road: "Ferozepur Road Alligator Cracking",
+  },
+  {
+    id: "capture-diagram",
+    label: "Civil Distress Benchmark",
+    src: "/samples/civil_distress_diagram.jpg",
+    road: "ASTM D6433 Civil Engineering Distress Diagram",
+  },
+  {
     id: "capture-pothole",
     label: "Asphalt Crater (Sector 12)",
     src: "/samples/asphalt_crater.jpg",
     road: "NH-44 Sector 12 Arterial",
-  },
-  {
-    id: "capture-mumbai",
-    label: "Mumbai Monsoon (40+ Potholes)",
-    src: "/samples/mumbai_monsoon.jpg",
-    road: "SV Road Monsoon Corridor (Mumbai)",
-  },
-  {
-    id: "capture-bengaluru",
-    label: "Bengaluru Arterial (Multi-Pothole)",
-    src: "/samples/bengaluru_arterial.jpg",
-    road: "Outer Ring Road Arterial (Bengaluru)",
-  },
-  {
-    id: "capture-multi",
-    label: "Multi-Crater Cluster (20+ Hazards)",
-    src: "/samples/user_tested_potholes.jpg",
-    road: "Gill Road Industrial Corridor",
-  },
-  {
-    id: "capture-unpaved",
-    label: "Unpaved Rural (Sector 4)",
-    src: "/samples/unpaved_craters.jpg",
-    road: "Sector 4 Unpaved Bypass",
   },
   {
     id: "capture-clean",
@@ -85,9 +85,9 @@ export const ScannerPage: React.FC = () => {
   const [showBoxes, setShowBoxes] = useState<boolean>(true);
   const [privacyMask, setPrivacyMask] = useState<boolean>(false);
   const [confThresh, setConfThresh] = useState<number>(0.15);
-  const [selectedSampleId, setSelectedSampleId] = useState<string>("capture-pothole");
-  const [activeImageSrc, setActiveImageSrc] = useState<string>("/samples/asphalt_crater.jpg");
-  const [activeRoadName, setActiveRoadName] = useState<string>("NH-44 Sector 12 Arterial");
+  const [selectedSampleId, setSelectedSampleId] = useState<string>("capture-bengaluru");
+  const [activeImageSrc, setActiveImageSrc] = useState<string>("/samples/bengaluru_potholes.jpg");
+  const [activeRoadName, setActiveRoadName] = useState<string>("Bengaluru North Arterial (14,000 Potholes Survey)");
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStage, setScanStage] = useState<"preprocess" | "inference" | "postprocess">("postprocess");
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
@@ -112,7 +112,7 @@ export const ScannerPage: React.FC = () => {
     latencyMs: 78.4,
     imageWidth: 667,
     imageHeight: 363,
-    engine: "YOLO11n-INT8 (Quantized Edge Engine)",
+    engine: "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)",
   });
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -710,7 +710,7 @@ export const ScannerPage: React.FC = () => {
               <div className="flex items-center justify-between py-1">
                 <span className="text-slate-600 dark:text-slate-400">Model Engine</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-                  YOLO11n-INT8 (Quantized)
+                  {inspection.engine || "Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8)"}
                 </span>
               </div>
             </div>
@@ -865,7 +865,7 @@ export const ScannerPage: React.FC = () => {
           <div className="p-3 bg-slate-50 dark:bg-slate-800/50 m-3 rounded-md border border-slate-200 dark:border-slate-700/80 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-              YOLO11n INT8 engine verified on edge deployment profile.
+              Ensemble Hybrid (70% YOLOv8-Seg + 30% YOLO11n-INT8) active with polygon mask segmentation.
             </span>
           </div>
         </div>

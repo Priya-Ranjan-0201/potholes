@@ -272,6 +272,12 @@ async def infer_road_defects(
                     confs_np = seg_res.boxes.conf.cpu().numpy()
                     masks_xy = seg_res.masks.xy if seg_res.masks is not None else []
                     for i, bx in enumerate(boxes_np):
+                        # Filter out oversized seg boxes (hallucinations on text banners or entire lower frame)
+                        seg_bw = bx[2] - bx[0]
+                        seg_bh = bx[3] - bx[1]
+                        if (seg_bw / w > 0.60) or (seg_bh / h > 0.45):
+                            continue
+
                         poly = None
                         if i < len(masks_xy) and len(masks_xy[i]) >= 3:
                             pts = np.array(masks_xy[i], dtype=np.float32)
@@ -317,12 +323,21 @@ async def infer_road_defects(
                 sb["matched"] = True
                 best_b["matched"] = True
                 cf = 0.70 * sb["conf"] + 0.30 * best_b["conf"]
-                bx = [
-                    min(sb["box"][0], best_b["box"][0]),
-                    min(sb["box"][1], best_b["box"][1]),
-                    max(sb["box"][2], best_b["box"][2]),
-                    max(sb["box"][3], best_b["box"][3]),
-                ]
+
+                # Use compact base bounds if seg box is disproportionately bloated
+                sb_w = sb["box"][2] - sb["box"][0]
+                bb_w = best_b["box"][2] - best_b["box"][0]
+                sb_h = sb["box"][3] - sb["box"][1]
+                bb_h = best_b["box"][3] - best_b["box"][1]
+                if sb_w > 1.6 * bb_w or sb_h > 1.6 * bb_h:
+                    bx = best_b["box"]
+                else:
+                    bx = [
+                        min(sb["box"][0], best_b["box"][0]),
+                        min(sb["box"][1], best_b["box"][1]),
+                        max(sb["box"][2], best_b["box"][2]),
+                        max(sb["box"][3], best_b["box"][3]),
+                    ]
                 fused_potholes.append({
                     "box": bx,
                     "conf": cf,
@@ -331,12 +346,16 @@ async def infer_road_defects(
                 })
             else:
                 cf = 0.70 * sb["conf"]
-                fused_potholes.append({
-                    "box": sb["box"],
-                    "conf": cf,
-                    "poly": sb["poly"] or extract_defect_polygon(img, sb["box"]),
-                    "source": "YOLOv8-Seg (70% Weight)",
-                })
+                # Must meet confidence threshold and valid defect proportion
+                sb_w = sb["box"][2] - sb["box"][0]
+                sb_h = sb["box"][3] - sb["box"][1]
+                if cf >= conf_thresh and (sb_w / w <= 0.45) and (sb_h / h <= 0.40):
+                    fused_potholes.append({
+                        "box": sb["box"],
+                        "conf": cf,
+                        "poly": sb["poly"] or extract_defect_polygon(img, sb["box"]),
+                        "source": "YOLOv8-Seg (70% Weight)",
+                    })
 
         for bb in base_boxes:
             if not bb["matched"]:
@@ -394,13 +413,13 @@ async def infer_road_defects(
             aspect = max(bw / bh, bh / bw)
             if aspect > 9.5:
                 continue
-            if (bw / w > 0.98) and (bh / h > 0.98):
+            if (bw / w > 0.60) or (bh / h > 0.55):
                 continue
 
             # Filter 6: Vehicle hood / dashboard reflection / watermark banner
             if bx[3] > (h * 0.96) and (bw / w > 0.85):
                 continue
-            if (bw / w > 0.75) and (bx[3] > h * 0.85):
+            if (bw / w > 0.50) and (bx[3] > h * 0.70):
                 continue
 
             # Filter 7: Thin horizontal sensor line artifacts
