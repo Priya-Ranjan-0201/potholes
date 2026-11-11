@@ -152,7 +152,7 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
                 refetchDrift();
                 refetchAlerts();
                 refetchRetraining();
-                info("Telemetry Refreshed", "Ingested latest edge model stability and drift statistics.");
+                info("Metrics Refreshed", "Loaded latest model stability and drift statistics.");
               }}
               className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
             >
@@ -162,7 +162,6 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
           </div>
         </div>
 
-        {/* Telemetry Stat Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono">
           <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
             <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Production Model</span>
@@ -210,7 +209,7 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wide uppercase flex items-center gap-2">
               <Sliders className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              <span>Section 2: Statistical Data Drift Detection (PSI &amp; KS-Test)</span>
+              <span>Statistical Data Drift (PSI &amp; KS-Test)</span>
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               Statistical monitoring of incoming patrol stream against reference baseline. Select a domain scenario to simulate real-world environmental distribution shifts.
@@ -311,13 +310,13 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
         )}
       </div>
 
-      {/* 3. Environmental & Geographic Robustness Matrix */}
+      {/* Environmental & Corridor Breakdown */}
       {driftData && driftData.environmental_matrix && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wide uppercase flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-              <span>Section 5: Environmental &amp; Geographic Robustness Matrix</span>
+              <span>Environmental &amp; Corridor Breakdown</span>
             </h3>
             <span className="text-xs font-mono text-slate-500 dark:text-slate-400">Patrol Conditions Tested</span>
           </div>
@@ -347,14 +346,14 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Automated Model Comparison & 5-Rule Municipal Promotion Gate */}
+      {/* Model Comparison & Acceptance Rules */}
       {comparisonData && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wide uppercase flex items-center gap-2">
                 <Layers className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-                <span>Section 6: Automated Model Comparison &amp; Promotion Gate</span>
+                <span>Model Comparison &amp; Acceptance Checks</span>
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                 Evaluation of candidate model ({comparisonData.candidate.version}) against production baseline ({comparisonData.production.version}) across 5 strict municipal acceptance rules.
@@ -422,7 +421,7 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wide uppercase flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-              <span>Section 4: Performance Degradation &amp; Drift Alert Center</span>
+              <span>Degradation &amp; Drift Alerts</span>
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
               Actionable notifications on potholes, contrast drop, false positives, or edge latency degradation.
@@ -477,23 +476,23 @@ export const ModelDriftMonitoringWorkbench: React.FC = () => {
             ))
           ) : (
             <div className="py-6 text-center text-xs text-slate-500 font-mono">
-              Zero active degradation alerts. Model telemetry nominal across all patrol corridors.
+              No active degradation alerts across monitored corridors.
             </div>
           )}
         </div>
       </div>
 
-      {/* 6. Targeted Retraining Recommendations */}
+      {/* Retraining Recommendations */}
       {retrainingList && retrainingList.length > 0 && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white tracking-wide uppercase flex items-center gap-2">
                 <FileCheck2 className="w-4 h-4 text-blue-500 dark:text-cyan-400" />
-                <span>Section 7: Targeted Retraining Recommendations</span>
+                <span>Retraining Recommendations</span>
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Prescriptive retraining plans with sample curation recipes and acceptance criteria.
+                Suggested retraining datasets and acceptance thresholds.
               </p>
             </div>
           </div>

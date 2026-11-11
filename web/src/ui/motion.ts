@@ -1,6 +1,5 @@
 /**
- * ScamRoad Motion System Tokens (v9 Vibrant Upgrade)
- * Section 5: All animations via motion.ts tokens.
+ * ScamRoad motion system tokens.
  * Durations: 120, 200, 320, 520, 900 ms.
  * Easing: cubic-bezier(.2, .8, .2, 1).
  * Spring: { stiffness: 260, damping: 26 }.

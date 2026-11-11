@@ -1,54 +1,45 @@
 # ScamRoad — Web Frontend Architecture
 
-Modern React 18 + TypeScript single-page application for the ScamRoad Road Defect Surveillance and Municipal Operations Portal.
+React 18, TypeScript, and Tailwind CSS web interface for road defect scanning, maintenance tracking, and model evaluation.
 
 ---
 
-## 🏗️ Directory Layout
+## Directory Layout
 
-```
+```text
 web/
 ├── src/
-│   ├── pages/               # Top-Level Application Views
-│   │   ├── ScannerPage.tsx      # 🛣️ Real-Time Defect Scanner with 70/30 AI Ensemble
-│   │   ├── DashboardPage.tsx    # 📊 Executive Ward Metrics & Corridor Distress Leaderboard
-│   │   ├── MaintenancePage.tsx  # 🛠️ Work Order Lifecycle, Contractor Dispatch & Verification
-│   │   └── BenchmarksPage.tsx   # 🧪 Empirical Evaluation Metrics & Confusion Matrix
-│   ├── motion/              # Visual Presentation & Motion Primitives
-│   │   ├── BoxOverlay.tsx       # 🎯 Polygonal Segmentation Masks & Dark Bounding Boxes
-│   │   ├── CompareSlider.tsx    # ↔️ Interactive Before/After Split Comparison Slider
-│   │   ├── ImageViewer.tsx      # 🔍 Deep Zoom & Pan Defect Inspector
-│   │   └── ScanLine.tsx         # 📡 Active Inference Scan Animation
-│   ├── components/          # Reusable UI Blocks (Navbar, Header, Status Badges, Icons)
-│   ├── ui/                  # Design System Primitives (Buttons, Cards, Dialogs, Inputs)
-│   ├── utils/               # Utilities
-│   │   └── cvDetector.ts        # ⚡ API Bridge communicating with /api/v1/infer
-│   ├── context/             # Global Contexts (ThemeContext, ToastContext)
-│   ├── App.tsx              # Root router configuration
-│   └── main.tsx             # Application DOM mounting
-├── public/                  # Static assets & /samples/ benchmark images
-│   └── samples/             # Bengaluru, Mumbai, Alligator Cracks & Diagram test imagery
-├── dist/                    # Optimized production bundle (`npm run build`)
-├── vite.config.ts           # Vite proxying `/api` -> `http://localhost:8000`
-└── package.json             # Dependencies and scripts
+│   ├── pages/
+│   │   ├── ScannerPage.tsx          # Defect scanner UI connected to /api/v1/infer
+│   │   ├── DashboardPage.tsx        # Ward summary and corridor defect counts
+│   │   ├── MaintenancePage.tsx      # Defect table, work orders, reports, repair verification
+│   │   ├── ModelBenchmarksPage.tsx  # Evaluation metrics, confusion matrix, drift checks
+│   │   ├── LandingPage.tsx          # Project overview and capabilities summary
+│   │   └── LoginPage.tsx            # Engineer / staff login form
+│   ├── motion/
+│   │   ├── BoxOverlay.tsx           # SVG bounding boxes, polygons, and labels
+│   │   ├── CompareSlider.tsx        # Before/after split image slider
+│   │   ├── ImageViewer.tsx          # Zoom and pan image viewer
+│   │   └── ScanLine.tsx             # Active scan progress indicator
+│   ├── components/                  # Navbar, Footer, CommandPalette, icons, verification views
+│   ├── ui/                          # Reusable buttons, badges, stat cards, and modals
+│   ├── utils/cvDetector.ts          # Client wrapper for POST /api/v1/infer
+│   ├── context/                     # Theme, Toast, Auth, and Language contexts
+│   ├── App.tsx                      # Application router
+│   └── main.tsx                     # DOM entrypoint
+├── public/samples/                  # Local road test images (Bengaluru, Mumbai, crater, cracks)
+├── dist/                            # Production bundle (`npm run build`)
+├── vite.config.ts                   # Dev proxy forwarding `/api` -> `http://localhost:8000`
+└── package.json                     # Dependencies and npm scripts
 ```
 
 ---
 
-## 🚀 Running the Frontend
+## Development & Build
 
 ```bash
 cd web
-npm run dev
+npm run dev      # Dev server on http://localhost:3000
+npm test -- --run
+npm run build    # TypeScript check (`tsc`) + Vite production bundle
 ```
-*Listens on `http://localhost:3000`. Proxies all `/api/*` network requests automatically to the backend on `http://localhost:8000`.*
-
----
-
-## 📦 Building for Production
-
-```bash
-cd web
-npm run build
-```
-*Typechecks with `tsc` and bundles with Vite. Generates minified assets in `web/dist/`.*

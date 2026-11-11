@@ -1,7 +1,5 @@
 /**
- * ScamRoad Functional Motion Tokens & Presets (SPEC v11).
- * Adheres strictly to Specification (Functional motion only), Specification (Reduced motion),
- * and Specification (Consistency: One central token registry).
+ * ScamRoad functional motion tokens and Framer Motion presets.
  */
 
 import { useMemo, useState, useEffect } from "react";

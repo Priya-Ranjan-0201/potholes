@@ -102,7 +102,7 @@ export const CommandPalette: React.FC = () => {
     },
     {
       id: "act-scan-image",
-      title: "Run Neural Edge Scanner (YOLO11n)",
+      title: "Open Road Scanner",
       category: "Actions",
       icon: <Camera className="w-4 h-4 text-blue-500" />,
       action: () => { navigate("/scanner"); setIsOpen(false); },

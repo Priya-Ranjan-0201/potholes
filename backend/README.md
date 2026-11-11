@@ -1,58 +1,59 @@
 # ScamRoad — Backend Architecture & API Guide
 
-FastAPI-powered asynchronous backend providing REST API services, real-time computer vision inference orchestration, and municipal work order lifecycle management.
+FastAPI backend providing ONNX computer vision inference, SQLAlchemy persistence, work-order workflows, and repair comparison endpoints.
 
 ---
 
-## 🏗️ Directory Layout
+## Directory Layout
 
-```
+```text
 backend/
 ├── app/
-│   ├── api/v1/          # REST API Version 1 Endpoints
-│   │   ├── infer.py         # 🧠 70/30 Multi-Model AI Inference Endpoint (/api/v1/infer)
-│   │   ├── defects.py       # Defect database records, query filtering, and engineer overrides
-│   │   ├── complaints.py    # Citizen incident reporting and municipal triage
-│   │   ├── maintenance.py   # Work order generation, contractor dispatch, and SLA tracking
-│   │   ├── verification.py  # Repair verification before/after image comparison
-│   │   ├── benchmarks.py    # Model evaluation metrics and confusion matrix
-│   │   ├── drift.py         # Data drift & concept drift monitoring (PSI / KS tests)
-│   │   ├── forecasts.py     # Deterioration curve forecasts and health index
-│   │   ├── reports.py       # Municipal CSV / PDF report export
-│   │   ├── auth.py          # JWT authentication and user profile management
-│   │   └── router.py        # Centralized APIRouter aggregation
-│   ├── core/            # Configuration settings, security hashing, JWT tokens
-│   ├── db/              # Async SQLAlchemy session and database engine
-│   ├── models/          # 39 SQLAlchemy database models (audit logs, defects, work orders)
-│   ├── schemas/         # Pydantic v2 request and response validation contracts
-│   ├── services/        # Domain business logic (severity scoring, sensor fusion)
-│   └── main.py          # Main FastAPI application entry point
+│   ├── api/v1/          # REST API v1 endpoints
+│   │   ├── infer.py         # 70/30 multi-model inference endpoint (/api/v1/infer)
+│   │   ├── defects.py       # Defect queries, filtering, and severity overrides
+│   │   ├── complaints.py    # Citizen report triage workflow
+│   │   ├── maintenance.py   # Work orders, contractor assignment, SLA tracking
+│   │   ├── verification.py  # Before/after repair alignment and comparison
+│   │   ├── benchmarks.py    # Stored evaluation metrics and confusion matrix
+│   │   ├── drift.py         # Input distribution drift (PSI / KS tests)
+│   │   ├── forecasts.py     # Corridor deterioration projections
+│   │   ├── reports.py       # CSV and PDF export endpoints
+│   │   ├── auth.py          # JWT authentication and role checks
+│   │   └── router.py        # APIRouter aggregation
+│   ├── core/            # Application settings, hashing, and JWT utilities
+│   ├── db/              # Async SQLAlchemy engine and session management
+│   ├── models/          # 44 SQLAlchemy ORM tables
+│   ├── schemas/         # Pydantic validation schemas
+│   ├── services/        # Severity scoring, alignment, drift, PDF export
+│   └── main.py          # FastAPI entrypoint
 ├── alembic/             # Database schema migrations
-├── tests/               # 78 Backend unit and integration test suites
-└── requirements.txt     # Python dependency specifications
+└── tests/               # 78 backend unit and integration tests (20 files)
 ```
 
 ---
 
-## 🚀 Running the Backend
+## Running the Backend
 
-### Option A: High-Speed AI Inference Server (Recommended for Local Dev)
+### Standalone Inference Server (Local Development)
+
 ```bash
 set PYTHONPATH=.
 python scripts\serve_inference.py
 ```
-*Listens on `http://localhost:8000`. Supports ONNX Runtime session pooling, dynamic image formats (AVIF, WebP, JPEG, PNG), and sub-millisecond route dispatching.*
 
-### Option B: Full Application Stack via Uvicorn
+Listens on `http://localhost:8000` with persistent ONNX Runtime session caching for `/api/v1/infer`.
+
+### Full FastAPI Stack
+
 ```bash
 uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ---
 
-## 🧪 Running Backend Tests
+## Running Backend Tests
 
 ```bash
 pytest backend/tests/ -v
 ```
-*Executes all 78 backend tests covering authentication, RBAC security matrix, work order state machines, sensor fusion, spatial deduplication, and repair verification.*

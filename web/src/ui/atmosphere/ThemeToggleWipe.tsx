@@ -8,8 +8,7 @@ interface ThemeToggleWipeProps {
 }
 
 /**
- * Theme Toggle with Sunrise/Sunset Wipe Animation (SPEC v12 A10).
- * Swaps tokens smoothly with a clip-path sunrise sweep; plain crossfade on reduced motion.
+ * Theme toggle button with light/dark transition (crossfade on reduced motion).
  */
 export const ThemeToggleWipe: React.FC<ThemeToggleWipeProps> = ({
   className = "",

@@ -222,7 +222,7 @@ export const DashboardPage: React.FC = () => {
         <div className="text-center">
           <Activity className="w-6 h-6 animate-spin text-slate-400 mx-auto mb-2" />
           <p className="text-slate-500 font-mono text-xs">
-            Connecting to Municipal PostGIS &amp; Neural Engine...
+            Loading road network dashboard...
           </p>
         </div>
       </div>
@@ -410,7 +410,7 @@ export const DashboardPage: React.FC = () => {
                   Defect Observations &amp; Repair Analytics
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Authentic neural detections and municipal dispatch progress
+                  Logged detections and maintenance dispatch progress
                 </p>
               </div>
 
@@ -443,7 +443,7 @@ export const DashboardPage: React.FC = () => {
 
             {loadingTrends ? (
               <div className="h-56 flex items-center justify-center text-xs text-slate-400 font-mono">
-                Synchronizing telemetry trends...
+                Loading survey history...
               </div>
             ) : trendView === "distribution" ? (
               <div>
@@ -476,9 +476,9 @@ export const DashboardPage: React.FC = () => {
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Right: Telemetry & Severity Distribution Panel (5 cols) */}
+                  {/* Right: Severity Distribution Panel (5 cols) */}
                   <div className="md:col-span-5 flex flex-col justify-between p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Distress Telemetry</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Distress Summary</span>
                     
                     <div className="space-y-1.5 text-[11px]">
                       <div className="flex items-center justify-between">

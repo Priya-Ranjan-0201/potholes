@@ -23,7 +23,7 @@ interface RepairVerificationWorkbenchProps {
   initialDefectId?: string | null;
 }
 
-type ViewMode = "slider" | "side-by-side" | "matches" | "heatmap";
+type ViewMode = "slider" | "side-by-side" | "matches" | "diff";
 
 export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchProps> = ({
   initialWorkOrderId,
@@ -277,20 +277,20 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
         </div>
       </div>
 
-      {/* 2. Interactive Comparison Workbench Card */}
+      {/* Comparison Viewer */}
       <div className="card p-5 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
-                Before-and-After Verification Engine
+                Before-and-After Repair Verification
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
                 ORB RANSAC + ONNX
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Homography perspective alignment, remaining distress detection, and explainable quality assessment
+              Perspective alignment and remaining surface defect check between pre- and post-repair photos
             </p>
           </div>
 
@@ -302,7 +302,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
             >
               <Zap className="w-3.5 h-3.5" />
               <span>
-                {verifyMutation.isPending ? "Executing Verification..." : "Run AI Verification"}
+                {verifyMutation.isPending ? "Verifying..." : "Verify Repair"}
               </span>
             </button>
             <a
@@ -439,15 +439,15 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                   Keypoint Inliers
                 </button>
                 <button
-                  onClick={() => setViewMode("heatmap")}
+                  onClick={() => setViewMode("diff")}
                   disabled={!activeAssessment?.difference_heatmap_data_uri}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-40 ${
-                    viewMode === "heatmap"
+                    viewMode === "diff"
                       ? "bg-amber-500 text-slate-950 font-bold"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
-                  Difference Heatmap
+                  Pixel Diff Overlay
                 </button>
               </div>
             </div>
@@ -554,22 +554,22 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
               </div>
             )}
 
-            {viewMode === "heatmap" && activeAssessment?.difference_heatmap_data_uri && (
+            {viewMode === "diff" && activeAssessment?.difference_heatmap_data_uri && (
               <div className="space-y-1">
                 <img
                   src={activeAssessment.difference_heatmap_data_uri}
-                  alt="Difference heatmap"
+                  alt="Surface pixel difference overlay"
                   className="w-full rounded-lg object-contain max-h-[500px]"
                 />
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono py-1">
-                  Color spectrum: Red/Yellow indicates significant surface height & asphalt compaction variance
+                  Highlighted regions indicate pixel-level surface texture differences after alignment
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* 3. Real-Time Telemetry & Quality Classification Card */}
+        {/* Verification Result Summary */}
         {activeAssessment && (
           <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-3">
@@ -618,7 +618,7 @@ export const RepairVerificationWorkbench: React.FC<RepairVerificationWorkbenchPr
                   {activeAssessment.effectiveness_pct}%
                 </div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Remediation metric
+                  Surface recovery
                 </div>
               </div>
 

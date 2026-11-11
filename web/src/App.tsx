@@ -101,7 +101,7 @@ const AppShell: React.FC = () => {
       <CommandPalette />
       <ShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
 
-      {/* Offline Banner (Section 2: slides down 200ms) */}
+      {/* Offline Banner */}
       <AnimatePresence>
         {isOffline && (
           <motion.div

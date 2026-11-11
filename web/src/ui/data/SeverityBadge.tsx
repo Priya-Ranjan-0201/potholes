@@ -25,8 +25,7 @@ interface SeverityBadgeProps {
 }
 
 /**
- * Road-Sign Severity Badge (SPEC v12).
- * Combines physical road-sign shape + icon + text (never color alone).
+ * Road-sign severity badge combining geometric shape, icon, and text label.
  * - Minor: Round / Circle (#0EA5A4)
  * - Moderate: Warning Triangle (#D97706)
  * - Severe: Yield Diamond (#EA580C)

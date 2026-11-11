@@ -40,7 +40,7 @@ class DetectionBox(BaseModel):
     unit: str = "px_relative_pct"
     wheel_path_risk: bool = False
     depth_indicator: str = "Medium"
-    model_source: str = "Ensemble (70% SOTA + 30% Edge)"
+    model_source: str = "Ensemble (70% External + 30% Edge)"
 
 
 class InferenceResponse(BaseModel):
@@ -561,7 +561,7 @@ async def infer_road_defects(
         # 0. Semantic Scene Exclusion (people, cars, bikes, trucks, stop signs)
         obstacles = detect_non_road_obstacles(img, conf_thresh=0.23)
 
-        # 1. 70% New SOTA Models (D-FINE Large + PyResearch YOLOv12 + keremberke YOLOv8-Seg)
+        # 1. 70% Weightage Models (D-FINE Large + PyResearch YOLOv12 + keremberke YOLOv8-Seg)
         dfine_boxes = predict_dfine_potholes(img, conf_thresh=max(0.24, conf_thresh * 0.85))
         pyres_boxes = predict_pyresearch_potholes(img, conf_thresh=max(0.24, conf_thresh * 0.85))
         seg_boxes = predict_segmentation_potholes(img, conf_thresh=conf_thresh, iou_thresh=iou_thresh)

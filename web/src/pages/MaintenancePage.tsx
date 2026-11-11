@@ -960,7 +960,7 @@ export const MaintenancePage: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Sub-Tab Content: AI-Powered Road Repair Verification */}
+      {/* Repair Verification Sub-Tab */}
       {subTab === "verification" && (
         <RepairVerificationWorkbench
           initialWorkOrderId={searchParams.get("woId")}

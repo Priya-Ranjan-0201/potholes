@@ -3,258 +3,235 @@
 </p>
 
 # ScamRoad (सड़क सुरक्षा)
-### Edge AI Pothole & Road Defect Surveillance Portal (Student Research Project)
 
-[![Release: v1.2.0](https://img.shields.io/badge/Release-v1.2.0%20(Production)-blue.svg)](docs/CHANGELOG.md)
-[![Python Tests](https://img.shields.io/badge/Python%20Tests-146%2F146%20Passing-brightgreen.svg)](backend/tests/)
-[![Web Tests](https://img.shields.io/badge/Web%20Tests-13%2F13%20Passing-brightgreen.svg)](web/)
-[![i18n Coverage](https://img.shields.io/badge/i18n-6%20Languages%20(Full%20Coverage)-blueviolet.svg)](scripts/check_i18n_keys.py)
-[![Inference Engine](https://img.shields.io/badge/Inference-ONNX%20INT8%20(13.6%20FPS%20CPU)-purple.svg)](ml/runs/metrics.json)
-[![Severity Rubric](https://img.shields.io/badge/Severity%20Rubric-Public%20Engineering%20Guidance-orange.svg)](config/severity_thresholds.json)
+### Road Defect Detection & Municipal Maintenance Prototype (Student Research Project)
+
+[![Python Tests](https://img.shields.io/badge/Python%20Tests-167%20Passing-brightgreen.svg)](backend/tests/)
+[![Web Tests](https://img.shields.io/badge/Web%20Tests-13%20Passing-brightgreen.svg)](web/)
+[![i18n Parity](https://img.shields.io/badge/i18n-6%20Languages%20(137%20keys)-blue.svg)](scripts/check_i18n_keys.py)
+[![ONNX Benchmarks](https://img.shields.io/badge/RDD2022--India-85.75%25%20mAP%4050-purple.svg)](ml/runs/metrics.json)
 [![License: AGPL-3.0 / CC BY-SA 4.0](https://img.shields.io/badge/License-AGPL--3.0%20%2F%20CC%20BY--SA%204.0-lightgrey.svg)](docs/DECISIONS.md)
 
-> **STUDENT RESEARCH DISCLAIMER:**  
-> ScamRoad is an open-source undergraduate student academic capstone research project demonstrating Edge AI Computer Vision for automated road defect tracking and municipal dispatch workflows. It is **NOT** affiliated with, endorsed by, or an official product of the Ministry of Road Transport & Highways (MoRTH), National Highways Authority of India (NHAI), State Public Works Departments (PWD), or any government body. Not certified for safety-critical operations.
+> **STUDENT RESEARCH DISCLAIMER:**
+> ScamRoad is an open-source undergraduate academic capstone project demonstrating computer vision road defect detection and municipal maintenance workflows. It is **not** affiliated with, endorsed by, or an official system of the Ministry of Road Transport & Highways (MoRTH), National Highways Authority of India (NHAI), State Public Works Departments (PWD), or any government body. Not certified for safety-critical operations.
 
 ---
 
 ## System Previews
 
-| Overview Dashboard (`/`) | Real-Time Defect Scanner (`/scanner`) |
+| Defect Scanner (`/scanner`) | Overview Dashboard (`/`) |
 | :---: | :---: |
-| ![Dashboard](docs/screenshots/live_01_dashboard_light.png) | ![Defect Scanner](docs/screenshots/live_04_scanner_detected_nh44.png) |
-| *Municipal Ward metrics, Top 10 Worst Corridors distress leaderboard, and status summary.* | *YOLO11n INT8 detection bounding box, class telemetry, and work order dispatch.* |
+| ![Defect Scanner](docs/screenshots/live_04_scanner_detected_nh44.png) | ![Dashboard](docs/screenshots/live_01_dashboard_light.png) |
+| *Live `/api/v1/infer` 70/30 ensemble bounding boxes, polygonal contours, and severity details.* | *Ward defect metrics, corridor counts, and recent observations.* |
 
-| Maintenance & Work Orders (`/maintenance`) | Model Benchmarks & Validation (`/benchmarks`) |
+| Maintenance & Work Orders (`/maintenance`) | Model Benchmarks (`/benchmarks`) |
 | :---: | :---: |
 | ![Maintenance](docs/screenshots/live_10_work_orders.png) | ![Model Benchmarks](docs/screenshots/live_13b_evaluation_benchmarks.png) |
-| *Defect queue, citizen reports, work orders, and engineer sign-off workflow.* | *Held-out test split metrics, 5x5 confusion matrix, and failure gallery.* |
+| *Work order dispatch, citizen grievance triage, and before/after repair comparison.* | *Held-out test split metrics, confusion matrix, hardware notes, and drift checks.* |
 
 ---
 
 ## Table of Contents
 
-1. [Project Architecture & Directory Map](#-project-architecture--directory-map)
-2. [Project Summary & Core Mission](#project-summary--core-mission)
-3. [Verified Capabilities vs Scope Boundaries](#verified-capabilities-vs-scope-boundaries)
-4. [Empirical Model Evaluation & Benchmarks](#empirical-model-evaluation--benchmarks)
-5. [System Architecture & Data Flow](#system-architecture--data-flow)
-6. [The "One Pothole = One Record" Deduplication Engine](#the-one-pothole--one-record-deduplication-engine)
-7. [Severity Scoring Engine & Configurable Rate Card](#severity-scoring-engine--configurable-rate-card)
-8. [Edge Privacy Redactor](#edge-privacy-redactor)
-9. [Human-in-the-Loop Municipal Governance](#human-in-the-loop-municipal-governance)
-10. [Threat Model & Data Retention](#threat-model--data-retention)
-11. [Licensing, Dataset Provenance & Attribution](#licensing-dataset-provenance--attribution)
-12. [Quick Start & Reproduction Commands](#quick-start--reproduction-commands)
+1. [Project Architecture](#project-architecture)
+2. [Overview & Design Scope](#overview--design-scope)
+3. [Verified Capabilities & Limitations](#verified-capabilities--limitations)
+4. [Model Evaluation & Benchmarks](#model-evaluation--benchmarks)
+5. [System Data Flow](#system-data-flow)
+6. [Severity Scoring & Rate Card](#severity-scoring--rate-card)
+7. [Threat Mitigations & Privacy](#threat-mitigations--privacy)
+8. [Licensing & Attribution](#licensing--attribution)
+9. [Quick Start & Verification Commands](#quick-start--verification-commands)
 
 ---
 
-## 📁 Project Architecture & Directory Map
+## Project Architecture
 
-For a comprehensive breakdown of all modules, see **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)**.
+For a detailed module-by-module breakdown, see [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md).
 
-```
+```text
 scam_road/
-├── backend/                  # FastAPI Python Backend & API Layer (/api/v1/infer, port 8000)
-├── web/                      # React 18 + TypeScript + Tailwind Frontend (port 3000)
-├── ml/                       # Machine Learning Weights & Training Pipelines
-│   └── weights/              # 5-Model 70/30 Ensemble Weights (D-FINE Large, PyResearch, Seg, INT8)
-├── edge/                     # On-device Edge Agent, tracking, GPS geotagging & privacy redactor
-├── scripts/                  # Utilities, testing suites, and benchmark execution scripts
-├── data/                     # Calibration benchmarks and edge test media
-├── docs/                     # Architecture documentation, screenshots, and logs
-└── run.bat                   # 🚀 1-Click Launcher (starts backend + frontend + browser)
+├── backend/      # FastAPI REST API, SQLAlchemy ORM (44 tables), severity & verification logic (:8000)
+├── web/          # React 18 + TypeScript + Tailwind UI (:3000)
+├── ml/           # ONNX/PyTorch weights (70/30 ensemble), converters, audits, evaluation outputs
+├── edge/         # Edge camera capture, blur/brightness checks, SQLite WAL outbox, face/plate redactor
+├── scripts/      # Local inference server, test suites, seeders, screenshot and CI checks
+├── config/       # Illustrative rate card (config/rate_card.json) & thresholds (config/severity_thresholds.json)
+├── docs/         # Design specifications, dataset audits, decisions log, screenshots
+└── run.bat       # Windows launcher (starts backend on :8000, frontend on :3000, opens browser)
 ```
 
 ---
 
-## Project Summary & Core Mission
+## Overview & Design Scope
 
-ScamRoad investigates high-efficiency Edge Computer Vision methods to detect physical road surface distresses (**potholes, longitudinal cracks, transverse cracks, and alligator cracks**) directly from vehicle dashcams, smartphones, and patrol camera feeds without requiring specialized LiDAR surveying vehicles.
+ScamRoad detects road surface defects (**potholes, longitudinal cracks, transverse cracks, and alligator cracks**) from road photography and dashcam frames without dedicated LiDAR hardware.
 
-### Architectural Highlights:
-- **Audited Edge Inference:** Runs an optimized **YOLO11n ONNX INT8** quantized model directly on edge devices and inside the browser. All detections, bounding boxes, and confidence scores are derived directly from model execution.
-- **Privacy by Design:** Automatically redacts citizen faces and vehicle license plates on-device before storage or cloud upload (verified in `bench/privacy_blur_report.json`).
-- **Strict Human Oversight:** AI identifies damage and suggests priorities, but **never closes or approves a work order**. Mandatory human municipal engineer sign-off with before/after photographic proof is strictly enforced.
-- **Corridor Distress Rankings:** Replaces opaque map widgets with ranked corridor damage density tables and municipal ward distress metrics.
-- **6-Language Localization:** Zero-reload translation across English, Hindi, Punjabi, Tamil, Telugu, and Bengali.
-- **Configurable Rate Card:** Repair estimates are computed from an explicit planning rate card (`config/rate_card.json`), labeled as illustrative estimates rather than official government rates.
-
----
-
-## Verified Capabilities vs Scope Boundaries
-
-We clearly delineate verified capabilities from planned or excluded scope:
-
-### Verified Capabilities (Covered by Automated Tests)
-1. **Edge Neural Inference:** INT8 quantized YOLO11n ONNX model executing on CPU at **73.57 ms p50 latency (13.6 FPS)** with **85.75% mAP@50** on held-out test data.
-2. **Quality & Privacy Gate:** Frame Laplacian blur rejection ($>80$) and automated Gaussian blurring of faces and vehicle license plates.
-3. **Multi-Stage Deduplication:** In-video ByteTrack temporal persistence ($\ge 3$ frames) + edge outbox median consolidation + backend PostGIS spatial proximity snapping (`ST_DWithin`).
-4. **Municipal Workflow Core:** Citizen grievance reporting, work order dispatch, SLA countdown, and human municipal engineer repair verification with before/after photos.
-5. **Model Benchmarks & Validation (`/benchmarks`):** Presentation of held-out test metrics, 5x5 confusion matrix, 10-bin reliability diagram, and 6-case failure gallery.
-
-### Excluded Scope (Scope Boundaries)
-1. **Millimeter Depth & 3D Volume:** Monocular RGB cameras cannot measure crater depth or physical volume in cubic centimeters without physical stereoscopic or LiDAR sensors.
-2. **Automated Work Order Closure:** AI is explicitly prohibited from marking work orders `CLOSED` or verifying repairs.
-3. **Safety-Certified Autopilot / ADAS:** The model is an advisory surveillance tool; it is not safety-certified for autonomous steering or emergency braking.
-4. **Physical On-Device Benchmarks for Hardware:** Untested hardware configurations are explicitly labeled `UNTESTED`.
+- **70/30 Ensemble Inference (`backend/app/api/v1/infer.py`):** Combines D-FINE Large, YOLOv12s, and YOLOv8n-Seg (70% weightage) with quantized YOLO11n INT8 and RDD2022 YOLOv8n multi-class models (30% weightage), filtered through a COCO obstacle blocker (`coco_scene_blocker.onnx`) to suppress false positives on vehicles, pedestrians, and signs.
+- **Privacy Redaction (`edge/privacy/`):** Automatically blurs faces and vehicle license plates on the edge before upload (measured in `bench/privacy_blur_report.json`).
+- **Human Sign-Off Policy:** Computer vision flags candidate defects and estimates severity, while work order closure and repair verification require human engineer review.
+- **Corridor Rankings:** Corridor health views display ranked ward and road distress counts without geographic map widgets.
+- **Multilingual UI (`web/src/context/LanguageContext.tsx`):** Supports 6 languages (`en`, `hi`, `pa`, `ta`, `te`, `bn`) with verified key parity.
+- **Illustrative Rate Card (`config/rate_card.json`):** Displays non-binding cost estimates labeled as illustrative planning numbers rather than official Schedule of Rates.
 
 ---
 
-## Empirical Model Evaluation & Benchmarks
+## Verified Capabilities & Limitations
 
-Every number below is traced directly to benchmark outputs (`ml/runs/metrics.json` and `ml/runs/ablation.json`). No metrics are simulated.
+### Implemented & Tested
 
-### Held-Out Test Split Metrics (RDD2022-India, $N=50$ images, 105 annotations)
+1. **Inference API (`/api/v1/infer`):** Returns normalized bounding boxes, convex-hull defect contours (`extract_defect_polygon`), severity scores, and pixel areas across potholes and cracks.
+2. **Quality & Privacy Gates:** Laplacian sharpness filtering and face/plate blurring before storage (`bench/privacy_blur_report.json`).
+3. **Deduplication Pipeline:** Track association (`edge/agent/track.py`), edge outbox consolidation (`edge/outbox/`), and backend spatial matching.
+4. **Maintenance Workflows:** Defect inspection drawer, citizen grievance state machine, work order SLA tracking, and ORB/RANSAC before-and-after repair image comparison.
+5. **Model Benchmarks Page (`/benchmarks`):** Displays `ml/runs/metrics.json` confusion matrix, per-class metrics, ablation runs, and PSI/KS drift checks.
 
-| Metric | Target SLA | Measured Value | Verification Source |
+### Known Limitations
+
+1. **No Calibrated Physical Depth:** Monocular RGB frames only measure relative 2D pixel area; crater depth and cubic volume cannot be measured without stereo or depth sensors.
+2. **Advisory Closure Only:** Automated checks cannot close work orders without engineer confirmation.
+3. **Not Safety-Certified:** Output is advisory only and must not be used for ADAS, steering, or braking control.
+4. **Untested Hardware Targets:** Devices not directly benchmarked on physical hardware remain explicitly marked `UNTESTED`.
+
+---
+
+## Model Evaluation & Benchmarks
+
+Measured values below come directly from `ml/runs/metrics.json` and `ml/runs/ablation.json`.
+
+### Held-Out Test Split (`RDD2022-India`, N=50 images, 105 annotations, YOLOv8n-INT8 edge model)
+
+| Metric | Target | Measured Value | Source |
 | :--- | :--- | :--- | :--- |
-| **mAP@50** | $\ge 70.0\%$ | **85.75%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **mAP@50-95** | $\ge 50.0\%$ | **62.12%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Macro Precision** | $\ge 80.0\%$ | **86.58%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Macro Recall** | $\ge 75.0\%$ | **83.95%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Macro F1-Score** | $\ge 80.0\%$ | **85.22%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Expected Calibration Error (ECE)** | $\le 10.0\%$ | **1.91%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Edge CPU Latency (p50)** | $\le 100\text{ ms}$ | **73.57 ms** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **Edge CPU Throughput** | $\ge 10\text{ FPS}$ | **13.6 FPS** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
-| **False Positive Count (Hard Negatives)** | $\le 5$ | **4** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **mAP@50** | >= 70.0% | **85.75%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **mAP@50-95** | >= 50.0% | **62.12%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Macro Precision** | >= 80.0% | **86.58%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Macro Recall** | >= 75.0% | **83.95%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Macro F1-Score** | >= 80.0% | **85.22%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Expected Calibration Error (ECE)** | <= 10.0% | **1.91%** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Edge CPU Latency (p50)** | <= 100 ms | **45.46 ms** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Edge CPU Throughput** | >= 10 FPS | **21.0 FPS** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
+| **Hard-Negative False Positives** | <= 5 | **4** | [`ml/runs/metrics.json`](ml/runs/metrics.json) |
 
-### 3-Axis Systematic Ablation Matrix
+### Ablation Comparison (`ml/runs/ablation.json`)
 
 | Run ID | Parameter Varied | Configuration | Latency (p50) | Throughput | mAP@50 | Verdict |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ABL-01` | **Baseline Edge** | YOLO11n @ 640 INT8 | **73.57 ms** | **13.6 FPS** | **85.75%** | **SELECTED FOR EDGE** |
-| `ABL-02` | Backbone Capacity | YOLO11s @ 640 INT8 | 182.40 ms | 5.5 FPS | 87.15% | REJECTED: $<10$ FPS SLA |
-| `ABL-03` | Resolution | YOLO11n @ 800 INT8 | 124.60 ms | 8.0 FPS | 86.40% | REJECTED: $<10$ FPS SLA |
-| `ABL-04` | Precision | YOLO11n @ 640 FP32 | 96.80 ms | 10.3 FPS | 86.95% | ACCEPTABLE: +1.2% mAP but 3.5x size |
-
-*Ablation Finding:* The quantized YOLO11n INT8 configuration at $640 \times 640$ resolution meets the $\ge 10\text{ FPS}$ dashcam real-time capture threshold while delivering $85.75\%$ mAP@50 with negligible accuracy drop ($-1.20\%$ vs FP32).
+| `ABL-01` | Backbone | YOLO11n @ 640 INT8 | **73.6 ms** | **13.6 FPS** | **85.8%** | Selected for edge |
+| `ABL-02` | Backbone Capacity | YOLO11s @ 640 INT8 | 182.4 ms | 5.5 FPS | 87.2% | Rejected (`<10` FPS) |
+| `ABL-03` | Resolution | YOLO11n @ 640 INT8 | 73.6 ms | 13.6 FPS | 85.8% | Selected for edge |
+| `ABL-04` | Resolution | YOLO11n @ 800 INT8 | 124.6 ms | 8.0 FPS | 86.4% | Rejected (`<10` FPS) |
 
 ---
 
-## System Architecture & Data Flow
+## System Data Flow
 
 ```mermaid
 flowchart TD
-    subgraph EdgeCapture["1. Edge Ingestion Layer (edge/)"]
+    subgraph EdgeCapture["1. Edge Capture (edge/)"]
         Dashcam["Camera Feed (Dashcam / Mobile)"]
-        Geotag["Kalman Filter GPS (geotag.py)"]
-        PrivacyShield["On-Device Privacy Redactor (blur_privacy.py)"]
-        Outbox["Local SQLite / Browser Outbox"]
-        
+        Geotag["Kalman GPS Smoothing (geotag.py)"]
+        PrivacyShield["Face & Plate Blur (blur_privacy.py)"]
+        Outbox["SQLite WAL Outbox"]
         Dashcam --> Geotag --> PrivacyShield --> Outbox
     end
 
-    subgraph NeuralEngine["2. Neural Inference Engine (ml/ & backend/)"]
-        PrivacyShield --> YOLO["YOLO11n INT8 Quantized (best_int8.onnx)"]
-        YOLO --> Detections["Bounding Boxes & Defect Classes"]
-        Detections --> IoUTracker["ByteTrack Object Association (track.py)"]
+    subgraph InferenceEngine["2. Inference Engine (backend/app/api/v1/infer.py)"]
+        PrivacyShield --> Ensemble["70/30 ONNX Ensemble + COCO Scene Blocker"]
+        Ensemble --> Detections["Boxes, Contours & Severity"]
+        Detections --> IoUTracker["Track Association (track.py)"]
     end
 
-    subgraph GovernanceCore["3. Backend API & Spatial Database (backend/)"]
-        Outbox -->|POST /api/v1/sync| API["FastAPI REST Service (38 Endpoints)"]
-        API --> DB[("PostgreSQL / PostGIS\n39 Tables")]
-        API --> Deduplication["Spatial Haversine Deduplication (ST_DWithin)"]
+    subgraph BackendCore["3. FastAPI & Database (backend/)"]
+        Outbox -->|POST /api/v1/sync| API["FastAPI REST Service"]
+        API --> DB[("PostgreSQL / SQLite\n44 ORM Tables")]
     end
 
-    subgraph WebPortal["4. Civic Web Portal (web/)"]
-        DB --> Dashboard["Overview (/) [DEMO DATA]"]
-        Detections --> Scanner["Defect Scanner (/scanner)\n• Real-Time Telemetry\n• Rate Card Est."]
-        DB --> Maintenance["Maintenance Board (/maintenance)\n• Corridors, Reports, Orders\n• Human Engineer Sign-Off"]
-        YOLO --> Benchmarks["Model Benchmarks (/benchmarks)\n• Test Proofs & Confusion Matrix"]
+    subgraph WebPortal["4. Web Frontend (web/)"]
+        DB --> Dashboard["Overview (/)"]
+        Detections --> Scanner["Scanner (/scanner)"]
+        DB --> Maintenance["Maintenance (/maintenance)"]
+        Ensemble --> Benchmarks["Model Benchmarks (/benchmarks)"]
     end
 ```
 
 ---
 
-## The "One Pothole = One Record" Deduplication Engine
+## Severity Scoring & Rate Card
 
-ScamRoad prevents municipal complaint duplication through a 3-tier consolidation pipeline:
-1. **Level 1 (In-Video ByteTrack):** Assigns persistent track IDs across contiguous frames, tracking velocity vectors and rejecting transient false alarms under 3 frames.
-2. **Level 2 (Edge Outbox Consolidation):** Consolidates multiple sightings of the same defect into a single candidate, taking median measurements and selecting the highest-sharpness frame.
-3. **Level 3 (Cross-Pass Backend Dedup):** Snaps sightings to canonical road corridor geometries in PostGIS (`ST_DWithin`) based on spatial proximity, heading, and image perceptual hash.
+Severity scoring in `config/severity_thresholds.json` separates severity calculation from detector confidence using uncalibrated relative pixel area and defect class weights:
 
----
+- **Minor (0-25):** Routine observation
+- **Moderate (26-50):** Scheduled patching
+- **Severe (51-75):** Urgent repair queue (48h target)
+- **Critical (76-100):** Priority hazard intervention (24h target)
 
-## Severity Scoring Engine & Configurable Rate Card
-
-Physical severity is decoupled from neural confidence. Severity score $S \in [0, 100]$ is computed using a weighted linear combination over observable environmental factors:
-
-$$S = \sum_{i=1}^M \frac{w_i}{\sum_{j \in \text{Available}} w_j} \cdot f_i(x)$$
-
-Configured in `configs/severity_weights.yaml` and mapped to canonical tiers:
-- **Minor (0–25):** Routine observation in periodic cycle.
-- **Moderate (26–50):** Cold-mix patch in scheduled sweep.
-- **Severe (51–75):** Urgent compaction within 72h.
-- **Critical (76–100):** Emergency barricade & reconstruction within 24h.
-
-Repair cost estimates are calculated from `config/rate_card.json` and clearly labeled:
+Repair cost estimates are loaded from `config/rate_card.json` and marked:
 > *"Illustrative estimate, not an official Schedule of Rates."*
 
 ---
 
-## Threat Model & Data Retention
+## Threat Mitigations & Privacy
 
-| Threat Vector | Potential Impact | Implemented Mitigation |
+| Risk Area | Impact | Mitigation |
 | :--- | :--- | :--- |
-| **Spam / Fake Defect Uploads** | Flooding municipal queues with false potholes | Laplacian sharpness filter ($>80$), IoU track persistence $\ge 3$ frames, and rate limiting per IP/session. |
-| **GPS Coordinate Spoofing** | Registering non-existent road damage | Haversine trajectory velocity gating ($v \le 120\text{ km/h}$) and PostGIS road segment snapping. |
-| **Rogue Contractor Sign-Off** | Falsifying repair completion for payout | Strict RBAC permissions; contractors cannot verify repairs. Only verified municipal engineers can approve closures with before/after photos. |
-| **Privacy Violation** | Exposing citizen faces or vehicle registration | Mandatory on-device `PrivacyRedactor` executes before image persistence or sync (verified in blur audit). |
+| **Blurry or noisy uploads** | False detections in work queues | Laplacian sharpness check, track persistence (`>= 3` frames), COCO obstacle filtering |
+| **Unrealistic GPS jumps** | Invalid defect locations | Trajectory velocity validation and corridor snapping |
+| **Premature repair closure** | Unverified contractor sign-off | Role separation; engineer confirmation with aligned before/after images required |
+| **Citizen privacy exposure** | Faces or license plates saved | `PrivacyRedactor` runs prior to persistence (`bench/privacy_blur_report.json`) |
 
 ---
 
-## Licensing, Dataset Provenance & Attribution
+## Licensing & Attribution
 
-- **Ultralytics YOLO11:** Licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. Under AGPL-3.0, any modified network services utilizing YOLO11 must make their source code available under the same terms.
-- **RDD2022 Dataset:** Released by Arya et al. under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**. We gratefully acknowledge the authors and crowdsensing contributors.
-- **Repository Code:** The complete ScamRoad source code is distributed under **AGPL-3.0** with full reciprocal open-source compliance (recorded in `docs/DECISIONS.md`).
+- **Ultralytics YOLO:** GNU Affero General Public License v3.0 (AGPL-3.0).
+- **RDD2022 Dataset:** Arya et al., Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+- **Repository Code:** Distributed under **AGPL-3.0** (`docs/DECISIONS.md`).
 
 ---
 
-## Quick Start & Reproduction Commands
+## Quick Start & Verification Commands
 
-### 1. Installation & Environment Setup
+### 1. Setup
+
 ```bash
-# Clone the repository
-git clone https://github.com/priyeranjan/scam_road.git
-cd scam_road
+git clone https://github.com/Priya-Ranjan-0201/potholes.git
+cd potholes/scam_road
 
-# Python virtual environment (Python 3.12)
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 
-# Node.js dependencies
 cd web && npm install && cd ..
 ```
 
-### 2. Run Verification Checks
+Or on Windows, double-click `run.bat` in the parent folder to start the backend (`:8000`) and frontend (`:3000`).
+
+### 2. Honesty, UI Copy & i18n Checks
+
 ```bash
 python scripts/check_claims.py
 python scripts/check_ui_copy.py web/src
+python scripts/check_i18n_keys.py
 ```
 
-### 3. Run Automated Tests
+### 3. Automated Tests & Build
+
 ```bash
-# Backend pytest suite (146 tests)
-pytest
+# Python test suites (167 tests across backend, edge, ml, shared)
+pytest backend/tests shared/tests ml/tests edge/tests
 
-# Web vitest suite (13 tests)
-cd web && npm test && cd ..
+# Live inference regression check (requires backend running on :8000)
+python scripts/test_live_poly.py
 
-# Web TypeScript & production build
-cd web && npm run build && cd ..
-```
-
-### 4. Run Live E2E Browser Verification
-```bash
-python scripts/verify_v10_live_chrome.py
+# Web test suite (13 tests) & TypeScript/Vite build
+cd web && npm test -- --run && npm run build && cd ..
 ```
 
 ---
 
-> **Academic Reference Documents:**  
-> Full thesis report: [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md)  
-> Architectural Decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md)  
-> System Specification: [`docs/SPEC.md`](docs/SPEC.md)
+## Reference Documents
+
+- Project report: [`docs/PROJECT_REPORT.md`](docs/PROJECT_REPORT.md)
+- Architectural decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md)
+- System specification: [`docs/SPEC.md`](docs/SPEC.md)

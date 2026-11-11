@@ -26,10 +26,10 @@ api_v1_router.include_router(health_router, prefix="", tags=["Health"])
 # Real-Time AI Inference (YOLO + Surface Edge CV)
 api_v1_router.include_router(infer_router, prefix="", tags=["AI Inference"])
 
-# AI-Powered Road Repair Verification (Module v12)
+# Road Repair Verification
 api_v1_router.include_router(verification_router, prefix="", tags=["Repair Verification"])
 
-# Model Benchmarks & Edge Telemetry (Rule R1 & Rule P4)
+# Model Benchmarks & Evaluation Metrics
 api_v1_router.include_router(benchmarks_router, prefix="", tags=["Model Benchmarks"])
 
 # Model Drift, Continuous Monitoring & Governance
@@ -62,7 +62,7 @@ api_v1_router.include_router(stats_router, prefix="/stats", tags=["Analytics & S
 # Road Health Index & Forecasts (Rule R6)
 api_v1_router.include_router(forecasts_router, prefix="", tags=["Forecasts & Health Index"])
 
-# Municipal Reporting & Exports (SPEC B10)
+# Municipal Reporting & Exports
 api_v1_router.include_router(reports_router, prefix="", tags=["Municipal Reports"])
 
 # Alerts & Notifications

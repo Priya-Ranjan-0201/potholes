@@ -11,10 +11,7 @@ interface FileDropzoneProps {
 }
 
 /**
- * Scanner Dropzone with Flowing Lane Dashes (SPEC v12 A8).
- * - Dashed border with stroke-dashoffset animation simulating highway lane dashes.
- * - Speeds up and tints to primary amber/indigo on drag-over.
- * - Converges to real-byte progress bar on upload.
+ * File dropzone with drag-over state and byte-progress bar on upload.
  */
 export const FileDropzone: React.FC<FileDropzoneProps> = ({
   onFileSelect,

@@ -286,7 +286,7 @@ export const ModelBenchmarksPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-              Model Benchmarks &amp; Intelligence
+              Model Benchmarks
             </h1>
             <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-semibold">
               {evaluation.model_version}
@@ -304,8 +304,8 @@ export const ModelBenchmarksPage: React.FC = () => {
             value={activeTab}
             onChange={(tab) => setActiveTab(tab)}
             options={[
-              { id: "benchmarks", label: "Edge Benchmarks & Telemetry" },
-              { id: "drift", label: "Drift & Performance Monitoring" },
+              { id: "benchmarks", label: "Evaluation Metrics" },
+              { id: "drift", label: "Drift Monitoring" },
             ]}
           />
         </div>
@@ -477,7 +477,7 @@ export const ModelBenchmarksPage: React.FC = () => {
         <div className="pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Edge Runtime &amp; Hardware Benchmark Matrix
+              Hardware Benchmarks
             </h2>
             <p className="text-xs text-slate-500">
               Measured devices verified via onnxruntime benchmarking; unmeasured targets clearly labeled

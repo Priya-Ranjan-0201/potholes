@@ -656,7 +656,7 @@ export const api = {
   getModelEvaluation: () => request<ModelEvaluationResponse>("/models/evaluation"),
   health: () => request<any>("/health"),
 
-  // AI-Powered Repair Verification
+  // Repair Verification
   verifyRepairAssessment: (payload: VerifyRepairPayload) =>
     request<VerificationAssessment>("/verifications/verify", {
       method: "POST",
