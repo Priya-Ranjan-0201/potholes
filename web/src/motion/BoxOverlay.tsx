@@ -1,12 +1,11 @@
 import React from "react";
-import { useReducedMotion } from "./motion";
 
 export interface BoundingBoxItem {
   id: string;
   label: string;
   confidence: number;
   box: [number, number, number, number]; // [x%, y%, w%, h%]
-  polygon?: [number, number][]; // [[x%, y%], ...] organic segmentation contour
+  polygon?: [number, number][]; // [[x%, y%], ...] non-intersecting contour
   severity?: string;
   score?: number;
 }
@@ -22,9 +21,8 @@ interface BoxOverlayProps {
 }
 
 /**
- * Clean, Professional Hybrid Bounding Box & Polygon Segmentation Mask Overlay.
- * Renders deep learning instance segmentation contours alongside crisp bounding boxes
- * with collision-free label badges.
+ * Clean, High-Contrast Defect Bounding Box & Mask Overlay.
+ * Prevents stacked label collisions on dense scenes while always revealing hovered/selected labels cleanly.
  */
 export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   detections,
@@ -32,133 +30,92 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
   onHover,
   onSelect,
   className = "",
-  colorScheme = "emerald",
-  viewMode = "both",
+  viewMode = "boxes",
 }) => {
-  const isReduced = useReducedMotion();
-
-  // Sort by confidence descending
   const sorted = [...detections].sort((a, b) => b.confidence - a.confidence);
 
   const getDefectName = (rawLabel: string) => {
     const upper = (rawLabel || "").toUpperCase();
-    if (upper.includes("ALLIGATOR") || upper.includes("CROCODILE")) return "Alligator Crack";
-    if (upper.includes("LONGITUDINAL") || upper.includes("LONG")) return "Longitudinal Crack";
-    if (upper.includes("TRANSVERSE") || upper.includes("TRANS")) return "Transverse Crack";
-    if (upper.includes("CRACK")) return "Asphalt Crack";
+    if (upper.includes("ALLIGATOR") || upper.includes("CROCODILE")) return "Alligator";
+    if (upper.includes("LONGITUDINAL") || upper.includes("LONG")) return "Long. Crack";
+    if (upper.includes("TRANSVERSE") || upper.includes("TRANS")) return "Trans. Crack";
+    if (upper.includes("CRACK")) return "Crack";
     return "Pothole";
   };
 
   const getColor = (rawLabel: string, sev?: string) => {
-    const isCrack = (rawLabel || "").toUpperCase().includes("CRACK");
-    if (sev?.toLowerCase() === "critical") {
-      return "#991b1b"; // Deep Crimson Red
-    }
-    if (isCrack) {
-      return "#b45309"; // Dark Amber Bronze for cracks
-    }
-    if (colorScheme === "emerald") {
-      return "#065f46"; // Dark, authoritative forest emerald (high-contrast, deep tone)
-    }
-    switch (sev?.toLowerCase()) {
-      case "severe":
-        return "#92400e"; // Deep Amber Bronze
-      case "moderate":
-        return "#1e40af"; // Deep Royal Navy
-      default:
-        return "#065f46";
-    }
+    const upper = (rawLabel || "").toUpperCase();
+    if (upper.includes("CRACK")) return "#d97706"; // Clean Warm Amber
+    if (sev?.toLowerCase() === "critical") return "#dc2626"; // Clean Red
+    return "#047857"; // Deep Crisp Emerald
   };
 
-  // Pre-calculate collision-free label placements
-  const labelHeight = 3.1;
+  const labelHeight = 2.4;
   const placedLabels: { x: number; y: number; w: number; h: number }[] = [];
 
   const items = sorted.map((d, index) => {
     const [x, y, w, h] = d.box;
     const color = getColor(d.label, d.severity);
-    const defectName = getDefectName(d.label);
-    const labelWidth = Math.max(defectName.length > 8 ? 22 : 16, Math.min(Math.max(w, 16), 30));
+    const shortName = getDefectName(d.label);
+    const labelText = `${shortName} ${Math.round(d.confidence * 100)}%`;
+    const labelWidth = Math.max(10.5, Math.min(20, labelText.length * 0.9 + 2.0));
 
-    // Candidates in smart preference order:
-    // For boxes with sufficient height (h >= 6.5), inside-top keeps the tag cleanly bound within the defect
-    const candidates = h >= 6.5 ? [
-      { x: x + 0.4, y: y + 0.4 },                                    // Inside top-left (neatest)
-      { x: x, y: y - labelHeight - 0.25 },                           // Above box
-      { x: x, y: y + h + 0.25 },                                     // Below box
-      { x: Math.max(0.5, x + w - labelWidth - 0.4), y: y + 0.4 },     // Inside top-right
-      { x: x + 0.4, y: Math.max(0.5, y + h - labelHeight - 0.4) },   // Inside bottom-left
-    ] : [
-      { x: x, y: y - labelHeight - 0.25 },                           // Above box
-      { x: x, y: y + h + 0.25 },                                     // Below box
-      { x: x + 0.4, y: y + 0.3 },                                    // Inside top
-      { x: Math.max(0.5, x + w - labelWidth), y: y - labelHeight - 0.25 }, // Above right-aligned
-    ];
-
-    // Constrain within visible viewport bounds [0.5, 99.5]
-    const boundedCandidates = candidates.map((c) => ({
-      x: Math.max(0.5, Math.min(100 - labelWidth - 0.5, c.x)),
-      y: Math.max(0.5, Math.min(100 - labelHeight - 0.5, c.y)),
+    const candidates = [
+      { x, y: y - labelHeight - 0.3 },
+      { x: x + 0.3, y: y + 0.3 },
+      { x, y: y + h + 0.3 },
+      { x: Math.max(0.5, x + w - labelWidth), y: y - labelHeight - 0.3 },
+      { x: Math.max(0.5, x + w - labelWidth - 0.3), y: y + 0.3 },
+    ].map((c) => ({
+      x: Math.max(0.4, Math.min(100 - labelWidth - 0.4, c.x)),
+      y: Math.max(0.4, Math.min(100 - labelHeight - 0.4, c.y)),
     }));
 
-    let bestPos = boundedCandidates[0];
-    let minCollisions = 999;
-
-    for (const cand of boundedCandidates) {
-      let collisions = 0;
-      for (const pl of placedLabels) {
-        const overlaps = !(
-          cand.x + labelWidth <= pl.x ||
-          cand.x >= pl.x + pl.w ||
-          cand.y + labelHeight <= pl.y ||
-          cand.y >= pl.y + pl.h
-        );
-        if (overlaps) {
-          collisions++;
-        }
-      }
-      if (collisions === 0) {
+    let bestPos: { x: number; y: number } | null = null;
+    for (const cand of candidates) {
+      const collides = placedLabels.some(
+        (pl) =>
+          !(
+            cand.x + labelWidth <= pl.x ||
+            cand.x >= pl.x + pl.w ||
+            cand.y + labelHeight <= pl.y ||
+            cand.y >= pl.y + pl.h
+          )
+      );
+      if (!collides) {
         bestPos = cand;
-        minCollisions = 0;
         break;
       }
-      if (collisions < minCollisions) {
-        minCollisions = collisions;
-        bestPos = cand;
-      }
     }
 
-    // Fallback: If still colliding, stack safely below the colliding label
-    if (minCollisions > 0 && placedLabels.length > 0) {
-      const last = placedLabels[placedLabels.length - 1];
-      bestPos = {
-        x: Math.max(0.5, Math.min(100 - labelWidth - 0.5, bestPos.x)),
-        y: Math.min(96.5, last.y + labelHeight + 0.4),
-      };
+    const isActive = activeId === d.id;
+    // Show non-colliding labels automatically (up to 15 clearest), and always show hovered/selected
+    const showLabel = isActive || (bestPos !== null && index < 15);
+    const finalPos = bestPos ?? candidates[0];
+    if (bestPos !== null) {
+      placedLabels.push({ x: finalPos.x, y: finalPos.y, w: labelWidth, h: labelHeight });
     }
-
-    placedLabels.push({
-      x: bestPos.x,
-      y: bestPos.y,
-      w: labelWidth,
-      h: labelHeight,
-    });
 
     return {
       d,
-      index,
       x,
       y,
       w,
       h,
-      labelX: bestPos.x,
-      labelY: bestPos.y,
+      labelX: finalPos.x,
+      labelY: finalPos.y,
       labelWidth,
-      labelHeight,
+      labelText,
+      showLabel,
       color,
-      defectName,
     };
   });
+
+  // Render active item last so its highlight sits cleanly on top
+  const ordered = [
+    ...items.filter((i) => activeId !== i.d.id),
+    ...items.filter((i) => activeId === i.d.id),
+  ];
 
   return (
     <svg
@@ -166,18 +123,10 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
     >
-      <defs>
-        <filter id="box-dark-contrast" x="-15%" y="-15%" width="130%" height="130%">
-          <feDropShadow dx="0" dy="0.3" stdDeviation="0.4" floodColor="#000000" floodOpacity="0.85" />
-        </filter>
-      </defs>
-      {items.map((item) => {
-        const { d, index, x, y, w, h, labelX, labelY, labelWidth, color, defectName } = item;
+      {ordered.map((item) => {
+        const { d, x, y, w, h, labelX, labelY, labelWidth, labelText, showLabel, color } = item;
         const isActive = activeId === d.id;
         const isDimmed = activeId !== null && !isActive;
-
-        const shouldAnimate = !isReduced && index < 12;
-        const delayMs = index * 25;
 
         return (
           <g
@@ -189,87 +138,60 @@ export const BoxOverlay: React.FC<BoxOverlayProps> = ({
             onClick={() => onSelect(d.id)}
             role="button"
             tabIndex={0}
-            filter="url(#box-dark-contrast)"
-            aria-label={`${d.label} with confidence ${(d.confidence * 100).toFixed(0)}%`}
+            aria-label={`${d.label} ${Math.round(d.confidence * 100)}%`}
           >
-            {/* 1. Polygonal Instance Segmentation Mask */}
-            {(viewMode === "masks" || viewMode === "both") && d.polygon && d.polygon.length >= 3 && (
-              <polygon
-                points={d.polygon.map(([px, py]) => `${px},${py}`).join(" ")}
-                fill={color}
-                fillOpacity={isActive ? 0.38 : 0.22}
-                stroke={color}
-                strokeWidth={isActive ? 0.95 : 0.65}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                filter="url(#box-dark-contrast)"
-              />
-            )}
-
-            {/* 2. Bounding Box Fill & Stroke */}
-            {(viewMode === "boxes" || viewMode === "both" || !d.polygon || d.polygon.length < 3) && (
-              <>
-                <rect
-                  x={x}
-                  y={y}
-                  width={w}
-                  height={h}
+            {(viewMode === "masks" || viewMode === "both") &&
+              d.polygon &&
+              d.polygon.length >= 3 && (
+                <polygon
+                  points={d.polygon.map(([px, py]) => `${px},${py}`).join(" ")}
                   fill={color}
-                  fillOpacity={isActive ? 0.28 : (viewMode === "both" && d.polygon ? 0.04 : 0.08)}
-                  rx={0.3}
-                />
-                <rect
-                  x={x}
-                  y={y}
-                  width={w}
-                  height={h}
-                  fill="none"
+                  fillOpacity={isActive ? 0.36 : 0.22}
                   stroke={color}
-                  strokeWidth={isActive ? 0.95 : 0.68}
-                  rx={0.3}
-                  style={{
-                    strokeDasharray: shouldAnimate ? "400" : "none",
-                    strokeDashoffset: shouldAnimate ? "400" : "0",
-                    animation: shouldAnimate
-                      ? `detection-box-draw 180ms ease-out ${delayMs}ms forwards`
-                      : "none",
-                  }}
+                  strokeWidth={isActive ? 0.75 : 0.5}
+                  strokeLinejoin="round"
                 />
-              </>
+              )}
+
+            {(viewMode === "boxes" || viewMode === "both" || !d.polygon || d.polygon.length < 3) && (
+              <rect
+                x={x}
+                y={y}
+                width={w}
+                height={h}
+                fill={color}
+                fillOpacity={isActive ? 0.22 : 0.08}
+                stroke={color}
+                strokeWidth={isActive ? 0.85 : 0.55}
+                rx={0.35}
+              />
             )}
 
-            {/* Corner Label Chip: Dark, solid, crisp and collision-free */}
-            <g
-              transform={`translate(${labelX}, ${labelY})`}
-              style={{
-                opacity: shouldAnimate ? 0 : 1,
-                animation: shouldAnimate
-                  ? `fade-in 120ms ease-out ${delayMs + 60}ms forwards`
-                  : "none",
-              }}
-            >
-              <rect
-                x={0}
-                y={0}
-                width={labelWidth}
-                height={labelHeight}
-                fill={color}
-                stroke="#000000"
-                strokeWidth={0.2}
-                rx={0.4}
-              />
-              <text
-                x={0.8}
-                y={labelHeight * 0.70}
-                fill="#ffffff"
-                fontSize={1.7}
-                fontFamily="system-ui, -apple-system, sans-serif"
-                fontWeight="700"
-                letterSpacing="0.01em"
-              >
-                {defectName} {Math.round(d.confidence * 100)}%
-              </text>
-            </g>
+            {showLabel && (
+              <g transform={`translate(${labelX}, ${labelY})`}>
+                <rect
+                  x={0}
+                  y={0}
+                  width={labelWidth}
+                  height={labelHeight}
+                  fill={color}
+                  stroke="#000000"
+                  strokeOpacity={0.35}
+                  strokeWidth={0.18}
+                  rx={0.35}
+                />
+                <text
+                  x={0.75}
+                  y={labelHeight * 0.72}
+                  fill="#ffffff"
+                  fontSize={1.45}
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                  fontWeight="700"
+                >
+                  {labelText}
+                </text>
+              </g>
+            )}
           </g>
         );
       })}
