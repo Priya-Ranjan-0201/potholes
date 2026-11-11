@@ -34,17 +34,37 @@
 
 ## Table of Contents
 
-1. [Project Summary & Core Mission](#project-summary--core-mission)
-2. [Verified Capabilities vs Scope Boundaries](#verified-capabilities-vs-scope-boundaries)
-3. [Empirical Model Evaluation & Benchmarks](#empirical-model-evaluation--benchmarks)
-4. [System Architecture & Data Flow](#system-architecture--data-flow)
-5. [The "One Pothole = One Record" Deduplication Engine](#the-one-pothole--one-record-deduplication-engine)
-6. [Severity Scoring Engine & Configurable Rate Card](#severity-scoring-engine--configurable-rate-card)
-7. [Edge Privacy Redactor](#edge-privacy-redactor)
-8. [Human-in-the-Loop Municipal Governance](#human-in-the-loop-municipal-governance)
-9. [Threat Model & Data Retention](#threat-model--data-retention)
-10. [Licensing, Dataset Provenance & Attribution](#licensing-dataset-provenance--attribution)
-11. [Quick Start & Reproduction Commands](#quick-start--reproduction-commands)
+1. [Project Architecture & Directory Map](#-project-architecture--directory-map)
+2. [Project Summary & Core Mission](#project-summary--core-mission)
+3. [Verified Capabilities vs Scope Boundaries](#verified-capabilities-vs-scope-boundaries)
+4. [Empirical Model Evaluation & Benchmarks](#empirical-model-evaluation--benchmarks)
+5. [System Architecture & Data Flow](#system-architecture--data-flow)
+6. [The "One Pothole = One Record" Deduplication Engine](#the-one-pothole--one-record-deduplication-engine)
+7. [Severity Scoring Engine & Configurable Rate Card](#severity-scoring-engine--configurable-rate-card)
+8. [Edge Privacy Redactor](#edge-privacy-redactor)
+9. [Human-in-the-Loop Municipal Governance](#human-in-the-loop-municipal-governance)
+10. [Threat Model & Data Retention](#threat-model--data-retention)
+11. [Licensing, Dataset Provenance & Attribution](#licensing-dataset-provenance--attribution)
+12. [Quick Start & Reproduction Commands](#quick-start--reproduction-commands)
+
+---
+
+## 📁 Project Architecture & Directory Map
+
+For a comprehensive breakdown of all modules, see **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)**.
+
+```
+scam_road/
+├── backend/                  # FastAPI Python Backend & API Layer (/api/v1/infer, port 8000)
+├── web/                      # React 18 + TypeScript + Tailwind Frontend (port 3000)
+├── ml/                       # Machine Learning Weights & Training Pipelines
+│   └── weights/              # 5-Model 70/30 Ensemble Weights (D-FINE Large, PyResearch, Seg, INT8)
+├── edge/                     # On-device Edge Agent, tracking, GPS geotagging & privacy redactor
+├── scripts/                  # Utilities, testing suites, and benchmark execution scripts
+├── data/                     # Calibration benchmarks and edge test media
+├── docs/                     # Architecture documentation, screenshots, and logs
+└── run.bat                   # 🚀 1-Click Launcher (starts backend + frontend + browser)
+```
 
 ---
 
