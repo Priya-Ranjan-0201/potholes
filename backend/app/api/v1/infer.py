@@ -20,9 +20,11 @@ router = APIRouter()
 # Global persistent engine cache to eliminate cold startup latency on repeated inference
 _ENGINE_CACHE: dict = {}
 
-# COCO classes representing non-road foreground obstacles / traffic / signs
-_OBSTACLE_CLASSES = frozenset({0, 1, 2, 3, 5, 7, 9, 11, 14, 15, 16, 17, 18, 19})
-_VEHICLE_CLASSES = frozenset({2, 5, 7})
+# COCO classes representing non-road foreground obstacles / traffic / signs / accessories
+_OBSTACLE_CLASSES = frozenset({
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 24, 25, 26, 28
+})
+_VEHICLE_CLASSES = frozenset({1, 2, 3, 5, 7})
 
 
 class DetectionBox(BaseModel):
@@ -183,12 +185,11 @@ def get_segmentation_engine():
         return None
 
 
-def detect_non_road_obstacles(img: np.ndarray, conf_thresh: float = 0.23) -> List[List[float]]:
+def detect_non_road_obstacles(img: np.ndarray, conf_thresh: float = 0.12) -> List[List[float]]:
     """Detect people, bicycles, motorcycles, cars, buses, trucks, and road signs via COCO ONNX.
 
-    Returns exclusion boxes in pixel [x1, y1, x2, y2]. Uses a lower confidence threshold (0.13)
-    only for partially cropped objects touching outer image borders, and trims bottom 7% of
-    4-wheel vehicles so potholes touching tire edges remain detectable while bodies/roofs are masked.
+    Returns exclusion boxes in pixel [x1, y1, x2, y2]. Uses a sensitive threshold (0.12)
+    to guarantee traffic and pedestrian occlusion masking across all lighting conditions.
     """
     sess = _get_ort_session("coco_blocker", "ml/weights/coco_scene_blocker.onnx")
     if sess is None:
@@ -204,7 +205,7 @@ def detect_non_road_obstacles(img: np.ndarray, conf_thresh: float = 0.23) -> Lis
         cls_ids = np.argmax(cls_scores, axis=0)
         confs = np.max(cls_scores, axis=0)
 
-        keep_mask = confs >= 0.13
+        keep_mask = confs >= conf_thresh
         idxs = np.where(keep_mask)[0]
         if len(idxs) == 0:
             return []
@@ -223,11 +224,8 @@ def detect_non_road_obstacles(img: np.ndarray, conf_thresh: float = 0.23) -> Lis
             y1 = max(0.0, (cy - bh / 2.0) * sy)
             x2 = min(float(w), (cx + bw / 2.0) * sx)
             y2 = min(float(h), (cy + bh / 2.0) * sy)
-            on_border = (y2 >= h * 0.94) or (x1 <= w * 0.03) or (x2 >= w * 0.97) or (y1 <= h * 0.03)
-            if cf < conf_thresh and not (on_border and cid in {0, 1, 2, 3, 5, 7}):
-                continue
             if cid in _VEHICLE_CLASSES:
-                y2 = max(y1 + 2.0, y2 - 0.07 * (y2 - y1))
+                y2 = max(y1 + 2.0, y2 - 0.05 * (y2 - y1))
             box = [float(x1), float(y1), float(x2), float(y2)]
             if not any(compute_iou_xyxy(box, prev) > 0.45 for prev in obstacles):
                 obstacles.append(box)
@@ -237,8 +235,8 @@ def detect_non_road_obstacles(img: np.ndarray, conf_thresh: float = 0.23) -> Lis
         return []
 
 
-def overlaps_obstacle(box: List[float], obstacles: List[List[float]], iom_thresh: float = 0.30) -> bool:
-    """Return True if candidate defect center lies inside an obstacle or overlaps above threshold."""
+def overlaps_obstacle(box: List[float], obstacles: List[List[float]], iom_thresh: float = 0.20) -> bool:
+    """Return True if candidate defect center lies inside an obstacle, overlaps, or contains an obstacle."""
     if not obstacles:
         return False
     cx = (box[0] + box[2]) / 2.0
@@ -247,6 +245,12 @@ def overlaps_obstacle(box: List[float], obstacles: List[List[float]], iom_thresh
         if obs[0] <= cx <= obs[2] and obs[1] <= cy <= obs[3]:
             return True
         if compute_iom_xyxy(box, obs) > iom_thresh:
+            return True
+        if compute_iou_xyxy(box, obs) > 0.12:
+            return True
+        obs_cx = (obs[0] + obs[2]) / 2.0
+        obs_cy = (obs[1] + obs[3]) / 2.0
+        if box[0] <= obs_cx <= box[2] and box[1] <= obs_cy <= box[3]:
             return True
     return False
 
@@ -337,7 +341,10 @@ def predict_dfine_potholes(img: np.ndarray, conf_thresh: float = 0.25) -> List[d
             aspect = box_w / max(1.0, box_h)
             if aspect < 0.14 or aspect > 6.5:
                 continue
-            if (box_w / w > 0.85) or (box_h / h > 0.85):
+            is_centered = (0.28 <= (x1 + x2) / (2.0 * w) <= 0.72) and (0.28 <= (y1 + y2) / (2.0 * h) <= 0.72)
+            max_w = 0.65 if is_centered else 0.55
+            max_h = 0.65 if is_centered else 0.50
+            if (box_w / w > max_w) or (box_h / h > max_h):
                 continue
             bx = [float(x1), float(y1), float(x2), float(y2)]
             results.append({
@@ -376,7 +383,10 @@ def predict_pyresearch_potholes(img: np.ndarray, conf_thresh: float = 0.25) -> L
             box_w, box_h = x2 - x1, y2 - y1
             if box_w < 6 or box_h < 6:
                 continue
-            if (box_w / w > 0.85) or (box_h / h > 0.85):
+            is_centered = (0.28 <= (x1 + x2) / (2.0 * w) <= 0.72) and (0.28 <= (y1 + y2) / (2.0 * h) <= 0.72)
+            max_w = 0.65 if is_centered else 0.55
+            max_h = 0.65 if is_centered else 0.50
+            if (box_w / w > max_w) or (box_h / h > max_h):
                 continue
             bx = [float(x1), float(y1), float(x2), float(y2)]
             if any(compute_iou_xyxy(bx, s["box"]) > 0.40 for s in selected):
@@ -461,52 +471,62 @@ def _is_false_pothole_surface(
     hsv_img: np.ndarray,
     obstacles: List[List[float]],
 ) -> bool:
-    """Reject vehicles, pedestrians, sky bands, dashboards, and bright wooden sticks/debris."""
+    """Reject vehicles, pedestrians, sky bands, dashboards, shoulders, and corner artifacts."""
     h, w = img.shape[:2]
     bw = max(1.0, bx[2] - bx[0])
     bh = max(1.0, bx[3] - bx[1])
     cx = (bx[0] + bx[2]) / 2.0
     cy = (bx[1] + bx[3]) / 2.0
+    area_ratio = (bw * bh) / max(1.0, float(w * h))
 
     # 1. Semantic obstacle shield (cars, SUVs, bikes, pedestrians, signs)
     if overlaps_obstacle(bx, obstacles):
         return True
 
     # 2. Extreme upper horizon / sky / distant banner rejection
-    if cy < (h * 0.04) or bx[1] < (h * 0.01):
+    if cy < (h * 0.05) or bx[1] < (h * 0.02):
         return True
-    if cy < (h * 0.30) and ((bw / w > 0.48) or (bh / h > 0.42)):
+    if cy < (h * 0.32) and ((bw / w > 0.40) or (bh / h > 0.35)):
         return True
 
-    # 3. Realistic geometry & dashboard hood bar guard (while allowing large foreground craters <= 85%)
+    # 3. Realistic geometry & aspect ratio guard
     aspect = max(bw / bh, bh / bw)
-    if aspect > 8.5:
+    if aspect > 7.0:
         return True
-    if (bw / w > 0.86) or (bh / h > 0.86):
+
+    # 4. Oversized bounding box filter (real potholes in road scans are local cavities)
+    is_centered_closeup = (0.28 <= cx / w <= 0.72) and (0.28 <= cy / h <= 0.72) and aspect <= 1.45
+    if (bw / w > 0.58 or bh / h > 0.50 or area_ratio > 0.22) and not (is_centered_closeup and area_ratio <= 0.42):
         return True
-    if bx[3] > (h * 0.95) and (bw / w > 0.80):
-        return True
-    if (bw / w > 0.85) and (bh / h < 0.03):
-        return True
+
+    # 5. Corner shoulder / curb / ditch filter (touches bottom and outer side edge with large area)
+    touches_bottom = bx[3] >= (h * 0.90)
+    touches_left = bx[0] <= (w * 0.08)
+    touches_right = bx[2] >= (w * 0.92)
+    if touches_bottom and (touches_left or touches_right) and area_ratio > 0.08:
+        if conf_val < 0.88 or votes <= 2:
+            return True
 
     x1_c, y1_c = int(max(0, bx[0])), int(max(0, bx[1]))
     x2_c, y2_c = int(min(w, bx[2])), int(min(h, bx[3]))
-    if (x2_c - x1_c) < 6 or (y2_c - y1_c) < 6:
+    if (x2_c - x1_c) < 8 or (y2_c - y1_c) < 8:
         return True
 
-    # 4. Painted vehicle surface / colorful sign check in upper corridor
+    # 6. Painted vehicle surface / colorful sign check (colorful paint/fabrics)
     patch_hsv = hsv_img[y1_c:y2_c, x1_c:x2_c]
     patch_sat = float(np.mean(patch_hsv[:, :, 1]))
-    if cy < (h * 0.38) and patch_sat > 110.0:
+    if patch_sat > 115.0:
         return True
 
-    # 5. Bright bottom-edge vehicle hood glare, raised twigs/debris, & flat crack-tile checks
+    # 7. Bright bottom-edge vehicle hood glare & flat surface checks
     roi_gray = gray_img[y1_c:y2_c, x1_c:x2_c]
     rh, rw = roi_gray.shape
-    if bx[3] > (h * 0.96) and aspect > 2.2 and (
-        float(np.mean(roi_gray)) > 185.0 or (bx[3] > h * 0.98 and float(np.percentile(roi_gray, 80)) > 210.0)
+    if bx[3] > (h * 0.95) and (
+        float(np.mean(roi_gray)) > 180.0 or float(np.percentile(roi_gray, 85)) > 215.0
     ):
-        return True  # Bright white vehicle roof/hood clipped at bottom frame edge
+        return True
+
+    # 8. Cavity depression & contrast check
     core = roi_gray[int(rh * 0.25) : int(rh * 0.75), int(rw * 0.25) : int(rw * 0.75)]
     if core.size > 0 and rh >= 4:
         core_mean = float(np.mean(core))
@@ -516,12 +536,12 @@ def _is_false_pothole_surface(
         patch_hue = float(np.mean(patch_hsv[:, :, 0]))
 
         # Bright warm wood/twig/cardboard sitting on dark pavement (uncorroborated strip)
-        if votes <= 1 and conf_val < 0.65 and aspect >= 2.1:
+        if conf_val < 0.65 and aspect >= 2.1:
             if (core_mean - border_mean) > 8.0 and patch_sat > 35.0 and (5.0 <= patch_hue <= 32.0):
                 return True
 
-        # Low-confidence uncorroborated flat bright dry/clay glare (preserves darker waterlogged puddles)
-        if conf_val < 0.28 and votes <= 1 and (border_mean - core_mean) < -12.0 and patch_sat > 55.0:
+        # Flat dry clay / gravel shoulder glare lacking cavity depression
+        if conf_val < 0.55 and (border_mean - core_mean) < -8.0 and patch_sat > 35.0:
             return True
 
     return False
@@ -536,6 +556,8 @@ async def infer_road_defects(
     """Run real-time 70/30 ensemble road defect inference with semantic obstacle exclusion."""
     start_t = time.perf_counter()
     try:
+        conf_thresh = float(getattr(conf_thresh, "default", conf_thresh))
+        iou_thresh = float(getattr(iou_thresh, "default", iou_thresh))
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -561,7 +583,7 @@ async def infer_road_defects(
             raise HTTPException(status_code=503, detail="No trained YOLO11n ONNX model found in runs/export/.")
 
         # 0. Semantic Scene Exclusion (people, cars, bikes, trucks, stop signs)
-        obstacles = detect_non_road_obstacles(img, conf_thresh=0.23)
+        obstacles = detect_non_road_obstacles(img, conf_thresh=0.12)
 
         # 1. 70% Weightage Models (D-FINE Large + PyResearch YOLOv12 + keremberke YOLOv8-Seg)
         dfine_boxes = predict_dfine_potholes(img, conf_thresh=max(0.24, conf_thresh * 0.85))
@@ -570,7 +592,11 @@ async def infer_road_defects(
 
         new_70_candidates = []
         all_70_raw = sorted(
-            [c for c in (dfine_boxes + pyres_boxes + seg_boxes) if not overlaps_obstacle(c["box"], obstacles)],
+            [
+                c for c in (dfine_boxes + pyres_boxes + seg_boxes)
+                if not overlaps_obstacle(c["box"], obstacles)
+                and not _is_false_pothole_surface(c["box"], c["conf"], 1, img, gray_img, hsv_img, obstacles)
+            ],
             key=lambda x: x["conf"],
             reverse=True,
         )
@@ -599,6 +625,10 @@ async def infer_road_defects(
             p
             for p in engine.predict(img)
             if (getattr(p, "class_id", 0) == 0 or "POTHOLE" in str(getattr(p, "class_name", "")).upper())
+            and not overlaps_obstacle([float(x) for x in p.bbox_xyxy], obstacles)
+            and not _is_false_pothole_surface(
+                [float(x) for x in p.bbox_xyxy], float(p.confidence), 1, img, gray_img, hsv_img, obstacles
+            )
         ]
         base_boxes = [
             {
@@ -757,7 +787,7 @@ async def infer_road_defects(
             )
 
         # 4. Multi-class Crack Detection (RDD2022 Distress Multi-Class)
-        crack_floor = max(0.30, conf_thresh)
+        crack_floor = max(0.32, conf_thresh)
         crack_engine = get_crack_engine(conf_thresh=crack_floor, iou_thresh=iou_thresh)
         raw_cracks = crack_engine.predict(img) if crack_engine else []
 
@@ -772,21 +802,25 @@ async def infer_road_defects(
             bh = max(1.0, bx[3] - bx[1])
             cy = (bx[1] + bx[3]) / 2.0
 
-            # Exclude upper-horizon false alarms, obstacles, and oversized low-conf zones
+            # Exclude upper-horizon false alarms, obstacles, and oversized zones
             if cy < (h * 0.35):
                 continue
-            if overlaps_obstacle(bx, obstacles, iom_thresh=0.18):
+            if (bw / w > 0.55) or (bh / h > 0.50) or ((bw * bh) / (w * h) > 0.16):
                 continue
-            if (bw / w > 0.65) and (bh / h > 0.45) and float(c.confidence) < 0.55:
-                continue
-            if (bw / w > 0.92) and (bh / h > 0.85):
+            if overlaps_obstacle(bx, obstacles, iom_thresh=0.15):
                 continue
 
             x1_c, y1_c = int(max(0, bx[0])), int(max(0, bx[1]))
             x2_c, y2_c = int(min(w, bx[2])), int(min(h, bx[3]))
             if (x2_c > x1_c + 4) and (y2_c > y1_c + 4):
                 patch_sat = float(np.mean(hsv_img[y1_c:y2_c, x1_c:x2_c, 1]))
-                if cy < (h * 0.45) and patch_sat > 110.0:
+                # Saturated color (colorful clothes, traffic paint, signs) is not a road crack
+                if patch_sat > 58.0:
+                    continue
+                # Roadside edge foliage / dry leaf debris check
+                if bx[3] >= (h * 0.88) and (bx[0] <= w * 0.08 or bx[2] >= w * 0.92) and (
+                    float(c.confidence) < 0.60 or patch_sat > 38.0
+                ):
                     continue
 
             # Suppress cracks overlapping OR trapped inside an authoritative pothole crater
@@ -802,7 +836,7 @@ async def infer_road_defects(
                 "box": bx,
             })
 
-        # Iterative clustering for nearby/overlapping crack distress zones
+        # Iterative clustering for nearby/overlapping crack distress zones (bounded to prevent whole-road monster boxes)
         crack_clusters = [[vc] for vc in valid_cracks]
         merged = True
         while merged:
@@ -818,15 +852,21 @@ async def infer_road_defects(
                         continue
                     c2 = crack_clusters[j]
                     has_overlap = any(
-                        compute_iou_xyxy(b1["box"], b2["box"]) > 0.10
-                        or compute_iom_xyxy(b1["box"], b2["box"]) > 0.25
+                        compute_iou_xyxy(b1["box"], b2["box"]) > 0.30
+                        or compute_iom_xyxy(b1["box"], b2["box"]) > 0.45
                         for b1 in c1
                         for b2 in c2
                     )
                     if has_overlap:
-                        c1.extend(c2)
-                        used[j] = True
-                        merged = True
+                        cand_boxes = c1 + c2
+                        c_min_x = min(m["box"][0] for m in cand_boxes)
+                        c_max_x = max(m["box"][2] for m in cand_boxes)
+                        c_min_y = min(m["box"][1] for m in cand_boxes)
+                        c_max_y = max(m["box"][3] for m in cand_boxes)
+                        if (c_max_x - c_min_x) / w <= 0.55 and (c_max_y - c_min_y) / h <= 0.45:
+                            c1.extend(c2)
+                            used[j] = True
+                            merged = True
                 new_clusters.append(c1)
             crack_clusters = new_clusters
 
