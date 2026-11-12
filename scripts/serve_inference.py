@@ -3,8 +3,13 @@ Runs on http://localhost:8000 with CORS enabled.
 Serves real-time YOLO11n + CV pothole detection and full municipal GIS/PostgreSQL endpoints.
 """
 
+import os
 import sys
 from pathlib import Path
+
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "2")
+os.environ.setdefault("OMP_NUM_THREADS", "2")
+os.environ.setdefault("MKL_NUM_THREADS", "2")
 
 project_root = Path(__file__).resolve().parents[1]
 if str(project_root) not in sys.path:

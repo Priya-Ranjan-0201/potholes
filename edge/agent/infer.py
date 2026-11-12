@@ -149,6 +149,7 @@ class EdgeInferenceEngine:
 
         # Setup ONNX Runtime session
         sess_opts = ort.SessionOptions()
+        sess_opts.enable_cpu_mem_arena = False
         sess_opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         providers = ["CPUExecutionProvider"]
         if "CUDAExecutionProvider" in ort.get_available_providers() and device_profile != "cpu":

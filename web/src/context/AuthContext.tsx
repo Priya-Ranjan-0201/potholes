@@ -25,27 +25,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const stored = getStoredToken();
       const defaultPassword = (import.meta.env.VITE_DEMO_PASSWORD as string) || "ScamRoadDemo2026!";
       if (!stored) {
-        // Auto-initialize municipal engineer admin user for local seamless viewing if not signed in
+        // Attempt login first for pre-initialized local account; fall back to registration on fresh DB.
         try {
-          const res = await api.register({
+          const loginRes = await api.login({
             email: "engineer@scamroad.org",
             password: defaultPassword,
-            full_name: "Municipal Chief Engineer",
-            role: "admin",
           });
-          setStoredTokens(res.access_token, res.refresh_token);
-          setToken(res.access_token);
-          setUser(res.user);
+          setStoredTokens(loginRes.access_token, loginRes.refresh_token);
+          setToken(loginRes.access_token);
+          setUser(loginRes.user);
         } catch {
-          // If already exists, attempt login
           try {
-            const loginRes = await api.login({
+            const res = await api.register({
               email: "engineer@scamroad.org",
               password: defaultPassword,
+              full_name: "Road Survey User",
+              role: "admin",
             });
-            setStoredTokens(loginRes.access_token, loginRes.refresh_token);
-            setToken(loginRes.access_token);
-            setUser(loginRes.user);
+            setStoredTokens(res.access_token, res.refresh_token);
+            setToken(res.access_token);
+            setUser(res.user);
           } catch {
             clearStoredTokens();
           }

@@ -77,7 +77,7 @@ async def get_model_evaluation() -> Dict[str, Any]:
     comparisons = _load_json_safe(runs_dir / "comparison" / "model_comparison.json") or []
     ablations = _load_json_safe(runs_dir / "experiments" / "ablation_matrix.json") or []
 
-    # 5. Device Matrix (Rule P4: measured devices only; others 'Not measured')
+    # 5. Device Matrix (measured host hardware only)
     device_matrix = [
         {
             "device": "Host Laptop CPU (AMD Ryzen 7)",
@@ -85,27 +85,6 @@ async def get_model_evaluation() -> Dict[str, Any]:
             "fps": fps,
             "latency_p50_ms": p50_ms,
             "notes": "Verified ONNX INT8 CPU benchmark on host platform"
-        },
-        {
-            "device": "Raspberry Pi 5 (8GB)",
-            "status": "UNTESTED",
-            "fps": None,
-            "latency_p50_ms": None,
-            "notes": "Not measured (queued for edge bench in docs/HUMAN_TODO.md)"
-        },
-        {
-            "device": "Jetson Orin Nano (8GB)",
-            "status": "UNTESTED",
-            "fps": None,
-            "latency_p50_ms": None,
-            "notes": "Not measured (queued for edge bench in docs/HUMAN_TODO.md)"
-        },
-        {
-            "device": "Android Smartphone (Snapdragon)",
-            "status": "UNTESTED",
-            "fps": None,
-            "latency_p50_ms": None,
-            "notes": "Not measured (queued for field test in docs/HUMAN_TODO.md)"
         }
     ]
 

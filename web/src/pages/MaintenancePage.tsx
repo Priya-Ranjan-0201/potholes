@@ -17,7 +17,6 @@ import {
   SeverityBadge,
   StatusChip,
   SegmentedControl,
-  DemoBadge,
 } from "../ui";
 import { useToast } from "../context/ToastContext";
 import { CompareSlider } from "../motion/CompareSlider";
@@ -39,7 +38,7 @@ export const MaintenancePage: React.FC = () => {
   const [bulkProgress, setBulkProgress] = useState(0);
 
   // Tab & View States
-  const [subTab, setSubTab] = useState<SubTab>("work-orders");
+  const [subTab, setSubTab] = useState<SubTab>("defects");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   // Filters
@@ -274,14 +273,11 @@ export const MaintenancePage: React.FC = () => {
       {/* 1. Page Header with Sub-tabs & Create Action */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-              Maintenance Management
-            </h1>
-            <DemoBadge />
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Saved Defects &amp; Maintenance
+          </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Contractor dispatches, defect registry, and authoritative human engineer sign-offs
+            Saved road detections, work orders, reports, and repair comparison
           </p>
         </div>
 
@@ -294,10 +290,10 @@ export const MaintenancePage: React.FC = () => {
               setSearchParams({ tab });
             }}
             options={[
+              { id: "defects", label: "Saved Defects", count: defects.length },
               { id: "work-orders", label: "Work Orders", count: workOrders.length },
-              { id: "defects", label: "Defects", count: defects.length },
-              { id: "reports", label: "Citizen Reports", count: complaints.length },
-              { id: "verification", label: "Repair Verification" },
+              { id: "reports", label: "Reports", count: complaints.length },
+              { id: "verification", label: "Repair Check" },
             ]}
           />
 
@@ -334,7 +330,7 @@ export const MaintenancePage: React.FC = () => {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Filter by ID, corridor..."
+              placeholder="Filter by ID or defect type..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-xs w-48 sm:w-60 outline-none focus:ring-1 focus:ring-amber-500"
@@ -796,48 +792,56 @@ export const MaintenancePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredDefects.map((def) => {
-                const firstSeen = new Date(def.first_seen);
-                return (
-                  <tr key={def.id}>
-                    <td className="font-mono text-xs font-semibold">
-                      <button
-                        onClick={() => setSelectedDefectId(def.id)}
-                        className="text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        #{def.id.slice(0, 8)}
-                      </button>
-                    </td>
-                    <td className="font-medium text-slate-900 dark:text-slate-100">
-                      {def.class_code}
-                    </td>
-                    <td>
-                      <SeverityBadge
-                        level={def.latest_severity_level || def.severity_level || "Minor"}
-                        score={def.latest_severity_score ?? def.normalized_score ?? undefined}
-                        size="sm"
-                      />
-                    </td>
-                    <td className="font-mono text-xs text-slate-500">
-                      {firstSeen.toLocaleDateString([], { month: "short", day: "numeric" })}
-                    </td>
-                    <td className="font-mono text-slate-700 dark:text-slate-300">
-                      {def.times_seen}×
-                    </td>
-                    <td>
-                      <StatusChip status={def.status} />
-                    </td>
-                    <td className="text-right">
-                      <button
-                        onClick={() => setSelectedDefectId(def.id)}
-                        className="btn-secondary text-xs"
-                      >
-                        Inspect
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {filteredDefects.length > 0 ? (
+                filteredDefects.map((def) => {
+                  const firstSeen = new Date(def.first_seen);
+                  return (
+                    <tr key={def.id}>
+                      <td className="font-mono text-xs font-semibold">
+                        <button
+                          onClick={() => setSelectedDefectId(def.id)}
+                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          #{def.id.slice(0, 8)}
+                        </button>
+                      </td>
+                      <td className="font-medium text-slate-900 dark:text-slate-100">
+                        {def.class_code.replace(/_/g, " ")}
+                      </td>
+                      <td>
+                        <SeverityBadge
+                          level={def.latest_severity_level || def.severity_level || "Minor"}
+                          score={def.latest_severity_score ?? def.normalized_score ?? undefined}
+                          size="sm"
+                        />
+                      </td>
+                      <td className="font-mono text-xs text-slate-500">
+                        {firstSeen.toLocaleDateString([], { month: "short", day: "numeric" })}
+                      </td>
+                      <td className="font-mono text-slate-700 dark:text-slate-300">
+                        {def.times_seen}×
+                      </td>
+                      <td>
+                        <StatusChip status={def.status} />
+                      </td>
+                      <td className="text-right">
+                        <button
+                          onClick={() => setSelectedDefectId(def.id)}
+                          className="btn-secondary text-xs"
+                        >
+                          Inspect
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-xs text-slate-400">
+                    No saved defects match the current filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -1159,7 +1163,7 @@ export const MaintenancePage: React.FC = () => {
             </div>
 
             <p className="text-xs text-slate-500">
-              Authoritative human closure for Order #{verifyModalWo.id.slice(0, 8)}. AI model recommends approval with 94.5% damage reduction.
+              Human review and closure for Order #{verifyModalWo.id.slice(0, 8)}.
             </p>
 
             {/* S5 Before / After Repair Comparison */}

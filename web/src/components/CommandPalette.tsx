@@ -15,7 +15,7 @@ import {
 interface CommandItem {
   id: string;
   title: string;
-  category: "Navigation" | "Actions" | "Wards" | "Theme" | "Language";
+  category: "Navigation" | "Actions" | "Theme" | "Language";
   icon: React.ReactNode;
   action: () => void;
 }
@@ -106,43 +106,6 @@ export const CommandPalette: React.FC = () => {
       category: "Actions",
       icon: <Camera className="w-4 h-4 text-blue-500" />,
       action: () => { navigate("/scanner"); setIsOpen(false); },
-    },
-
-    // Municipal Wards
-    {
-      id: "ward-1",
-      title: "Ward 1 — Clock Tower Central",
-      category: "Wards",
-      icon: <Compass className="w-4 h-4 text-slate-500" />,
-      action: () => { navigate("/maintenance?tab=defects&ward=W-01"); setIsOpen(false); },
-    },
-    {
-      id: "ward-2",
-      title: "Ward 2 — Focal Point Industrial",
-      category: "Wards",
-      icon: <Compass className="w-4 h-4 text-slate-500" />,
-      action: () => { navigate("/maintenance?tab=defects&ward=W-02"); setIsOpen(false); },
-    },
-    {
-      id: "ward-3",
-      title: "Ward 3 — Civil Lines & Mall Road",
-      category: "Wards",
-      icon: <Compass className="w-4 h-4 text-rose-500" />,
-      action: () => { navigate("/maintenance?tab=defects&ward=W-03"); setIsOpen(false); },
-    },
-    {
-      id: "ward-4",
-      title: "Ward 4 — Model Town Residential",
-      category: "Wards",
-      icon: <Compass className="w-4 h-4 text-amber-500" />,
-      action: () => { navigate("/maintenance?tab=defects&ward=W-04"); setIsOpen(false); },
-    },
-    {
-      id: "ward-10",
-      title: "Central GT Ward",
-      category: "Wards",
-      icon: <Compass className="w-4 h-4 text-slate-500" />,
-      action: () => { navigate("/maintenance?tab=defects&ward=W-10"); setIsOpen(false); },
     },
 
     // Theme Toggle

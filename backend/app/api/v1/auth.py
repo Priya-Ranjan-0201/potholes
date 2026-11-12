@@ -23,6 +23,7 @@ from backend.app.schemas.auth import (
 )
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -62,28 +63,35 @@ async def register(
             detail="An account with this email address already exists",
         )
 
-    # Ensure role exists
-    role_stmt = select(Role).where(Role.name == req.role.lower())
-    role = (await db.execute(role_stmt)).scalar_one_or_none()
-    if role is None:
-        role = Role(name=req.role.lower(), description=f"{req.role.capitalize()} user role")
-        db.add(role)
+    try:
+        # Ensure role exists
+        role_stmt = select(Role).where(Role.name == req.role.lower())
+        role = (await db.execute(role_stmt)).scalar_one_or_none()
+        if role is None:
+            role = Role(name=req.role.lower(), description=f"{req.role.capitalize()} user role")
+            db.add(role)
+            await db.flush()
+
+        new_user = User(
+            email=req.email.lower(),
+            password_hash=hash_password(req.password),
+            full_name=req.full_name,
+            phone=req.phone,
+            is_active=True,
+            is_verified=True,
+        )
+        db.add(new_user)
         await db.flush()
 
-    new_user = User(
-        email=req.email.lower(),
-        password_hash=hash_password(req.password),
-        full_name=req.full_name,
-        phone=req.phone,
-        is_active=True,
-        is_verified=True,
-    )
-    db.add(new_user)
-    await db.flush()
-
-    user_role = UserRole(user_id=new_user.id, role_id=role.id)
-    db.add(user_role)
-    await db.commit()
+        user_role = UserRole(user_id=new_user.id, role_id=role.id)
+        db.add(user_role)
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email address already exists",
+        ) from exc
 
     # Re-fetch with relations
     user_stmt = (

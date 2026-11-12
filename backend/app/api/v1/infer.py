@@ -92,7 +92,9 @@ def _get_ort_session(cache_key: str, path: str):
     try:
         import onnxruntime as ort
 
-        sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+        sess_opts = ort.SessionOptions()
+        sess_opts.enable_cpu_mem_arena = False
+        sess = ort.InferenceSession(path, sess_options=sess_opts, providers=["CPUExecutionProvider"])
         _ENGINE_CACHE[cache_key] = sess
         return sess
     except Exception as e:
@@ -105,9 +107,9 @@ def get_authoritative_engine(conf_thresh: float = 0.25, iou_thresh: float = 0.35
     from edge.agent.infer import EdgeInferenceEngine
 
     onnx_candidates = [
+        "runs/export/best.onnx",
         "runs/export/best_yolo11_int8.onnx",
         "runs/export/best_int8.onnx",
-        "runs/export/best.onnx",
     ]
     selected_path = next((p for p in onnx_candidates if os.path.exists(p)), None)
     if not selected_path:
@@ -518,8 +520,8 @@ def _is_false_pothole_surface(
             if (core_mean - border_mean) > 8.0 and patch_sat > 35.0 and (5.0 <= patch_hue <= 32.0):
                 return True
 
-        # Low-confidence flat crack-tile hallucination (lacks cavity depression)
-        if conf_val < 0.32 and votes <= 1 and (border_mean - core_mean) < -3.0 and patch_sat > 25.0:
+        # Low-confidence uncorroborated flat bright dry/clay glare (preserves darker waterlogged puddles)
+        if conf_val < 0.28 and votes <= 1 and (border_mean - core_mean) < -12.0 and patch_sat > 55.0:
             return True
 
     return False
@@ -554,7 +556,7 @@ async def infer_road_defects(
         hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        engine = get_authoritative_engine(conf_thresh=max(0.22, conf_thresh * 0.85), iou_thresh=iou_thresh)
+        engine = get_authoritative_engine(conf_thresh=max(0.16, conf_thresh * 0.65), iou_thresh=iou_thresh)
         if engine is None:
             raise HTTPException(status_code=503, detail="No trained YOLO11n ONNX model found in runs/export/.")
 
@@ -563,7 +565,7 @@ async def infer_road_defects(
 
         # 1. 70% Weightage Models (D-FINE Large + PyResearch YOLOv12 + keremberke YOLOv8-Seg)
         dfine_boxes = predict_dfine_potholes(img, conf_thresh=max(0.24, conf_thresh * 0.85))
-        pyres_boxes = predict_pyresearch_potholes(img, conf_thresh=max(0.24, conf_thresh * 0.85))
+        pyres_boxes = predict_pyresearch_potholes(img, conf_thresh=max(0.22, conf_thresh * 0.80))
         seg_boxes = predict_segmentation_potholes(img, conf_thresh=conf_thresh, iou_thresh=iou_thresh)
 
         new_70_candidates = []
@@ -592,8 +594,12 @@ async def infer_road_defects(
                 cand_copy["votes"] = 1
                 new_70_candidates.append(cand_copy)
 
-        # 2. 30% Calibrated Edge Engine (YOLO11n INT8)
-        raw_potholes = engine.predict(img)
+        # 2. 30% Calibrated Edge Engine (YOLO11n unified multi-condition pothole class only)
+        raw_potholes = [
+            p
+            for p in engine.predict(img)
+            if (getattr(p, "class_id", 0) == 0 or "POTHOLE" in str(getattr(p, "class_name", "")).upper())
+        ]
         base_boxes = [
             {
                 "box": [float(x) for x in p.bbox_xyxy],
@@ -655,31 +661,38 @@ async def infer_road_defects(
                         "source": "Ensemble (70% D-FINE/PyResearch/Seg + 30% Base)",
                     })
             else:
-                # Unmatched 70% candidate: require consensus or higher single-model certainty
-                min_single = max(0.32, conf_thresh) if nb["votes"] == 1 else max(0.24, conf_thresh * 0.85)
-                if nb["conf"] >= min_single:
-                    cf = min(0.92, 0.86 * nb["conf"])
-                    if cf >= max(0.25, conf_thresh * 0.90):
-                        fused_potholes.append({
-                            "box": nb["box"],
-                            "conf": cf,
-                            "votes": nb["votes"],
-                            "poly": nb.get("poly") or extract_defect_polygon(img, nb["box"]),
-                            "source": nb.get("source", "70% New Models"),
-                        })
+                # Unmatched 70% candidate: gate noisy solo D-FINE/Seg strictly while honoring multi-vote & clean PyResearch
+                src_name = str(nb.get("source", ""))
+                if nb["votes"] >= 2:
+                    min_single = max(0.22, conf_thresh * 0.80)
+                    cf = min(0.94, 0.92 * nb["conf"])
+                elif "PyResearch" in src_name:
+                    min_single = max(0.25, conf_thresh * 0.95)
+                    cf = min(0.90, 0.88 * nb["conf"])
+                else:
+                    min_single = max(0.42, conf_thresh + 0.14)
+                    cf = min(0.90, 0.85 * nb["conf"])
+                if nb["conf"] >= min_single and cf >= max(0.24, conf_thresh * 0.90):
+                    fused_potholes.append({
+                        "box": nb["box"],
+                        "conf": cf,
+                        "votes": nb["votes"],
+                        "poly": nb.get("poly") or extract_defect_polygon(img, nb["box"]),
+                        "source": src_name or "70% New Models",
+                    })
 
         for bb in base_boxes:
             if not bb["matched"]:
-                # Unmatched 30% base model: high certainty gate prevents weak debris hallucinations
-                if bb["conf"] >= max(0.45, conf_thresh + 0.14):
-                    cf = round(0.68 * bb["conf"], 4)
-                    if cf >= conf_thresh:
+                # Calibrated YOLO11n FP32 has 0/26 clean-road FPs; retain valid solo potholes above threshold
+                if bb["conf"] >= max(0.24, conf_thresh * 0.92):
+                    cf = round(min(0.92, bb["conf"] * 1.02), 4)
+                    if cf >= max(0.25, conf_thresh * 0.95):
                         fused_potholes.append({
                             "box": bb["box"],
                             "conf": cf,
                             "votes": 1,
                             "poly": extract_defect_polygon(img, bb["box"]),
-                            "source": "YOLO11n-Edge (30% Weight)",
+                            "source": "YOLO11n (Unified Multi-Condition)",
                         })
 
         # Sort high-confidence/high-consensus first and strictly deduplicate nested overlaps

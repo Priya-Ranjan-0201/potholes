@@ -1,24 +1,16 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { api, WardStat } from "../api/client";
+import { api } from "../api/client";
 import { useReducedMotion } from "../motion/motion";
-import { SidePanel } from "../motion/SidePanel";
 import {
   Activity,
   Layers,
-  ClipboardList,
   AlertTriangle,
-  ArrowRight,
-  Clock,
   RefreshCw,
-  BarChart3,
-  Calendar,
-  X,
-  ExternalLink,
   Trash2,
   Camera,
+  CheckCircle,
 } from "../components/Icons";
 import {
   ResponsiveContainer,
@@ -28,19 +20,15 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from "recharts";
-import { StatCard, SeverityBadge, StatusChip, DemoBadge, EmptyState } from "../ui";
+import { StatCard, SeverityBadge, EmptyState } from "../ui";
 import { useToast } from "../context/ToastContext";
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { info } = useToast();
   const isReduced = useReducedMotion();
-  const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
-  const [inspectingWard, setInspectingWard] = useState<WardStat | null>(null);
-  const [trendView, setTrendView] = useState<"distribution" | "daily">("distribution");
-  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [isClearing, setIsClearing] = useState(false);
 
   const {
     data: stats,
@@ -52,66 +40,27 @@ export const DashboardPage: React.FC = () => {
     refetchInterval: 12000,
   });
 
-  const {
-    data: trendsData,
-    isLoading: loadingTrends,
-    refetch: refetchTrends,
-  } = useQuery({
-    queryKey: ["statsTrends"],
-    queryFn: () => api.getTrends(14),
-    refetchInterval: 12000,
-  });
-
-  const {
-    data: wards,
-    isLoading: loadingWards,
-    refetch: refetchWards,
-  } = useQuery({
-    queryKey: ["statsWards"],
-    queryFn: api.getWards,
-    refetchInterval: 12000,
-  });
-
-  const {
-    data: workOrdersData,
-    isLoading: loadingWorkOrders,
-    refetch: refetchWorkOrders,
-  } = useQuery({
-    queryKey: ["workOrdersOverview"],
-    queryFn: () => api.listWorkOrders({ limit: 50 }),
-    refetchInterval: 12000,
-  });
-
-  const {
-    data: recentDefectsData,
-    refetch: refetchDefects,
-  } = useQuery({
+  const { data: recentDefectsData, refetch: refetchDefects } = useQuery({
     queryKey: ["recentDefectsOverview"],
-    queryFn: () => api.listDefects({ limit: 10 }),
+    queryFn: () => api.listDefects({ limit: 8 }),
     refetchInterval: 12000,
   });
-
-  const [isClearing, setIsClearing] = useState(false);
 
   const handleRefresh = () => {
     refetchStats();
-    refetchTrends();
-    refetchWards();
-    refetchWorkOrders();
     refetchDefects();
-    setLastRefreshed(new Date());
-    info("Network Synchronized", "Refreshed metrics from Central PostgreSQL & GIS repository.");
+    info("Updated", "Loaded latest saved detections.");
   };
 
   const handleClearAllData = async () => {
-    if (!window.confirm("Are you sure you want to clear all test defects and work orders? This will reset the platform so you can test fresh.")) {
+    if (!window.confirm("Clear all saved detections and reset counters to zero?")) {
       return;
     }
     setIsClearing(true);
     try {
       await api.clearAllDefects();
-      await handleRefresh();
-      info("Database Cleared", "All test defects have been purged. Platform is ready for fresh scans.");
+      await Promise.all([refetchStats(), refetchDefects()]);
+      info("Cleared", "All saved detections have been cleared.");
     } catch (err) {
       console.error("Failed to clear data:", err);
     } finally {
@@ -119,101 +68,25 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
-  // Filter corridors
-  const sortedWards = useMemo(() => {
-    return [...(wards || [])].sort(
-      (a, b) => b.critical_defects - a.critical_defects || b.total_defects - a.total_defects
-    );
-  }, [wards]);
+  const totalDefects = stats?.total_defects ?? 0;
+  const repairedDefects = stats?.repaired_defects ?? 0;
+  const criticalDefects = stats?.defects_by_severity?.["Critical"] ?? 0;
+  const severeDefects = stats?.defects_by_severity?.["Severe"] ?? 0;
+  const classStats = stats?.defects_by_class || {};
+  const potholeCount = classStats["POTHOLE"] ?? 0;
+  const crackLongCount = classStats["CRACK_LONG"] ?? 0;
+  const crackTransCount = classStats["CRACK_TRANS"] ?? 0;
+  const crackAlliCount = classStats["CRACK_ALLIGATOR"] ?? 0;
+  const totalCracks = crackLongCount + crackTransCount + crackAlliCount;
 
-  const activeWard = useMemo(() => {
-    return selectedCorridor === "all" ? null : sortedWards.find((w) => w.ward_id === selectedCorridor);
-  }, [selectedCorridor, sortedWards]);
-
-  const displayedWards = useMemo(() => {
-    return selectedCorridor === "all"
-      ? sortedWards
-      : sortedWards.filter((w) => w.ward_id === selectedCorridor);
-  }, [selectedCorridor, sortedWards]);
-
-  // Dynamic KPIs (scoped to selected corridor if active)
-  const totalDefects = activeWard ? activeWard.total_defects : (stats?.total_defects ?? 0);
-  const criticalDefects = activeWard ? activeWard.critical_defects : (stats?.defects_by_severity?.["Critical"] ?? 0);
-  const severeDefects = activeWard ? Math.max(0, activeWard.total_defects - activeWard.critical_defects - activeWard.repaired_defects) : (stats?.defects_by_severity?.["Severe"] ?? 0);
-  const highPriorityTotal = activeWard ? activeWard.critical_defects : Math.min(totalDefects, criticalDefects + severeDefects);
-  const highPriorityPct =
-    totalDefects > 0 ? Math.min(100, Math.round((highPriorityTotal / totalDefects) * 100)) : 0;
-
-  const openWorkOrders = activeWard
-    ? Math.max(0, activeWard.total_defects - activeWard.repaired_defects)
-    : (stats?.work_orders_by_status?.["CREATED"] ?? 0) +
-      (stats?.work_orders_by_status?.["ASSIGNED"] ?? 0) +
-      (stats?.work_orders_by_status?.["IN_PROGRESS"] ?? 0);
-
-  // SLA calculation
-  const workOrders = workOrdersData?.items || [];
-  const now = new Date();
-  const slaBreachedOrders = workOrders.filter((wo) => {
-    if (wo.status === "VERIFIED" || wo.status === "COMPLETED") return false;
-    if (!wo.deadline) return false;
-    return new Date(wo.deadline) < now;
-  });
-
-  const upcomingSlaOrders = workOrders
-    .filter((wo) => wo.status !== "VERIFIED" && wo.status !== "COMPLETED" && wo.deadline)
-    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-    .slice(0, 6);
-
-  // Distribution chart data computed strictly from real database stats
-  const defectDistributionData = useMemo(() => {
-    const classStats = stats?.defects_by_class || {};
-    const potholeCount = classStats["POTHOLE"] ?? 0;
-    const crackLongCount = classStats["CRACK_LONG"] ?? 0;
-    const crackAlliCount = classStats["CRACK_ALLIGATOR"] ?? 0;
-    const crackTransCount = classStats["CRACK_TRANS"] ?? 0;
-
-    const crit = stats?.defects_by_severity?.["Critical"] ?? 0;
-    const sev = stats?.defects_by_severity?.["Severe"] ?? 0;
-    const mod = stats?.defects_by_severity?.["Moderate"] ?? 0;
-
-    const items = [
-      {
-        name: "Potholes (D40)",
-        count: potholeCount,
-        critical: potholeCount > 0 ? crit : 0,
-        severe: potholeCount > 0 ? sev : 0,
-        moderate: potholeCount > 0 ? mod : 0,
-      },
-      {
-        name: "Longitudinal (D00)",
-        count: crackLongCount,
-        critical: 0,
-        severe: 0,
-        moderate: crackLongCount,
-      },
-      {
-        name: "Alligator (D20)",
-        count: crackAlliCount,
-        critical: 0,
-        severe: 0,
-        moderate: crackAlliCount,
-      },
-      {
-        name: "Transverse (D10)",
-        count: crackTransCount,
-        critical: 0,
-        severe: 0,
-        moderate: crackTransCount,
-      },
-    ];
-
-    return items;
-  }, [stats]);
-
-  // Filter trends: only distinct dates with detections or activity
-  const rawTrends = trendsData?.trends || [];
-  const activeTrends = rawTrends.filter(
-    (t) => t.observations_count > 0 || t.complaints_count > 0 || t.repairs_count > 0
+  const classChartData = useMemo(
+    () => [
+      { name: "Potholes", count: potholeCount },
+      { name: "Alligator Crack", count: crackAlliCount },
+      { name: "Longitudinal", count: crackLongCount },
+      { name: "Transverse", count: crackTransCount },
+    ],
+    [potholeCount, crackAlliCount, crackLongCount, crackTransCount]
   );
 
   if (loadingStats && !stats) {
@@ -221,9 +94,7 @@ export const DashboardPage: React.FC = () => {
       <div className="flex h-80 items-center justify-center">
         <div className="text-center">
           <Activity className="w-6 h-6 animate-spin text-slate-400 mx-auto mb-2" />
-          <p className="text-slate-500 font-mono text-xs">
-            Loading road network dashboard...
-          </p>
+          <p className="text-slate-500 font-mono text-xs">Loading detected defects...</p>
         </div>
       </div>
     );
@@ -231,704 +102,179 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header row with Status & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-              Road Network Overview
-            </h1>
-            <DemoBadge />
-            <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              5 Municipal Wards
-            </span>
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            Detected Defects Overview
+          </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Real-time asphalt condition metrics, contractor SLA compliance, and dispatch prioritization
+            Summary of potholes and cracks saved from the road scanner
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          {/* Corridor Scope Selector */}
-          <div className="flex items-center gap-1.5">
-            <select
-              value={selectedCorridor}
-              onChange={(e) => setSelectedCorridor(e.target.value)}
-              className="py-1.5 px-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-slate-700 dark:text-slate-200 font-medium outline-none focus:ring-1 focus:ring-amber-500"
-            >
-              <option value="all">All Corridors &amp; Sectors ({sortedWards.length})</option>
-              {sortedWards.map((w) => (
-                <option key={w.ward_id} value={w.ward_id}>
-                  {w.ward_name} ({w.ward_code || "Zone"}) — {w.total_defects} defects
-                </option>
-              ))}
-            </select>
-
-            {activeWard && (
-              <button
-                onClick={() => setSelectedCorridor("all")}
-                className="p-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
-                title="Clear corridor filter"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Quick Action: Deploy Scanner */}
           <Link
             to="/scanner"
-            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-sm transition-all"
+            className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1.5 transition-colors"
           >
             <Camera className="w-3.5 h-3.5" />
-            <span>Scan Road</span>
+            <span>Open Scanner</span>
           </Link>
 
-          {/* Action: Clear All Test Data */}
-          <button
-            onClick={handleClearAllData}
-            disabled={isClearing || totalDefects === 0}
-            className="px-2.5 py-1.5 rounded-md text-xs font-medium border border-rose-300 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
-            title="Purge test defects and reset platform to 0"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>{isClearing ? "Clearing..." : "Clear Data"}</span>
-          </button>
-
-          {/* Last updated & refresh button */}
-          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px] pl-2 border-l border-slate-200 dark:border-slate-800">
-            <span>
-              Updated {lastRefreshed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-            </span>
+          {totalDefects > 0 && (
             <button
-              onClick={handleRefresh}
-              className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
-              title="Synchronize live database"
+              onClick={handleClearAllData}
+              disabled={isClearing}
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium border border-rose-300 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isClearing ? "Clearing..." : "Clear Data"}</span>
             </button>
-          </div>
+          )}
+
+          <button
+            onClick={handleRefresh}
+            className="p-1.5 rounded-md border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer"
+            title="Refresh"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Corridor Scope Notice Banner (if filtered) */}
-      {activeWard && (
-        <div className="flex items-center justify-between p-2.5 rounded-md bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 text-xs">
-          <div className="flex items-center gap-2 text-blue-900 dark:text-blue-300">
-            <span className="font-semibold">Scoped View:</span>
-            <span>{activeWard.ward_name} ({activeWard.ward_code})</span>
-            <span className="text-slate-400">·</span>
-            <span>{activeWard.total_defects} total defects logged</span>
-            {activeWard.critical_defects > 0 && (
-              <span className="font-semibold text-rose-600 dark:text-rose-400">
-                · {activeWard.critical_defects} critical hazard requiring immediate patch
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => setSelectedCorridor("all")}
-            className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
-          >
-            Reset to Entire Network
-          </button>
-        </div>
-      )}
-
-      {/* 2. 4 Primary KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label={activeWard ? `Defects in ${activeWard.ward_code}` : "Total Defects Logged"}
+          label="Total Detected"
           value={totalDefects}
-          subtext={
-            activeWard
-              ? `${activeWard.repaired_defects} repaired (${activeWard.total_defects > 0 ? Math.round((activeWard.repaired_defects / activeWard.total_defects) * 100) : 0}% progress)`
-              : `${stats?.repaired_defects ?? 0} repaired across network`
-          }
+          subtext={`${repairedDefects} marked repaired`}
           icon={<Layers className="w-4 h-4 text-blue-500" />}
         />
-
         <StatCard
-          label={activeWard ? "Severe / Critical in Ward" : "Severe & Critical"}
-          value={highPriorityTotal}
-          subtext={
-            activeWard
-              ? `${activeWard.critical_defects} critical safety hazards`
-              : `${highPriorityPct}% of total network distress`
-          }
-          badge={
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-              High Priority
-            </span>
-          }
+          label="Potholes"
+          value={potholeCount}
+          subtext={potholeCount > 0 ? "Primary road cavities" : "None logged yet"}
           icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
         />
-
         <StatCard
-          label={activeWard ? "Active Repairs in Ward" : "Open Work Orders"}
-          value={openWorkOrders}
-          subtext={
-            activeWard
-              ? "Dispatched for contractor resolution"
-              : `${stats?.work_orders_by_status?.["ASSIGNED"] ?? 0} currently dispatched to contractors`
-          }
-          icon={<ClipboardList className="w-4 h-4 text-slate-400" />}
+          label="Road Cracks"
+          value={totalCracks}
+          subtext="Alligator, longitudinal, transverse"
+          icon={<Activity className="w-4 h-4 text-orange-500" />}
         />
-
         <StatCard
-          label="Overdue SLA Breaches"
-          value={slaBreachedOrders.length}
-          subtext={
-            slaBreachedOrders.length > 0
-              ? `${slaBreachedOrders.length} orders exceed deadline`
-              : "All active orders within SLA threshold"
-          }
-          className={
-            slaBreachedOrders.length > 0
-              ? "border-rose-200 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/10"
-              : ""
-          }
-          icon={
-            <Clock
-              className={`w-4 h-4 ${
-                slaBreachedOrders.length > 0 ? "text-rose-500" : "text-emerald-500"
-              }`}
-            />
-          }
+          label="High Severity"
+          value={criticalDefects + severeDefects}
+          subtext={`${criticalDefects} critical · ${severeDefects} severe`}
+          icon={<CheckCircle className="w-4 h-4 text-rose-500" />}
         />
       </div>
 
-      {/* 3. Main 2-Column Layout (2/3 + 1/3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2/3) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Section: Defect Analytics & Trends */}
-          <div className="card p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+      {totalDefects === 0 ? (
+        <div className="card p-8">
+          <EmptyState
+            title="No detections saved yet"
+            description="Scan a road photo or upload an image to detect potholes and surface cracks, then save the results."
+            actionLabel="Go to Scanner"
+            actionLink="/scanner"
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7 card p-4 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Defect Observations &amp; Repair Analytics
+                  Detected Defect Types
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Logged detections and maintenance dispatch progress
-                </p>
-              </div>
-
-              {/* View Toggle */}
-              <div className="flex items-center rounded-md border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-50 dark:bg-slate-900 text-[11px] self-start sm:self-auto">
-                <button
-                  onClick={() => setTrendView("distribution")}
-                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 cursor-pointer outline-none ${
-                    trendView === "distribution"
-                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-sm"
-                      : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
-                >
-                  <BarChart3 className="w-3 h-3" />
-                  <span>Distress Breakdown</span>
-                </button>
-                <button
-                  onClick={() => setTrendView("daily")}
-                  className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1.5 cursor-pointer outline-none ${
-                    trendView === "daily"
-                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-sm"
-                      : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
-                >
-                  <Calendar className="w-3 h-3" />
-                  <span>Survey Log</span>
-                </button>
-              </div>
-            </div>
-
-            {loadingTrends ? (
-              <div className="h-56 flex items-center justify-center text-xs text-slate-400 font-mono">
-                Loading survey history...
-              </div>
-            ) : trendView === "distribution" ? (
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                  {/* Left: Bar Chart (7 cols) */}
-                  <div className="md:col-span-7 h-56 w-full pt-1">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={defectDistributionData}
-                        margin={{ top: 8, right: 10, left: -20, bottom: 0 }}
-                        barGap={2}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" strokeOpacity={0.2} />
-                        <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748B" }} />
-                        <YAxis tick={{ fontSize: 10, fill: "#64748B" }} allowDecimals={false} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#0F172A",
-                            borderColor: "#334155",
-                            color: "#F8FAFC",
-                            borderRadius: "6px",
-                            fontSize: "11px",
-                          }}
-                        />
-                        <Legend wrapperStyle={{ fontSize: "10px", paddingTop: "4px" }} />
-                        <Bar dataKey="critical" name="Critical" fill="#EF4444" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
-                        <Bar dataKey="severe" name="Severe" fill="#F59E0B" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
-                        <Bar dataKey="moderate" name="Moderate" fill="#3B82F6" radius={[3, 3, 0, 0]} maxBarSize={22} isAnimationActive={!isReduced} animationDuration={600} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Right: Severity Distribution Panel (5 cols) */}
-                  <div className="md:col-span-5 flex flex-col justify-between p-3.5 rounded-lg bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-xs space-y-2">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">Distress Summary</span>
-                    
-                    <div className="space-y-1.5 text-[11px]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Potholes (D40)</span>
-                        <span className="font-mono font-bold text-slate-900 dark:text-white">{stats?.defects_by_class?.["POTHOLE"] ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Critical Safety Hazards</span>
-                        <span className="font-mono font-bold text-rose-600 dark:text-rose-400">{stats?.defects_by_severity?.["Critical"] ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Severe Cratering</span>
-                        <span className="font-mono font-bold text-amber-600 dark:text-amber-400">{stats?.defects_by_severity?.["Severe"] ?? 0}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-600 dark:text-slate-400">Moderate Depressions</span>
-                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{stats?.defects_by_severity?.["Moderate"] ?? 0}</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                      <span className="text-slate-600 dark:text-slate-400">Repairs Dispatched</span>
-                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {stats?.repaired_defects ?? 0} / {stats?.total_defects ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
-                  <span>Computed from {stats?.total_defects ?? 0} tested road distress detections</span>
-                  <Link to="/maintenance?tab=defects" className="text-blue-600 dark:text-blue-400 hover:underline">
-                    View raw defect catalog &rarr;
-                  </Link>
-                </div>
-              </div>
-            ) : activeTrends.length > 0 ? (
-              <div>
-                <p className="text-xs text-slate-500 mb-3">
-                  Chronological activity log across surveyed road corridors:
-                </p>
-                <div className="overflow-x-auto">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th className="text-right">Observations</th>
-                        <th className="text-right">Citizen Reports</th>
-                        <th className="text-right">Repairs Verified</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeTrends.map((row) => (
-                        <tr key={row.date}>
-                          <td className="font-mono text-xs font-semibold">{row.date}</td>
-                          <td className="text-right font-mono font-medium">{row.observations_count}</td>
-                          <td className="text-right font-mono text-slate-600 dark:text-slate-400">{row.complaints_count}</td>
-                          <td className="text-right font-mono text-emerald-600 dark:text-emerald-400 font-semibold">{row.repairs_count}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <EmptyState
-                title="Awaiting Observation History"
-                description="Chronological trendlines will render automatically as camera patrols and citizen reports log defects."
-                className="py-8"
-              />
-            )}
-          </div>
-
-          {/* Section: Corridor Health Table */}
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Corridor Health &amp; Maintenance Status
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Sector-wise defect density and repair allocation (Click any row to view defects)
+                  Counts across classes identified by the vision model
                 </p>
               </div>
               <Link
                 to="/maintenance?tab=defects"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
-              >
-                <span>View all defects</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-
-            <div className="overflow-x-auto">
-              {loadingWards ? (
-                <div className="py-6 text-center text-xs text-slate-400 font-mono">
-                  Loading corridor metrics...
-                </div>
-              ) : displayedWards.length > 0 ? (
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Corridor / Sector</th>
-                      <th className="text-right">Total Defects</th>
-                      <th className="text-right">Critical Hazards</th>
-                      <th className="text-right">Repaired</th>
-                      <th className="text-right">Progress</th>
-                      <th className="text-right">Status</th>
-                      <th className="text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayedWards.map((w) => {
-                      const cleanWardName = w.ward_name.replace(/\s*\([Ww]-\d+\)$/, "").trim();
-                      const repairPct =
-                        w.total_defects > 0
-                          ? Math.round((w.repaired_defects / w.total_defects) * 100)
-                          : 100;
-                      const hasCritical = w.critical_defects > 0;
-                      const isSelected = selectedCorridor === w.ward_id;
-
-                      // Professional municipal triage status
-                      let statusBadge: React.ReactNode;
-                      if (w.total_defects === 0) {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                            Awaiting Scan
-                          </span>
-                        );
-                      } else if (repairPct >= 75) {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40 font-semibold">
-                            Restored
-                          </span>
-                        );
-                      } else if (repairPct >= 35) {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-500/40 font-semibold">
-                            Repairs Active
-                          </span>
-                        );
-                      } else if (w.critical_defects >= 4) {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/50 font-semibold">
-                            Immediate Patch
-                          </span>
-                        );
-                      } else if (w.critical_defects > 0) {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/50 font-semibold">
-                            Scheduled Patch
-                          </span>
-                        );
-                      } else {
-                        statusBadge = (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                            Routine Patrol
-                          </span>
-                        );
-                      }
-
-                      return (
-                        <tr
-                          key={w.ward_id}
-                          className={`cursor-pointer transition-colors ${
-                            isSelected
-                              ? "bg-blue-50/50 dark:bg-blue-950/30"
-                              : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                          }`}
-                          onClick={() => {
-                            setSelectedCorridor(w.ward_id);
-                            setInspectingWard(w);
-                          }}
-                        >
-                          <td className="font-medium text-slate-900 dark:text-slate-100">
-                            <span>{cleanWardName}</span>
-                            {w.ward_code && (
-                              <span className="font-mono text-[10px] text-slate-400 ml-1.5">
-                                ({w.ward_code})
-                              </span>
-                            )}
-                          </td>
-                          <td className="text-right font-mono font-medium">{w.total_defects}</td>
-                          <td className="text-right font-mono">
-                            {hasCritical ? (
-                              <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                                {w.critical_defects}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400">0</span>
-                            )}
-                          </td>
-                          <td className="text-right font-mono text-emerald-600 dark:text-emerald-400 font-medium">
-                            {w.repaired_defects}
-                          </td>
-                          <td className="text-right">
-                            {w.total_defects === 0 ? (
-                              <span className="font-mono text-[11px] text-slate-400">—</span>
-                            ) : (
-                              <div className="inline-flex items-center gap-2">
-                                <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                  <div
-                                    className="h-full bg-emerald-500 rounded-full"
-                                    style={{ width: `${repairPct}%` }}
-                                  />
-                                </div>
-                                <span className="font-mono text-[11px] text-slate-500">
-                                  {repairPct}%
-                                </span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="text-right">
-                            {statusBadge}
-                          </td>
-                          <td className="text-right">
-                            {w.total_defects > 0 ? (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/maintenance?tab=defects&ward=${w.ward_code || w.ward_id}`);
-                                }}
-                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium inline-flex items-center gap-0.5 cursor-pointer"
-                              >
-                                <span>Inspect</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </button>
-                            ) : (
-                              <Link
-                                to="/scanner"
-                                onClick={(e) => e.stopPropagation()}
-                                className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-medium inline-flex items-center gap-0.5"
-                              >
-                                <span>Scan</span>
-                                <ArrowRight className="w-3 h-3" />
-                              </Link>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="py-6 text-center text-xs text-slate-400">
-                  No corridor data found.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column (1/3) */}
-        <div className="space-y-6">
-          {/* Section: SLA Breaches & Upcoming */}
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  SLA Deadlines &amp; Priority
-                </h2>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">Contractor resolution schedules</span>
-              </div>
-              <Link
-                to="/maintenance"
                 className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
               >
-                View all
+                View all &rarr;
               </Link>
             </div>
 
-            {loadingWorkOrders ? (
-              <div className="py-6 text-center text-xs text-slate-500 dark:text-slate-400 font-mono">
-                Checking SLA schedules...
-              </div>
-            ) : upcomingSlaOrders.length > 0 ? (
-              <div className="space-y-2.5">
-                {upcomingSlaOrders.map((wo) => {
-                  const deadlineDate = new Date(wo.deadline!);
-                  const diffHours = Math.round(
-                    (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-                  );
-                  const isOverdue = diffHours < 0;
-
-                  return (
-                    <div
-                      key={wo.id}
-                      className="p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-2 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-                            #{wo.id.slice(0, 8)}
-                          </span>
-                          <StatusChip status={wo.status} />
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                          Priority: <strong className="text-slate-700 dark:text-slate-300">{wo.priority}</strong>
-                        </p>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span
-                          className={`inline-block font-mono text-[11px] font-semibold ${
-                            isOverdue
-                              ? "text-rose-600 dark:text-rose-400"
-                              : diffHours <= 12
-                              ? "text-amber-600 dark:text-amber-400"
-                              : "text-slate-600 dark:text-slate-400"
-                          }`}
-                        >
-                          {isOverdue ? `${Math.abs(diffHours)}h overdue` : `${diffHours}h left`}
-                        </span>
-                        <Link
-                          to={`/maintenance?id=${wo.id}`}
-                          className="block text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                        >
-                          Inspect &rarr;
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                No active work orders pending SLA.
-              </div>
-            )}
+            <div className="h-56 w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={classChartData} margin={{ top: 8, right: 12, left: -18, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" strokeOpacity={0.2} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "#64748B" }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0F172A",
+                      borderColor: "#334155",
+                      color: "#F8FAFC",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                    }}
+                  />
+                  <Bar
+                    dataKey="count"
+                    name="Detections"
+                    fill="#2563EB"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={42}
+                    isAnimationActive={!isReduced}
+                    animationDuration={500}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Section: Recent Activity Feed */}
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="lg:col-span-5 card p-4 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  Recent Network Activity
+                  Recent Detections
                 </h2>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">Live camera patrol detections</span>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Latest saved potholes and cracks
+                </p>
               </div>
+              <span className="text-[11px] font-mono text-slate-400">
+                {recentDefectsData?.items?.length ?? 0} shown
+              </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-60 overflow-y-auto [scrollbar-width:thin]">
               {recentDefectsData?.items && recentDefectsData.items.length > 0 ? (
-                recentDefectsData.items.slice(0, 5).map((def) => {
+                recentDefectsData.items.map((def) => {
                   const seenDate = new Date(def.last_seen);
                   return (
-                    <motion.div
+                    <button
                       key={def.id}
-                      initial={isReduced ? false : { opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2 }}
+                      type="button"
                       onClick={() => navigate(`/maintenance?defectId=${def.id}&tab=defects`)}
-                      className="flex items-start gap-2.5 text-xs p-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
+                      className="w-full text-left flex items-center justify-between gap-2 text-xs p-2 rounded-md border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
                     >
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="font-mono text-slate-800 dark:text-slate-200 font-semibold truncate hover:text-blue-600">
-                            {def.class_code}
-                          </span>
-                          <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                            {seenDate.toLocaleDateString([], { month: "short", day: "numeric" })}
-                          </span>
+                      <div className="min-w-0">
+                        <div className="font-mono font-semibold text-slate-800 dark:text-slate-200 truncate">
+                          {def.class_code.replace(/_/g, " ")}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <SeverityBadge level={def.severity_level || "Minor"} size="sm" showScore={false} />
-                          <span className="text-[10px] font-mono text-slate-400">
-                            #{def.id.slice(0, 8)} · {def.times_seen} passes
-                          </span>
+                        <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                          #{def.id.slice(0, 8)} ·{" "}
+                          {seenDate.toLocaleDateString([], { month: "short", day: "numeric" })}
                         </div>
                       </div>
-                    </motion.div>
+                      <SeverityBadge level={def.severity_level || "Minor"} size="sm" showScore={false} />
+                    </button>
                   );
                 })
               ) : (
-                <div className="py-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                  No recent activity logged.
+                <div className="py-8 text-center text-xs text-slate-400">
+                  No recent detections.
                 </div>
               )}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Corridor Detail Side Panel (O4) */}
-      <SidePanel
-        isOpen={!!inspectingWard}
-        onClose={() => setInspectingWard(null)}
-        title={inspectingWard?.ward_name || "Corridor Detail"}
-        subtitle={inspectingWard?.ward_code ? `Division Code: ${inspectingWard.ward_code} · Sector Operations` : undefined}
-      >
-        {inspectingWard && (
-          <div className="space-y-5 text-xs">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-400 block mb-1">Total Defects</span>
-                <span className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100">{inspectingWard.total_defects}</span>
-              </div>
-              <div className="p-3 rounded-md bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50">
-                <span className="text-rose-600 dark:text-rose-400 block mb-1">Critical Hazards</span>
-                <span className="text-xl font-bold font-mono text-rose-700 dark:text-rose-300">{inspectingWard.critical_defects}</span>
-              </div>
-              <div className="p-3 rounded-md bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/50">
-                <span className="text-emerald-600 dark:text-emerald-400 block mb-1">Repaired</span>
-                <span className="text-xl font-bold font-mono text-emerald-700 dark:text-emerald-300">{inspectingWard.repaired_defects}</span>
-              </div>
-              <div className="p-3 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-400 block mb-1">Resolution Rate</span>
-                <span className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100">
-                  {inspectingWard.total_defects > 0 ? Math.round((inspectingWard.repaired_defects / inspectingWard.total_defects) * 100) : 100}%
-                </span>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40 space-y-2">
-              <div className="flex justify-between items-center text-slate-700 dark:text-slate-300 font-medium">
-                <span>Civil Maintenance Status</span>
-                <span className="font-mono text-[11px] text-slate-500">Ward ID: {inspectingWard.ward_id.slice(0, 8)}</span>
-              </div>
-              <p className="text-slate-500 text-[11px] leading-relaxed">
-                Corridor distress profiles are tracked via automated vision patrols and citizen geo-reports. High-severity potholes and structural cracks in this sector are scheduled according to municipal SLA deadlines.
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex gap-2">
-              <button
-                onClick={() => {
-                  const code = inspectingWard.ward_code || inspectingWard.ward_id;
-                  setInspectingWard(null);
-                  navigate(`/maintenance?tab=defects&ward=${code}`);
-                }}
-                className="btn btn-primary flex-1 justify-center py-2 text-xs"
-              >
-                Inspect All Defects in Ward
-              </button>
-              <button
-                onClick={() => {
-                  const code = inspectingWard.ward_code || inspectingWard.ward_id;
-                  setInspectingWard(null);
-                  navigate(`/maintenance?tab=work-orders&ward=${code}`);
-                }}
-                className="btn btn-secondary flex-1 justify-center py-2 text-xs"
-              >
-                Work Orders
-              </button>
-            </div>
-          </div>
-        )}
-      </SidePanel>
+      )}
     </div>
   );
 };

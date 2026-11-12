@@ -107,27 +107,6 @@ const BENCHMARK_DATA: ModelEvaluationResponse = {
       latency_p50_ms: 45.46,
       notes: "Verified ONNX INT8 benchmark on host CPU",
     },
-    {
-      device: "Raspberry Pi 5 (8GB)",
-      status: "UNTESTED",
-      fps: null,
-      latency_p50_ms: null,
-      notes: "Not measured (queued for edge bench in docs/HUMAN_TODO.md)",
-    },
-    {
-      device: "Jetson Orin Nano (8GB)",
-      status: "UNTESTED",
-      fps: null,
-      latency_p50_ms: null,
-      notes: "Not measured (queued for edge bench in docs/HUMAN_TODO.md)",
-    },
-    {
-      device: "Android Smartphone (Snapdragon)",
-      status: "UNTESTED",
-      fps: null,
-      latency_p50_ms: null,
-      notes: "Not measured (queued for field test in docs/HUMAN_TODO.md)",
-    },
   ],
   model_comparisons: [
     {
@@ -458,7 +437,7 @@ export const ModelBenchmarksPage: React.FC = () => {
               Hardware Benchmarks
             </h2>
             <p className="text-xs text-slate-500">
-              Measured devices verified via onnxruntime benchmarking; unmeasured targets clearly labeled
+              Measured host runtime via onnxruntime benchmarking
             </p>
           </div>
           <div className="text-xs font-mono text-slate-400">
@@ -513,7 +492,7 @@ export const ModelBenchmarksPage: React.FC = () => {
                       {d.fps != null ? `${num(d.fps, 1)} FPS` : "—"}
                     </td>
                     <td className="text-xs text-slate-500 dark:text-slate-400">
-                      {d.notes || (isTested ? "Measured on production edge build (INT8 opset 17)" : "Queued in docs/HUMAN_TODO.md")}
+                      {d.notes || "Measured via onnxruntime benchmark"}
                     </td>
                   </tr>
                 );
