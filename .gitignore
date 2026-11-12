@@ -10,6 +10,7 @@ __pycache__/
 *.egg-info/
 *.egg
 dist/
+dist_kaggle/
 build/
 .eggs/
 *.whl
@@ -70,7 +71,9 @@ node_modules/
 .expo/
 *.tsbuildinfo
 web/dist/
+dist_kaggle/
 mobile/dist/
+dist_kaggle/
 
 # Docker
 *.log
